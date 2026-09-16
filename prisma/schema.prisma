@@ -1,0 +1,1003 @@
+// SiteForge — multi-tenant platform schema
+// Every tenant-owned table carries `tenantId`; all queries MUST be scoped by it.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────── Platform core ─────────────────────────────
+
+enum TenantStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+enum SuperRole {
+  SUPERADMIN
+  EDITOR
+}
+
+enum SessionKind {
+  SUPER
+  TENANT
+}
+
+enum MediaVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+model Tenant {
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  name         String
+  category     String // business category key, e.g. "pizza"
+  templateId   String // template id from the code registry, e.g. "pizza-01"
+  status       TenantStatus @default(DRAFT)
+  isDemo       Boolean      @default(false)
+  settings     Json         @default("{}") // TenantSettings (branding, contact, languages, seo …)
+  storageUsed  BigInt       @default(0)
+  storageQuota BigInt       @default(1073741824) // 1 GB
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  domains       Domain[]
+  users         TenantUser[]
+  sessions      Session[]
+  sections      SiteSection[]
+  pages         SitePage[]
+  media         Media[]
+  leads         Lead[]
+  auditLogs     AuditLog[]
+  rateLimits    RateLimit[]
+  productCats   ProductCategory[]
+  products      Product[]
+  variants      ProductVariant[]
+  orders        Order[]
+  orderItems    OrderItem[]
+  customers     Customer[]
+  coupons       Coupon[]
+  shippingZones ShippingZone[]
+  prescriptions Prescription[]
+  menuCats      MenuCategory[]
+  menuItems     MenuItem[]
+  modifierGroups ModifierGroup[]
+  modifiers     Modifier[]
+  foodOrders    FoodOrder[]
+  foodOrderItems FoodOrderItem[]
+  deliveryZones DeliveryZone[]
+  reservations  Reservation[]
+  jobs          Job[]
+  applications  Application[]
+  packages      TravelPackage[]
+  bookings      Booking[]
+  properties    Property[]
+  plans         MembershipPlan[]
+  classes       ClassSchedule[]
+  team          TeamMember[]
+  services      Service[]
+  testimonials  Testimonial[]
+  faqs          FaqItem[]
+  gallery       GalleryItem[]
+  posts         TenantPost[]
+
+  @@index([category])
+  @@index([templateId])
+}
+
+model Domain {
+  id        String   @id @default(cuid())
+  tenantId  String
+  hostname  String   @unique // fully-qualified, lowercase, no port
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model TenantUser {
+  id             String    @id @default(cuid())
+  tenantId       String
+  username       String
+  passwordHash   String
+  name           String
+  email          String?
+  role           UserRole  @default(ADMIN)
+  isActive       Boolean   @default(true)
+  failedLogins   Int       @default(0)
+  lockedUntil    DateTime?
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sessions Session[]
+
+  @@unique([tenantId, username])
+}
+
+model SuperUser {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         SuperRole @default(SUPERADMIN)
+  isActive     Boolean   @default(true)
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions Session[]
+}
+
+model Session {
+  id           String      @id @default(cuid())
+  kind         SessionKind
+  tokenHash    String      @unique
+  superUserId  String?
+  tenantUserId String?
+  tenantId     String?
+  ip           String?
+  userAgent    String?
+  expiresAt    DateTime
+  createdAt    DateTime    @default(now())
+
+  superUser  SuperUser?  @relation(fields: [superUserId], references: [id], onDelete: Cascade)
+  tenantUser TenantUser? @relation(fields: [tenantUserId], references: [id], onDelete: Cascade)
+  tenant     Tenant?     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+/// One row per template section, per tenant. `data` is validated by the section's zod schema.
+model SiteSection {
+  id        String   @id @default(cuid())
+  tenantId  String
+  key       String
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  data      Json     @default("{}")
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, key])
+}
+
+/// Free-form extra pages (privacy policy, terms, about …) rendered by the template's page shell.
+model SitePage {
+  id        String   @id @default(cuid())
+  tenantId  String
+  slug      String
+  title     Json // LocalizedString
+  content   Json // rich blocks
+  enabled   Boolean  @default(true)
+  showInNav Boolean  @default(false)
+  sortOrder Int      @default(0)
+  seo       Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}
+
+model Media {
+  id         String          @id @default(cuid())
+  tenantId   String? // null => platform (super site) asset
+  key        String          @unique // R2 object key, always server-generated
+  url        String? // public URL (only for PUBLIC)
+  visibility MediaVisibility @default(PUBLIC)
+  mime       String
+  size       Int
+  width      Int?
+  height     Int?
+  alt        String?
+  folder     String          @default("general")
+  confirmed  Boolean         @default(false)
+  createdBy  String?
+  createdAt  DateTime        @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, folder])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  IN_PROGRESS
+  CLOSED
+  SPAM
+}
+
+/// Generic inbound form submissions: contact, quote, consultation, inquiry, booking …
+model Lead {
+  id        String     @id @default(cuid())
+  tenantId  String
+  formKey   String // e.g. "contact", "quote", "consultation", "property_inquiry"
+  name      String
+  phone     String?
+  email     String?
+  subject   String?
+  message   String?
+  data      Json       @default("{}") // form-specific fields
+  fileIds   String[]   @default([]) // Media ids (private)
+  status    LeadStatus @default(NEW)
+  notes     String?
+  source    String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, formKey, status])
+  @@index([tenantId, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  actorKind SessionKind
+  actorId   String
+  actorName String
+  action    String // e.g. "product.create"
+  entity    String?
+  entityId  String?
+  meta      Json     @default("{}")
+  ip        String?
+  createdAt DateTime @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+}
+
+/// In-database sliding-window rate limiter (login, public forms, checkout).
+model RateLimit {
+  id        String   @id @default(cuid())
+  tenantId  String?
+  bucket    String // e.g. "login:1.2.3.4"
+  hits      Int      @default(1)
+  windowEnd DateTime
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, bucket])
+  @@index([windowEnd])
+}
+
+/// Super-admin overrides for code templates (enable/disable, featured ordering).
+model TemplateSetting {
+  templateId String   @id
+  enabled    Boolean  @default(true)
+  featured   Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
+
+/// Super-site blog (one blog per business category).
+model BlogPost {
+  id          String    @id @default(cuid())
+  category    String // business category key or "general"
+  slug        String
+  title       String
+  excerpt     String
+  content     String // markdown
+  coverUrl    String?
+  tags        String[]  @default([])
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  authorName  String    @default("SiteForge Team")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([category, slug])
+  @@index([category, published])
+}
+
+/// Leads submitted on the super website (business owners asking for a site).
+model SuperLead {
+  id        String     @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  business  String?
+  category  String?
+  message   String?
+  status    LeadStatus @default(NEW)
+  createdAt DateTime   @default(now())
+}
+
+// ───────────────────────────── Ecommerce ─────────────────────────────
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+model ProductCategory {
+  id        String  @id @default(cuid())
+  tenantId  String
+  parentId  String?
+  slug      String
+  name      Json // LocalizedString
+  imageUrl  String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children ProductCategory[] @relation("CategoryTree")
+  products Product[]
+
+  @@unique([tenantId, slug])
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  tenantId     String
+  categoryId   String?
+  slug         String
+  name         Json // LocalizedString
+  description  Json     @default("{}") // LocalizedString (rich text/markdown)
+  shortDesc    Json     @default("{}")
+  price        Int // PKR
+  comparePrice Int?
+  costPrice    Int?
+  sku          String?
+  stock        Int      @default(0)
+  trackStock   Boolean  @default(true)
+  images       String[] @default([]) // public URLs (Media.url)
+  attributes   Json     @default("{}") // { brand, material, warranty, specs: {...} }
+  tags         String[] @default([])
+  isFeatured   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  // medical-store extras
+  requiresPrescription Boolean @default(false)
+  genericName  String?
+  manufacturer String?
+  dosageForm   String?
+  strength     String?
+  seo          Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants ProductVariant[]
+  orderItems OrderItem[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, isActive, isFeatured])
+  @@index([tenantId, categoryId])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  tenantId  String
+  productId String
+  name      String // e.g. "Red / XL"
+  options   Json // { "Color": "Red", "Size": "XL" }
+  price     Int?
+  sku       String?
+  stock     Int     @default(0)
+  imageUrl  String?
+  isActive  Boolean @default(true)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  tenantId  String
+  phone     String
+  name      String
+  email     String?
+  address   String?
+  city      String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders     Order[]
+  foodOrders FoodOrder[]
+
+  @@unique([tenantId, phone])
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  tenantId       String
+  number         Int
+  customerId     String?
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String
+  city           String
+  province       String?
+  postalCode     String?
+  notes          String?
+  subtotal       Int
+  shipping       Int         @default(0)
+  discount       Int         @default(0)
+  total          Int
+  couponCode     String?
+  paymentMethod  String      @default("COD")
+  status         OrderStatus @default(PENDING)
+  timeline       Json        @default("[]") // [{status, at, note}]
+  giftMessage    String?
+  prescriptionId String?
+  ageConfirmed   Boolean     @default(false)
+  ip             String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer     Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+  prescription Prescription? @relation(fields: [prescriptionId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, number])
+  @@index([tenantId, status, createdAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  tenantId    String
+  orderId     String
+  productId   String?
+  variantId   String?
+  name        String
+  variantName String?
+  imageUrl    String?
+  unitPrice   Int
+  quantity    Int
+  total       Int
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+model Coupon {
+  id         String    @id @default(cuid())
+  tenantId   String
+  code       String
+  type       String // "PERCENT" | "FIXED"
+  value      Int
+  minOrder   Int       @default(0)
+  maxUses    Int?
+  usedCount  Int       @default(0)
+  expiresAt  DateTime?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, code])
+}
+
+model ShippingZone {
+  id            String  @id @default(cuid())
+  tenantId      String
+  name          String // "Lahore", "Punjab", "Rest of Pakistan"
+  cities        String[] @default([])
+  fee           Int
+  freeAbove     Int?
+  etaDays       String? // "2-3"
+  isActive      Boolean @default(true)
+  sortOrder     Int     @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+/// Uploaded prescriptions (private R2 objects) for medical stores.
+model Prescription {
+  id            String   @id @default(cuid())
+  tenantId      String
+  mediaId       String
+  customerName  String
+  customerPhone String
+  notes         String?
+  status        String   @default("PENDING") // PENDING | VERIFIED | REJECTED
+  createdAt     DateTime @default(now())
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([tenantId, status])
+}
+
+// ───────────────────────────── Restaurant / food ─────────────────────────────
+
+enum FoodOrderStatus {
+  NEW
+  ACCEPTED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  COMPLETED
+  CANCELLED
+}
+
+enum FoodOrderType {
+  DELIVERY
+  PICKUP
+  DINE_IN
+}
+
+model MenuCategory {
+  id        String  @id @default(cuid())
+  tenantId  String
+  slug      String
+  name      Json // LocalizedString
+  imageUrl  String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  MenuItem[]
+
+  @@unique([tenantId, slug])
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  tenantId    String
+  categoryId  String?
+  slug        String
+  name        Json
+  description Json     @default("{}")
+  price       Int // base price (smallest size)
+  sizes       Json     @default("[]") // [{name, price}]
+  imageUrl    String?
+  tags        String[] @default([]) // "spicy", "veg", "bestseller", "new"
+  isAvailable Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category MenuCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  modifierGroups MenuItemModifierGroup[]
+  orderItems FoodOrderItem[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, categoryId, isAvailable])
+}
+
+model ModifierGroup {
+  id        String  @id @default(cuid())
+  tenantId  String
+  name      Json // "Extra toppings"
+  minSelect Int     @default(0)
+  maxSelect Int     @default(1)
+  required  Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  modifiers Modifier[]
+  items     MenuItemModifierGroup[]
+}
+
+model Modifier {
+  id        String  @id @default(cuid())
+  tenantId  String
+  groupId   String
+  name      Json
+  price     Int     @default(0)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  group  ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model MenuItemModifierGroup {
+  menuItemId String
+  groupId    String
+
+  item  MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  group ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([menuItemId, groupId])
+}
+
+model FoodOrder {
+  id            String          @id @default(cuid())
+  tenantId      String
+  number        Int
+  customerId    String?
+  type          FoodOrderType   @default(DELIVERY)
+  customerName  String
+  customerPhone String
+  address       String?
+  area          String?
+  tableNumber   String?
+  notes         String?
+  subtotal      Int
+  deliveryFee   Int             @default(0)
+  discount      Int             @default(0)
+  total         Int
+  paymentMethod String          @default("COD")
+  status        FoodOrderStatus @default(NEW)
+  timeline      Json            @default("[]")
+  scheduledFor  DateTime?
+  estimatedMins Int?
+  ip            String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items    FoodOrderItem[]
+
+  @@unique([tenantId, number])
+  @@index([tenantId, status, createdAt])
+}
+
+model FoodOrderItem {
+  id         String  @id @default(cuid())
+  tenantId   String
+  orderId    String
+  menuItemId String?
+  name       String
+  sizeName   String?
+  modifiers  Json    @default("[]") // [{name, price}]
+  unitPrice  Int
+  quantity   Int
+  total      Int
+  note       String?
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order    FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+model DeliveryZone {
+  id        String  @id @default(cuid())
+  tenantId  String
+  name      String // "DHA Phase 5", "Gulberg"
+  fee       Int
+  minOrder  Int     @default(0)
+  etaMins   Int?
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Reservation {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  phone     String
+  guests    Int
+  date      DateTime
+  time      String
+  notes     String?
+  status    String   @default("PENDING") // PENDING | CONFIRMED | SEATED | CANCELLED
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, date])
+}
+
+// ───────────────────────────── Recruiting ─────────────────────────────
+
+enum ApplicationStatus {
+  RECEIVED
+  SHORTLISTED
+  INTERVIEW
+  OFFERED
+  HIRED
+  REJECTED
+}
+
+model Job {
+  id           String    @id @default(cuid())
+  tenantId     String
+  slug         String
+  title        Json
+  company      String?
+  department   String?
+  location     String
+  country      String    @default("Pakistan")
+  type         String    @default("Full-time") // Full-time | Part-time | Contract | Remote | Overseas
+  salaryMin    Int?
+  salaryMax    Int?
+  salaryText   String?
+  experience   String?
+  description  Json      @default("{}")
+  requirements Json      @default("{}")
+  vacancies    Int       @default(1)
+  deadline     DateTime?
+  isFeatured   Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, isActive])
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  tenantId    String
+  jobId       String?
+  name        String
+  phone       String
+  email       String?
+  city        String?
+  cvMediaId   String? // private Media
+  coverLetter String?
+  experience  String?
+  data        Json              @default("{}")
+  status      ApplicationStatus @default(RECEIVED)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  job    Job?   @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status, createdAt])
+}
+
+// ───────────────────────────── Travel ─────────────────────────────
+
+model TravelPackage {
+  id          String   @id @default(cuid())
+  tenantId    String
+  slug        String
+  title       Json
+  destination String
+  kind        String   @default("TOUR") // TOUR | UMRAH | HAJJ | HONEYMOON | CORPORATE | VISA
+  days        Int
+  nights      Int
+  price       Int
+  priceNote   String? // "per person, double sharing"
+  images      String[] @default([])
+  summary     Json     @default("{}")
+  itinerary   Json     @default("[]") // [{day, title, description}]
+  inclusions  Json     @default("[]")
+  exclusions  Json     @default("[]")
+  departures  Json     @default("[]") // ["2026-10-05", …]
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, isActive, kind])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  tenantId   String
+  packageId  String?
+  name       String
+  phone      String
+  email      String?
+  travellers Int      @default(1)
+  date       DateTime?
+  message    String?
+  status     String   @default("NEW") // NEW | CONTACTED | CONFIRMED | CANCELLED
+  createdAt  DateTime @default(now())
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  package TravelPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status])
+}
+
+// ───────────────────────────── Real estate ─────────────────────────────
+
+model Property {
+  id          String   @id @default(cuid())
+  tenantId    String
+  slug        String
+  title       Json
+  purpose     String   @default("SALE") // SALE | RENT
+  type        String   @default("HOUSE") // HOUSE | FLAT | PLOT | COMMERCIAL | FARMHOUSE
+  price       Int
+  priceUnit   String   @default("TOTAL") // TOTAL | MONTHLY
+  areaValue   Float?
+  areaUnit    String   @default("MARLA") // MARLA | KANAL | SQFT | SQYD
+  bedrooms    Int?
+  bathrooms   Int?
+  city        String
+  location    String // "DHA Phase 6, Lahore"
+  description Json     @default("{}")
+  features    String[] @default([])
+  images      String[] @default([])
+  videoUrl    String?
+  mapUrl      String?
+  agentId     String? // TeamMember
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, isActive, purpose, type, city])
+}
+
+// ───────────────────────────── Gym ─────────────────────────────
+
+model MembershipPlan {
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       Json
+  price      Int
+  period     String   @default("MONTH") // MONTH | QUARTER | YEAR | DAY
+  features   Json     @default("[]")
+  isPopular  Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model ClassSchedule {
+  id        String  @id @default(cuid())
+  tenantId  String
+  name      Json
+  trainerId String?
+  dayOfWeek Int // 0 = Sunday
+  startTime String // "18:00"
+  endTime   String
+  capacity  Int?
+  level     String? // Beginner | Intermediate | Advanced
+  isActive  Boolean @default(true)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────────────────── Shared content ─────────────────────────────
+
+/// Attorneys, trainers, agents, chefs, staff.
+model TeamMember {
+  id        String   @id @default(cuid())
+  tenantId  String
+  slug      String
+  name      String
+  role      Json
+  bio       Json     @default("{}")
+  imageUrl  String?
+  phone     String?
+  email     String?
+  socials   Json     @default("{}")
+  specialties String[] @default([])
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}
+
+/// Services / practice areas / printing services / visa services.
+model Service {
+  id          String   @id @default(cuid())
+  tenantId    String
+  slug        String
+  name        Json
+  summary     Json     @default("{}")
+  description Json     @default("{}")
+  priceFrom   Int?
+  priceNote   String?
+  imageUrl    String?
+  icon        String?
+  features    Json     @default("[]")
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  role      String?
+  text      Json
+  rating    Int      @default(5)
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model FaqItem {
+  id        String  @id @default(cuid())
+  tenantId  String
+  question  Json
+  answer    Json
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model GalleryItem {
+  id        String  @id @default(cuid())
+  tenantId  String
+  imageUrl  String
+  caption   Json    @default("{}")
+  album     String  @default("general")
+  sortOrder Int     @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, album])
+}
+
+/// Tenant's own blog / news / offers.
+model TenantPost {
+  id          String    @id @default(cuid())
+  tenantId    String
+  slug        String
+  title       Json
+  excerpt     Json      @default("{}")
+  content     Json      @default("{}")
+  coverUrl    String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}

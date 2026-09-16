@@ -1,26 +1,263 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+ * Template theme tokens. Every tenant site sets the --t-* variables on <html>
+ * (see src/templates/theme.ts); templates use the `t-*` colour utilities below.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-t-primary: var(--t-primary);
+  --color-t-primary-fg: var(--t-primary-fg);
+  --color-t-secondary: var(--t-secondary);
+  --color-t-secondary-fg: var(--t-secondary-fg);
+  --color-t-accent: var(--t-accent);
+  --color-t-accent-fg: var(--t-accent-fg);
+  --color-t-bg: var(--t-bg);
+  --color-t-fg: var(--t-fg);
+  --color-t-muted: var(--t-muted);
+  --color-t-muted-fg: var(--t-muted-fg);
+  --color-t-card: var(--t-card);
+  --color-t-border: var(--t-border);
+  --color-t-dark: var(--t-dark);
+  --color-t-dark-fg: var(--t-dark-fg);
+  --radius-t: var(--t-radius);
+  --font-heading: var(--t-font-heading);
+  --font-body: var(--t-font-body);
+  --font-urdu: var(--t-font-urdu);
+
+  /* platform (super site + admin) palette */
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --t-primary: #4f46e5;
+  --t-primary-fg: #ffffff;
+  --t-secondary: #0f172a;
+  --t-secondary-fg: #ffffff;
+  --t-accent: #f59e0b;
+  --t-accent-fg: #111827;
+  --t-bg: #ffffff;
+  --t-fg: #0f172a;
+  --t-muted: #f1f5f9;
+  --t-muted-fg: #64748b;
+  --t-card: #ffffff;
+  --t-border: #e2e8f0;
+  --t-dark: #0f172a;
+  --t-dark-fg: #f8fafc;
+  --t-radius: 0.5rem;
+  --t-font-heading: ui-sans-serif, system-ui, sans-serif;
+  --t-font-body: ui-sans-serif, system-ui, sans-serif;
+  --t-font-urdu: "Noto Nastaliq Urdu", serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--t-bg);
+  color: var(--t-fg);
+  font-family: var(--t-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Urdu / RTL */
+[dir="rtl"] body,
+[dir="rtl"] .font-body,
+[dir="rtl"] .font-heading {
+  font-family: var(--t-font-urdu);
+  line-height: 2;
+}
+
+.font-heading {
+  font-family: var(--t-font-heading);
+}
+.font-body {
+  font-family: var(--t-font-body);
+}
+.font-urdu {
+  font-family: var(--t-font-urdu);
+}
+
+/* Utilities shared by templates */
+.t-container {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  .t-container {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .t-container {
+    padding-inline: 2rem;
+  }
+}
+
+.t-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: var(--t-radius);
+  padding: 0.75rem 1.5rem;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.15s,
+    box-shadow 0.2s;
+  cursor: pointer;
+  line-height: 1.25;
+}
+.t-btn:active {
+  transform: translateY(1px);
+}
+.t-btn-primary {
+  background: var(--t-primary);
+  color: var(--t-primary-fg);
+}
+.t-btn-primary:hover {
+  filter: brightness(0.92);
+}
+.t-btn-accent {
+  background: var(--t-accent);
+  color: var(--t-accent-fg);
+}
+.t-btn-accent:hover {
+  filter: brightness(0.94);
+}
+.t-btn-outline {
+  border: 2px solid currentColor;
+  background: transparent;
+}
+.t-btn-outline:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+.t-btn-ghost {
+  background: transparent;
+}
+.t-btn-ghost:hover {
+  background: var(--t-muted);
+}
+
+.t-input {
+  width: 100%;
+  border: 1px solid var(--t-border);
+  background: var(--t-card);
+  color: var(--t-fg);
+  border-radius: var(--t-radius);
+  padding: 0.7rem 0.9rem;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.t-input:focus {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-primary) 20%, transparent);
+}
+.t-card {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+}
+.t-eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--t-primary);
+}
+.t-prose :where(p) {
+  margin-block: 0.75em;
+}
+.t-prose :where(ul) {
+  list-style: disc;
+  padding-inline-start: 1.25rem;
+  margin-block: 0.75em;
+}
+.t-prose :where(h2, h3) {
+  font-family: var(--t-font-heading);
+  font-weight: 700;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+.t-prose :where(h2) {
+  font-size: 1.5rem;
+}
+.t-prose :where(h3) {
+  font-size: 1.25rem;
+}
+.t-prose :where(a) {
+  color: var(--t-primary);
+  text-decoration: underline;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* subtle entrance animation */
+@keyframes t-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.t-fade-up {
+  animation: t-fade-up 0.6s ease-out both;
+}
+@keyframes t-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.t-marquee {
+  animation: t-marquee 30s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .t-fade-up,
+  .t-marquee {
+    animation: none;
+  }
+}
+
+/* hide scrollbar for horizontal chips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

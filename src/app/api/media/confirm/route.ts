@@ -1,0 +1,23 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
+import { assertSameOrigin, resolveActor } from "@/server/api-auth";
+import { MediaError, confirmUpload } from "@/server/storage/media";
+
+const bodySchema = z.object({ mediaId: z.string().min(1).max(64) });
+
+export async function POST(req: NextRequest) {
+  const cross = assertSameOrigin(req);
+  if (cross) return cross;
+  const actor = await resolveActor();
+  if (!actor) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const parsed = bodySchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  try {
+    const media = await confirmUpload(actor, parsed.data.mediaId);
+    return NextResponse.json({ id: media.id, url: media.url, visibility: media.visibility, mime: media.mime, size: media.size });
+  } catch (e) {
+    if (e instanceof MediaError) return NextResponse.json({ error: e.message }, { status: e.status });
+    console.error(e);
+    return NextResponse.json({ error: "Confirm failed" }, { status: 500 });
+  }
+}
