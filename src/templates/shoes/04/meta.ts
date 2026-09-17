@@ -1,0 +1,3 @@
+import { buildMeta } from "@/templates/catalog";
+
+export const meta = buildMeta("shoes-04");

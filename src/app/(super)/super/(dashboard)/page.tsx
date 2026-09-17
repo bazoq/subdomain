@@ -10,7 +10,8 @@ import { formatDate } from "@/lib/utils";
 
 export default async function SuperDashboard() {
   await requireSuper();
-  const since = new Date(Date.now() - 30 * 86_400_000);
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
   const [tenants, active, demo, leads, ordersMonth, foodMonth, recentTenants, recentLeads, byCategory] = await Promise.all([
     db.tenant.count({ where: { isDemo: false } }),
     db.tenant.count({ where: { isDemo: false, status: "ACTIVE" } }),

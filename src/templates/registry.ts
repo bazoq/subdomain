@@ -17,6 +17,11 @@ export function getTemplateMeta(id: string): TemplateMeta | undefined {
   return byId.get(id);
 }
 
+export function getTemplateByCode(code: number | string): TemplateMeta | undefined {
+  const n = Number(code);
+  return TEMPLATES.find((t) => t.code === n);
+}
+
 export function templatesForCategory(category: CategoryKey | string): TemplateMeta[] {
   return TEMPLATES.filter((t) => t.category === category);
 }

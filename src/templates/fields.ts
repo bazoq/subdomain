@@ -97,19 +97,19 @@ export function fieldsSchema(fields: Field[]) {
 
 /* ---------- ergonomic constructors ---------- */
 export const f = {
-  text: (key: string, label: string, o: Partial<Extract<Field, { type: "text" }>> = {}) => ({ type: "text", key, label, ...o }) as const,
-  localized: (key: string, label: string, o: Partial<Extract<Field, { type: "localized" }>> = {}) =>
+  text: <K extends string>(key: K, label: string, o: Partial<Omit<Extract<Field, { type: "text" }>, "key" | "label" | "type">> = {}) => ({ type: "text", key, label, ...o }) as const,
+  localized: <K extends string>(key: K, label: string, o: Partial<Omit<Extract<Field, { type: "localized" }>, "key" | "label" | "type">> = {}) =>
     ({ type: "localized", key, label, ...o }) as const,
-  richtext: (key: string, label: string, o: Partial<FieldBase> = {}) => ({ type: "richtext", key, label, ...o }) as const,
-  number: (key: string, label: string, o: Partial<Extract<Field, { type: "number" }>> = {}) => ({ type: "number", key, label, ...o }) as const,
-  boolean: (key: string, label: string, o: Partial<FieldBase> = {}) => ({ type: "boolean", key, label, ...o }) as const,
-  select: (key: string, label: string, options: { value: string; label: string }[], o: Partial<FieldBase> = {}) =>
+  richtext: <K extends string>(key: K, label: string, o: { help?: string } = {}) => ({ type: "richtext", key, label, ...o }) as const,
+  number: <K extends string>(key: K, label: string, o: Partial<Omit<Extract<Field, { type: "number" }>, "key" | "label" | "type">> = {}) => ({ type: "number", key, label, ...o }) as const,
+  boolean: <K extends string>(key: K, label: string, o: { help?: string } = {}) => ({ type: "boolean", key, label, ...o }) as const,
+  select: <K extends string>(key: K, label: string, options: { value: string; label: string }[], o: { help?: string } = {}) =>
     ({ type: "select", key, label, options, ...o }) as const,
-  color: (key: string, label: string, o: Partial<FieldBase> = {}) => ({ type: "color", key, label, ...o }) as const,
-  image: (key: string, label: string, o: Partial<FieldBase> = {}) => ({ type: "image", key, label, ...o }) as const,
-  images: (key: string, label: string, o: Partial<Extract<Field, { type: "images" }>> = {}) => ({ type: "images", key, label, ...o }) as const,
-  link: (key: string, label: string, o: Partial<FieldBase> = {}) => ({ type: "link", key, label, ...o }) as const,
-  icon: (key: string, label: string, o: Partial<FieldBase> = {}) => ({ type: "icon", key, label, ...o }) as const,
-  repeater: <Sub extends Field[]>(key: string, label: string, fields: [...Sub], o: Partial<Omit<Extract<Field, { type: "repeater" }>, "fields">> = {}) =>
+  color: <K extends string>(key: K, label: string, o: { help?: string } = {}) => ({ type: "color", key, label, ...o }) as const,
+  image: <K extends string>(key: K, label: string, o: { help?: string } = {}) => ({ type: "image", key, label, ...o }) as const,
+  images: <K extends string>(key: K, label: string, o: Partial<Omit<Extract<Field, { type: "images" }>, "key" | "label" | "type">> = {}) => ({ type: "images", key, label, ...o }) as const,
+  link: <K extends string>(key: K, label: string, o: { help?: string } = {}) => ({ type: "link", key, label, ...o }) as const,
+  icon: <K extends string>(key: K, label: string, o: { help?: string } = {}) => ({ type: "icon", key, label, ...o }) as const,
+  repeater: <K extends string, Sub extends Field[]>(key: K, label: string, fields: [...Sub], o: Partial<Omit<Extract<Field, { type: "repeater" }>, "fields" | "key" | "label" | "type">> = {}) =>
     ({ type: "repeater", key, label, fields, ...o }) as const,
 };

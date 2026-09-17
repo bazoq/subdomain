@@ -11,7 +11,8 @@ export default async function TenantDashboard() {
   const ctx = await requireTenantAdmin();
   const tid = ctx.tenant.id;
   const has = (m: string) => ctx.category.modules.includes(m as never);
-  const since = new Date(Date.now() - 30 * 86_400_000);
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
 
   const [leadsNew, recentLeads] = await Promise.all([
     db.lead.count({ where: { tenantId: tid, status: "NEW" } }),

@@ -64,6 +64,8 @@ export interface NavItem {
 /* ---------- template meta (static, importable by super site) ---------- */
 export interface TemplateMeta {
   id: string; // "pizza-01"
+  /** human-facing serial code (category series + number), e.g. 901 */
+  code: number;
   category: CategoryKey;
   name: string; // "Slice House"
   tagline: string;
