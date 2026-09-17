@@ -64,12 +64,15 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
   const serviceLabel = services.find((x) => x.id === serviceId)?.label ?? "";
   const today = new Date().toISOString().slice(0, 10);
 
+  // clear attached files once a submission succeeds (state adjustment during render)
+  const [seenState, setSeenState] = React.useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state.ok) setFiles([]);
+  }
   React.useEffect(() => {
-    if (state.ok) {
-      formRef.current?.reset();
-      setFiles([]);
-    }
-  }, [state.ok]);
+    if (state.ok) formRef.current?.reset();
+  }, [state]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     const form = e.currentTarget;

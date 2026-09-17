@@ -119,9 +119,10 @@ export function GalleryManager({ rows, albums, current, urduEnabled }: { rows: G
         </ul>
       )}
 
-      <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} albums={albums.map((a) => a.name)} defaultAlbum={current === "all" ? "general" : current} onDone={() => router.refresh()} />
+      <UploadDialog key={`upload-${current}`} open={uploadOpen} onClose={() => setUploadOpen(false)} albums={albums.map((a) => a.name)} defaultAlbum={current === "all" ? "general" : current} onDone={() => router.refresh()} />
       {editing ? <EditDialog row={editing} albums={albums.map((a) => a.name)} urduEnabled={urduEnabled} onClose={() => setEditing(null)} onSaved={() => router.refresh()} /> : null}
       <AlbumDialog
+        key={`move-${moveOpen}`}
         open={moveOpen}
         title={`Move ${selected.size} image(s) to album`}
         albums={albums.map((a) => a.name)}
@@ -129,6 +130,7 @@ export function GalleryManager({ rows, albums, current, urduEnabled }: { rows: G
         onSubmit={async (album) => (await run(moveGalleryItems({ ids: Array.from(selected), toAlbum: album }))) && setMoveOpen(false)}
       />
       <AlbumDialog
+        key={`rename-${current}-${renameOpen}`}
         open={renameOpen}
         title={`Rename album "${current}"`}
         albums={[]}
@@ -152,7 +154,6 @@ function UploadDialog({ open, onClose, albums, defaultAlbum, onDone }: { open: b
   const [newAlbum, setNewAlbum] = React.useState("");
   const [saving, setSaving] = React.useState(false);
   const toast = useToast();
-  React.useEffect(() => setAlbum(defaultAlbum), [defaultAlbum]);
   const target = album === "__new" ? albumSlug(newAlbum) : album;
 
   async function save() {
@@ -263,7 +264,6 @@ function EditDialog({ row, albums, urduEnabled, onClose, onSaved }: { row: Galle
 function AlbumDialog({ open, title, albums, initial = "", onClose, onSubmit }: { open: boolean; title: string; albums: string[]; initial?: string; onClose: () => void; onSubmit: (album: string) => Promise<unknown> }) {
   const [value, setValue] = React.useState(initial);
   const [saving, setSaving] = React.useState(false);
-  React.useEffect(() => setValue(initial), [initial, open]);
   return (
     <Dialog
       open={open}

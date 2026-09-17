@@ -5,6 +5,24 @@ import Link from "next/link";
 import { Megaphone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const EVENT = "sf-announcement";
+/** In-memory fallback when sessionStorage is unavailable (private mode, blocked storage). */
+const dismissedInMemory = new Set<string>();
+
+function subscribe(cb: () => void) {
+  window.addEventListener(EVENT, cb);
+  return () => window.removeEventListener(EVENT, cb);
+}
+
+function isDismissed(key: string) {
+  if (dismissedInMemory.has(key)) return true;
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function AnnouncementBarClient({
   storageKey,
   text,
@@ -18,22 +36,21 @@ export function AnnouncementBarClient({
   className?: string;
   variant?: "primary" | "accent" | "dark";
 }) {
-  const [hidden, setHidden] = React.useState(true);
-  React.useEffect(() => {
-    try {
-      setHidden(sessionStorage.getItem(storageKey) === "1");
-    } catch {
-      setHidden(false);
-    }
-  }, [storageKey]);
+  // hidden on the server / first paint, then reflects the visitor's dismissal
+  const hidden = React.useSyncExternalStore(
+    subscribe,
+    () => isDismissed(storageKey),
+    () => true,
+  );
   if (hidden) return null;
   const dismiss = () => {
-    setHidden(true);
+    dismissedInMemory.add(storageKey);
     try {
       sessionStorage.setItem(storageKey, "1");
     } catch {
       /* ignore */
     }
+    window.dispatchEvent(new Event(EVENT));
   };
   const skin = variant === "accent" ? "bg-t-accent text-t-accent-fg" : variant === "dark" ? "bg-t-dark text-t-dark-fg" : "bg-t-primary text-t-primary-fg";
   const external = !!link && /^https?:/.test(link);

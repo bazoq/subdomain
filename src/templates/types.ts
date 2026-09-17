@@ -4,7 +4,18 @@ import type { CategoryKey } from "@/lib/categories";
 import type { Lang, LocalizedString } from "@/lib/i18n";
 import type { TenantSettings } from "@/lib/tenant-settings";
 import type { BusinessCategory } from "@/lib/categories";
-import type { SitePage, Tenant } from "@/generated/prisma/client";
+import type { SitePage, TenantStatus } from "@/generated/prisma/client";
+
+/** Serialisable tenant subset (safe to pass to client components). */
+export interface SiteTenant {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  templateId: string;
+  status: TenantStatus;
+  isDemo: boolean;
+}
 
 /* ---------- sections ---------- */
 export interface SectionDefinition<Fs extends Field[] = Field[]> {
@@ -89,8 +100,12 @@ export interface SectionState<T = Record<string, unknown>> {
   data: T;
 }
 
+/**
+ * Everything a template needs. Fully serialisable (no BigInt, Date or functions) so it can
+ * be passed to client components as-is.
+ */
 export interface SiteContext {
-  tenant: Tenant;
+  tenant: SiteTenant;
   settings: TenantSettings;
   category: BusinessCategory;
   host: string;
@@ -103,8 +118,6 @@ export interface SiteContext {
   orderedSections: { key: string; data: Record<string, unknown> }[];
   nav: NavItem[];
   pages: Pick<SitePage, "slug" | "title" | "showInNav">[];
-  /** path prefix for language switch links */
-  langHref: (lang: Lang) => string;
 }
 
 export interface TemplateLayoutProps {

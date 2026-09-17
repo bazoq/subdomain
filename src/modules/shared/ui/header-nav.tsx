@@ -32,10 +32,12 @@ export function HeaderNav({
   const pathname = usePathname() ?? "/";
   const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
-
-  React.useEffect(() => {
+  // close the drawer on navigation (state adjustment during render, no effect needed)
+  const [prevPath, setPrevPath] = React.useState(pathname);
+  if (pathname !== prevPath) {
+    setPrevPath(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
   React.useEffect(() => {
     if (variant !== "transparent") return;
     const onScroll = () => setScrolled(window.scrollY > 24);

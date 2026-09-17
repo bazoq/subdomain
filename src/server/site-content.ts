@@ -59,8 +59,9 @@ export async function buildSiteContext(tc: TenantContext, lang: Lang): Promise<S
       .map((p) => ({ label: p.title as { en: string; ur?: string }, href: `/p/${p.slug}` })),
   ];
 
+  const { id, slug, name, category, templateId, status, isDemo } = tc.tenant;
   return {
-    tenant: tc.tenant,
+    tenant: { id, slug, name, category, templateId, status, isDemo },
     settings: tc.settings,
     category: tc.category,
     host: tc.host,
@@ -71,7 +72,6 @@ export async function buildSiteContext(tc: TenantContext, lang: Lang): Promise<S
     orderedSections,
     nav,
     pages,
-    langHref: (l) => `?lang=${l}`,
   };
 }
 

@@ -2,11 +2,77 @@
 import type { TemplateComponents, TemplateMeta } from "@/templates/types";
 
 import { meta as law_01 } from "@/templates/law/01/meta";
+import { meta as law_02 } from "@/templates/law/02/meta";
+import { meta as law_03 } from "@/templates/law/03/meta";
+import { meta as law_04 } from "@/templates/law/04/meta";
+import { meta as law_05 } from "@/templates/law/05/meta";
+import { meta as law_06 } from "@/templates/law/06/meta";
+import { meta as realestate_01 } from "@/templates/realestate/01/meta";
+import { meta as realestate_02 } from "@/templates/realestate/02/meta";
+import { meta as realestate_03 } from "@/templates/realestate/03/meta";
+import { meta as recruiting_01 } from "@/templates/recruiting/01/meta";
+import { meta as recruiting_02 } from "@/templates/recruiting/02/meta";
+import { meta as recruiting_03 } from "@/templates/recruiting/03/meta";
+import { meta as recruiting_04 } from "@/templates/recruiting/04/meta";
+import { meta as travel_01 } from "@/templates/travel/01/meta";
+import { meta as travel_02 } from "@/templates/travel/02/meta";
+import { meta as travel_03 } from "@/templates/travel/03/meta";
+import { meta as travel_04 } from "@/templates/travel/04/meta";
+import { meta as travel_05 } from "@/templates/travel/05/meta";
+import { meta as travel_06 } from "@/templates/travel/06/meta";
+import { meta as travel_07 } from "@/templates/travel/07/meta";
+import { meta as travel_08 } from "@/templates/travel/08/meta";
+import { meta as travel_09 } from "@/templates/travel/09/meta";
+import { meta as travel_10 } from "@/templates/travel/10/meta";
 
 export const TEMPLATE_METAS: TemplateMeta[] = [
   law_01,
+  law_02,
+  law_03,
+  law_04,
+  law_05,
+  law_06,
+  realestate_01,
+  realestate_02,
+  realestate_03,
+  recruiting_01,
+  recruiting_02,
+  recruiting_03,
+  recruiting_04,
+  travel_01,
+  travel_02,
+  travel_03,
+  travel_04,
+  travel_05,
+  travel_06,
+  travel_07,
+  travel_08,
+  travel_09,
+  travel_10,
 ];
 
 export const TEMPLATE_LOADERS: Record<string, () => Promise<{ components: TemplateComponents }>> = {
   "law-01": () => import("@/templates/law/01"),
+  "law-02": () => import("@/templates/law/02"),
+  "law-03": () => import("@/templates/law/03"),
+  "law-04": () => import("@/templates/law/04"),
+  "law-05": () => import("@/templates/law/05"),
+  "law-06": () => import("@/templates/law/06"),
+  "realestate-01": () => import("@/templates/realestate/01"),
+  "realestate-02": () => import("@/templates/realestate/02"),
+  "realestate-03": () => import("@/templates/realestate/03"),
+  "recruiting-01": () => import("@/templates/recruiting/01"),
+  "recruiting-02": () => import("@/templates/recruiting/02"),
+  "recruiting-03": () => import("@/templates/recruiting/03"),
+  "recruiting-04": () => import("@/templates/recruiting/04"),
+  "travel-01": () => import("@/templates/travel/01"),
+  "travel-02": () => import("@/templates/travel/02"),
+  "travel-03": () => import("@/templates/travel/03"),
+  "travel-04": () => import("@/templates/travel/04"),
+  "travel-05": () => import("@/templates/travel/05"),
+  "travel-06": () => import("@/templates/travel/06"),
+  "travel-07": () => import("@/templates/travel/07"),
+  "travel-08": () => import("@/templates/travel/08"),
+  "travel-09": () => import("@/templates/travel/09"),
+  "travel-10": () => import("@/templates/travel/10"),
 };

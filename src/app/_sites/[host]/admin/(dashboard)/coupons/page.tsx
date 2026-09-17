@@ -9,10 +9,13 @@ import { CouponFormButton } from "@/components/admin/ecommerce/coupon-form";
 import { deleteCoupon } from "@/modules/ecommerce/actions";
 import { formatDate, formatPKR } from "@/lib/utils";
 
+function isExpired(expiresAt: Date | null): boolean {
+  return !!expiresAt && expiresAt.getTime() < Date.now();
+}
+
 export default async function CouponsPage() {
   const ctx = await requireTenantAdmin();
   const rows = await db.coupon.findMany({ where: { tenantId: ctx.tenant.id }, orderBy: { createdAt: "desc" } });
-  const now = Date.now();
 
   return (
     <>
@@ -34,7 +37,7 @@ export default async function CouponsPage() {
           </THead>
           <TBody>
             {rows.map((c) => {
-              const expired = !!c.expiresAt && c.expiresAt.getTime() < now;
+              const expired = isExpired(c.expiresAt);
               const exhausted = c.maxUses != null && c.usedCount >= c.maxUses;
               const tone = !c.isActive ? "default" : expired || exhausted ? "danger" : "success";
               const label = !c.isActive ? "Inactive" : expired ? "Expired" : exhausted ? "Used up" : "Active";
