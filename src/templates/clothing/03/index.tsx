@@ -60,7 +60,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           variant="light"
           cta={null}
           className="border-b-2 border-t-accent [&_nav_a]:rounded-full [&_nav_a]:px-4 [&_nav_a:hover]:bg-t-muted"
-          rightSlot={<CartButton ctx={lc} mode="drawer" className="rounded-full bg-t-primary px-3 text-t-primary-fg hover:bg-t-primary/90 [&>span]:bg-t-secondary [&>span]:text-white" />}
+          rightSlot={<CartButton ctx={lc} mode="drawer" className="rounded-full bg-t-primary px-3 text-t-primary-fg hover:bg-t-primary/90 [&>span]:bg-t-secondary [&>span]:text-t-secondary-fg" />}
         />
         {tagline ? (
           <div className="hidden border-b border-t-border bg-t-muted py-2 text-center sm:block">

@@ -57,7 +57,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             </div>
           }
         />
-        <div className="flex-1 pb-16 md:pb-0">{children}</div>
+        <main id="main" className="flex-1 pb-16 md:pb-0">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" showHours />
         {/* always-visible order bar (mobile); the cart bar stacks above it once items are added */}
         <div className="fixed inset-x-0 bottom-0 z-30 flex items-stretch gap-px border-t border-t-border bg-t-card md:hidden">

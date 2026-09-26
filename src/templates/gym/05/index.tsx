@@ -47,7 +47,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={{ label: { en: "Join today", ur: "آج شامل ہوں" }, href: "/join" }}
         className="border-b-0 bg-t-muted/90 [&_.t-btn-primary]:rounded-full [&_a>span.font-heading]:text-t-primary [&_nav_a]:rounded-full [&_nav_a]:font-medium"
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

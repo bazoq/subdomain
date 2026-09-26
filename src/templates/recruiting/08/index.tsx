@@ -43,7 +43,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBar ctx={ctx} variant="primary" />
       <SiteHeader ctx={ctx} variant="light" className="[&_nav_a]:rounded-full [&_.t-btn]:rounded-full [&_.font-heading]:text-t-primary" cta={{ label: { en: "Apply", ur: "درخواست دیں" }, href: "/jobs" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" className="rounded-t-[3rem]" />
       <WhatsAppFloat ctx={ctx} />
     </div>
@@ -112,8 +112,7 @@ function PhotoTiles({ ctx }: TemplatePageProps) {
               <li key={i}>
                 <SmartLink href={it.href || "/jobs"} ctx={ctx} className={cn("group relative flex aspect-[4/5] items-end overflow-hidden rounded-3xl p-5 text-white", i % 2 ? "bg-gradient-to-br from-t-accent to-t-secondary" : "bg-gradient-to-br from-t-primary to-t-secondary")}>
                   {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+                    <Img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
                   ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-t-dark/85 via-t-dark/30 to-transparent" aria-hidden="true" />
                   <Icon name={it.icon} className="absolute end-5 top-5 size-9 opacity-90" />

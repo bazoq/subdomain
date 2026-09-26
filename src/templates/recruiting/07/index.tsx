@@ -38,7 +38,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col text-[17px] leading-relaxed">
       <AnnouncementBar ctx={ctx} variant="accent" className="text-base font-semibold" />
       <CommunityHeader ctx={ctx} cta={{ label: ctx.lang === "ur" ? "اپنا سی وی جمع کریں" : "Submit your CV", href: "/jobs" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="primary" className="[&_a]:text-base [&_p]:text-base" />
       <WhatsAppFloat ctx={ctx} />
     </div>

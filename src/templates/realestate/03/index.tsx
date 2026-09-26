@@ -46,7 +46,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBar ctx={ctx} variant="accent" />
       <SiteHeader ctx={ctx} variant="dark" cta={{ label: ui.whatsapp, href: "whatsapp" }} className="bg-t-primary text-t-primary-fg [&_.t-btn-primary]:bg-t-accent [&_.t-btn-primary]:text-t-accent-fg" />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

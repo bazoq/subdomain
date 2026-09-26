@@ -70,7 +70,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
               <Link href="/shop" className="hidden border border-t-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-t-primary transition hover:bg-t-primary hover:text-t-primary-fg md:inline-flex">
                 {t(ui.shop, ctx.lang)}
               </Link>
-              <CartButton ctx={lc} mode="drawer" className="rounded-none hover:bg-white/10 [&>span]:rounded-none [&>span]:bg-t-accent [&>span]:text-t-accent-fg" />
+              <CartButton ctx={lc} mode="drawer" className="rounded-none hover:bg-t-dark-fg/10 [&>span]:rounded-none [&>span]:bg-t-accent [&>span]:text-t-accent-fg" />
             </>
           }
         />
@@ -198,7 +198,7 @@ async function Products({ ctx }: TemplatePageProps) {
           ctx={ctx}
           columns={4}
           showQuickAdd
-          className="[&_article]:rounded-none [&_article]:border-t-border [&_article_button]:rounded-none [&_article_button]:uppercase [&_article_button]:tracking-[0.15em] [&_article_button]:opacity-0 [&_article_button]:transition [&_article:hover_button]:opacity-100 [&_article_span.font-heading]:text-t-primary"
+          className="[&_article]:rounded-none [&_article]:border-t-border [&_article_button]:rounded-none [&_article_button]:uppercase [&_article_button]:tracking-[0.15em] [&_article_button]:opacity-0 [&_article_button]:transition [&_article:hover_button]:opacity-100 [&_article_button:focus-visible]:opacity-100 [&_article_span.font-heading]:text-t-primary"
         />
       </Container>
     </section>

@@ -243,7 +243,7 @@ function Home({ ctx }: TemplatePageProps) {
         ),
         testimonials: () => (
           <div className="contents" style={BROWN}>
-            <TestimonialsBlock ctx={ctx} variant="grid" columns={3} light className="py-14 sm:py-20 [&_.t-card]:border-white/25 [&_.t-card]:border-dashed" />
+            <TestimonialsBlock ctx={ctx} variant="grid" columns={3} light className="py-14 sm:py-20 [&_.t-card]:border-t-dark-fg/25 [&_.t-card]:border-dashed" />
           </div>
         ),
         faq: () => (

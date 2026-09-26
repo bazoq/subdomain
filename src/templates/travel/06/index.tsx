@@ -43,7 +43,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           className="rounded-[calc(var(--t-radius)*1.5)] bg-t-primary text-t-primary-fg shadow-lg [&_a.t-btn]:rounded-full [&_a.t-btn]:bg-t-accent [&_a.t-btn]:text-t-accent-fg [&_nav>a]:rounded-full"
         />
       </div>
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="primary" className="mt-6 rounded-t-[calc(var(--t-radius)*2)]" />
       <WhatsAppFloat ctx={ctx} />
     </div>

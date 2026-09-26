@@ -89,7 +89,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <span className="my-6 block h-px w-16 bg-t-accent" aria-hidden="true" />
           <p className="max-w-sm text-sm leading-7 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8">
-            <CtaButton value={h.primaryCta} ctx={ctx} className={cn("t-btn bg-t-secondary px-8 text-white hover:opacity-90", MICRO)} />
+            <CtaButton value={h.primaryCta} ctx={ctx} className={cn("t-btn bg-t-secondary px-8 text-t-secondary-fg hover:opacity-90", MICRO)} />
           </div>
           {h.badges?.length ? <p className={cn(MICRO, "mt-8 text-t-muted-fg")}>{h.badges.map((b) => b.text).filter(Boolean).join(" · ")}</p> : null}
         </div>
@@ -141,7 +141,7 @@ async function Products({ ctx }: TemplatePageProps) {
         <SectionHeading eyebrow={d.eyebrow} title={d.title} lang={ctx.lang} className="mb-12 [&_h2]:font-normal [&_span]:tracking-[0.3em]" />
         <ProductGrid products={products} ctx={ctx} layout="minimal" columns={4} className="gap-x-6 gap-y-10 [&_article]:text-center [&_h3]:uppercase [&_h3]:tracking-[0.15em]" />
         <div className="mt-14 text-center">
-          <CtaButton value={d.cta} ctx={ctx} className={cn("t-btn bg-t-secondary px-8 text-white hover:opacity-90", MICRO)} />
+          <CtaButton value={d.cta} ctx={ctx} className={cn("t-btn bg-t-secondary px-8 text-t-secondary-fg hover:opacity-90", MICRO)} />
         </div>
       </Container>
     </section>
@@ -163,7 +163,7 @@ function Banner({ ctx }: TemplatePageProps) {
           <span className="my-6 block h-px w-20 bg-t-accent" aria-hidden="true" />
           <p className="max-w-md text-sm leading-7 text-t-muted-fg">{t(d.text, ctx.lang)}</p>
           <div className="mt-8">
-            <CtaButton value={d.cta} ctx={ctx} className={cn("t-btn bg-t-secondary px-8 text-white hover:opacity-90", MICRO)} />
+            <CtaButton value={d.cta} ctx={ctx} className={cn("t-btn bg-t-secondary px-8 text-t-secondary-fg hover:opacity-90", MICRO)} />
           </div>
         </div>
         <div className={cn("border border-t-accent p-3", d.align === "left" && "lg:order-1")}>

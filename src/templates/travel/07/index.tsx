@@ -40,7 +40,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col bg-t-bg">
       <AnnouncementBar ctx={ctx} variant="dark" />
       <SiteHeader ctx={ctx} variant="light" cta={{ label: { en: "Explore packages", ur: "پیکجز دیکھیں" }, href: "/packages" }} className="bg-t-muted/95 [&_a>span.font-heading]:text-t-primary" />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

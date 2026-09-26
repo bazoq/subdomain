@@ -75,7 +75,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             }
           />
           {/* pages get room for the absolute header; the home hero pulls itself back under it */}
-          <div className="flex-1 pt-16 lg:pt-20">{children}</div>
+          <main id="main" className="flex-1 pt-16 lg:pt-20">{children}</main>
         </div>
         <Grain />
         <SiteFooter ctx={ctx} variant="dark" showHours />

@@ -62,7 +62,7 @@ async function Layout({ ctx, children }: TemplateLayoutProps) {
           ) : null
         }
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

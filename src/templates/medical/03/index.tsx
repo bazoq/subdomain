@@ -57,7 +57,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             variant="light"
             sticky={false}
             cta={null}
-            className="border-b-0 bg-transparent backdrop-blur-none [&>div]:h-14 [&>div]:lg:h-16 [&_nav_a]:rounded-full [&_nav_a]:text-sm [&_nav_a]:font-semibold"
+            className="border-b-0 bg-transparent backdrop-blur-none [&>div]:h-14 lg:[&>div]:h-16 [&_nav_a]:rounded-full [&_nav_a]:text-sm [&_nav_a]:font-semibold"
             rightSlot={
               <>
                 {city ? (
@@ -120,7 +120,7 @@ async function Hero({ ctx }: TemplatePageProps) {
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
               <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary rounded-full font-bold" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-              <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn rounded-full border border-white/40 bg-white/10 font-bold text-t-secondary-fg hover:bg-white/20" />
+              <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn rounded-full border border-t-secondary-fg/40 bg-t-secondary-fg/10 font-bold text-t-secondary-fg hover:bg-t-secondary-fg/20" />
             </div>
           </div>
         </div>

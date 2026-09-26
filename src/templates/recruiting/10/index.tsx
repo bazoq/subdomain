@@ -38,7 +38,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col bg-t-bg text-t-fg">
       <AnnouncementBar ctx={ctx} variant="accent" />
       <SiteHeader ctx={ctx} variant="light" className="[&_.font-heading]:font-semibold [&_.font-heading]:tracking-normal [&_.t-btn]:rounded-full" cta={{ label: { en: "Submit your CV", ur: "اپنا سی وی جمع کریں" }, href: "/jobs" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" className="rounded-t-[3rem]" />
       <WhatsAppFloat ctx={ctx} />
     </div>

@@ -44,8 +44,7 @@ function Header({ ctx }: TemplatePageProps) {
       <Container className="flex h-14 items-center justify-between gap-6">
         <Link href="/" className="flex items-center" aria-label={ctx.tenant.name}>
           {ctx.settings.branding.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-7 w-auto max-w-[140px] object-contain" />
+            <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-7 w-auto max-w-36 object-contain" />
           ) : (
             <span className="font-heading text-lg font-extrabold uppercase tracking-[0.2em]">{ctx.tenant.name}</span>
           )}
@@ -91,7 +90,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col bg-t-bg">
       <AnnouncementBar ctx={ctx} variant="dark" />
       <Header ctx={ctx} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="light" />
       <WhatsAppFloat ctx={ctx} />
     </div>

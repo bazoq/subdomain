@@ -45,7 +45,7 @@ const SPEED: React.CSSProperties = {
   backgroundImage: [
     "linear-gradient(90deg, transparent, color-mix(in srgb, var(--t-accent) 70%, transparent))",
     "linear-gradient(90deg, transparent, color-mix(in srgb, var(--t-accent) 40%, transparent))",
-    "linear-gradient(90deg, transparent, color-mix(in srgb, #ffffff 35%, transparent))",
+    "linear-gradient(90deg, transparent, color-mix(in srgb, var(--t-primary-fg) 35%, transparent))",
   ].join(","),
   backgroundSize: "40% 3px, 26% 3px, 32% 3px",
   backgroundPosition: "0 30%, 0 48%, 0 66%",
@@ -63,8 +63,8 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           ctx={ctx}
           variant="dark"
           cta={null}
-          className={cn(GRADIENT, "[&_nav_a]:font-semibold [&_nav_a:hover]:bg-white/15")}
-          rightSlot={<CartButton ctx={lc} mode="drawer" className="bg-t-accent px-3 text-t-accent-fg shadow-[0_0_18px_var(--t-accent)] hover:bg-t-accent/90 [&>span]:bg-white [&>span]:text-t-secondary" />}
+          className={cn(GRADIENT, "[&_nav_a]:font-semibold [&_nav_a:hover]:bg-t-primary-fg/15")}
+          rightSlot={<CartButton ctx={lc} mode="drawer" className="bg-t-accent px-3 text-t-accent-fg shadow-[0_0_18px_var(--t-accent)] hover:bg-t-accent/90 [&>span]:bg-t-primary-fg [&>span]:text-t-primary" />}
         />
         <div className="flex-1">{children}</div>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-accent" />
@@ -86,22 +86,22 @@ function Hero({ ctx }: TemplatePageProps) {
       <Img src={h.image} alt="" className="absolute inset-y-0 end-0 hidden h-full w-1/2 object-cover lg:block" fallback={<span />} />
       <div className="pointer-events-none absolute inset-y-1/4 start-0 w-2/3 opacity-70" style={SPEED} aria-hidden="true" />
       <Container className="relative grid gap-10 py-16 lg:grid-cols-2 lg:py-28">
-        <div className="t-fade-up text-white">
+        <div className="t-fade-up text-t-primary-fg">
           {h.eyebrow ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest text-t-accent backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full bg-t-primary-fg/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest text-t-accent backdrop-blur">
               <Zap className="size-4" /> {h.eyebrow}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
-          <p className="mt-5 max-w-lg text-base leading-8 text-white/85 sm:text-lg">{t(h.subtitle, lang)}</p>
+          <p className="mt-5 max-w-lg text-base leading-8 text-t-primary-fg/85 sm:text-lg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn bg-t-accent px-7 font-bold text-t-accent-fg shadow-[0_0_24px_var(--t-accent)] hover:opacity-90" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-white/50 px-7 font-bold text-white hover:bg-white/10" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-t-primary-fg/50 px-7 font-bold text-t-primary-fg hover:bg-t-primary-fg/10" />
           </div>
           {h.badges?.length ? (
             <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2">
               {h.badges.map((b, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm font-semibold text-white/85">
+                <li key={i} className="flex items-center gap-2 text-sm font-semibold text-t-primary-fg/85">
                   <Icon name={b.icon} className="size-4 text-t-accent" /> {b.text}
                 </li>
               ))}
@@ -217,12 +217,12 @@ function Banner({ ctx }: TemplatePageProps) {
   return (
     <section id="banner" className="py-16 sm:py-20">
       <Container>
-        <div className={cn("relative grid items-center overflow-hidden rounded-[var(--t-radius)] text-white lg:grid-cols-2", GRADIENT, d.align === "left" && "lg:[&>*:nth-child(2)]:order-2")}>
+        <div className={cn("relative grid items-center overflow-hidden rounded-[var(--t-radius)] text-t-primary-fg lg:grid-cols-2", GRADIENT, d.align === "left" && "lg:[&>*:nth-child(2)]:order-2")}>
           <div className="pointer-events-none absolute inset-y-1/3 start-0 w-1/2 opacity-60" style={SPEED} aria-hidden="true" />
           <div className="relative p-8 sm:p-12">
-            {d.eyebrow ? <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-t-accent">{d.eyebrow}</span> : null}
+            {d.eyebrow ? <span className="inline-block rounded-full bg-t-primary-fg/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-t-accent">{d.eyebrow}</span> : null}
             <h2 className="font-heading mt-5 text-3xl font-extrabold leading-tight sm:text-4xl">{title}</h2>
-            <p className="mt-4 max-w-md text-base text-white/85">{t(d.text, ctx.lang)}</p>
+            <p className="mt-4 max-w-md text-base text-t-primary-fg/85">{t(d.text, ctx.lang)}</p>
             <div className="mt-7">
               <CtaButton value={d.cta} ctx={ctx} className="t-btn bg-t-accent px-7 font-bold text-t-accent-fg hover:opacity-90" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
             </div>

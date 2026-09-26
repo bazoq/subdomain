@@ -192,7 +192,7 @@ function SolarBanner({ ctx }: TemplatePageProps) {
             <div className="relative mt-7 flex flex-wrap gap-3">
               <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-accent font-bold" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
               {phone ? (
-                <a href={`tel:${phone}`} className="t-btn t-btn-outline border-white/40 text-t-secondary-fg hover:bg-white/10">
+                <a href={`tel:${phone}`} className="t-btn t-btn-outline border-t-secondary-fg/40 text-t-secondary-fg hover:bg-t-secondary-fg/10">
                   <Phone className="size-4" /> {phone}
                 </a>
               ) : null}

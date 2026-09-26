@@ -6,8 +6,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Languages, Menu, MessageCircle, Phone, Search, X } from "lucide-react";
 import type { SiteContext } from "@/templates/types";
-import { t, ui } from "@/lib/i18n";
+import { ls, t, ui } from "@/lib/i18n";
 import { cn, whatsappLink } from "@/lib/utils";
+
+/** chrome labels for assistive tech (the platform ui dictionary has no menu strings) */
+const A11Y = { open: ls("Open menu", "مینیو کھولیں"), close: ls("Close menu", "مینیو بند کریں"), menu: ls("Menu", "مینیو"), lang: ls("Switch language", "زبان بدلیں") };
+import { Img } from "@/templates/ui";
 import { CartButton } from "@/modules/ecommerce/ui/cart-button";
 import { sui } from "@/modules/ecommerce/ui/strings";
 
@@ -62,7 +66,7 @@ export function RetailHeader({ ctx, categories }: { ctx: SiteContext; categories
               </a>
             ) : null}
             {ctx.settings.languages.urduEnabled ? (
-              <a href={langHref} className="inline-flex items-center gap-1 font-semibold hover:text-t-accent" title="Switch language">
+              <a href={langHref} className="inline-flex items-center gap-1 font-semibold hover:text-t-accent" title={t(A11Y.lang, lang)}>
                 <Languages className="size-3.5" /> {other === "ur" ? "اردو" : "English"}
               </a>
             ) : null}
@@ -75,8 +79,7 @@ export function RetailHeader({ ctx, categories }: { ctx: SiteContext; categories
         <div className="t-container flex h-16 items-center gap-4 lg:h-20 lg:gap-8">
           <Link href="/" className="flex shrink-0 items-center" aria-label={ctx.tenant.name}>
             {ctx.settings.branding.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-[150px] object-contain lg:h-12" />
+              <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} loading="eager" className="h-9 w-auto max-w-36 object-contain lg:h-12" />
             ) : (
               <span className="font-heading text-xl font-extrabold uppercase tracking-tight text-t-primary lg:text-2xl">{ctx.tenant.name}</span>
             )}
@@ -84,7 +87,7 @@ export function RetailHeader({ ctx, categories }: { ctx: SiteContext; categories
           {searchForm("shop-q-desktop", "hidden flex-1 md:flex")}
           <div className="ms-auto flex items-center gap-1 md:ms-0">
             <CartButton ctx={{ lang }} mode="drawer" showLabel className="rounded-[var(--t-radius)] bg-t-primary px-3 text-t-primary-fg hover:bg-t-primary/90 [&>span]:bg-t-accent [&>span]:text-t-accent-fg" />
-            <button type="button" onClick={() => setOpen(true)} className="inline-flex size-10 items-center justify-center rounded-[var(--t-radius)] hover:bg-t-muted lg:hidden" aria-label="Open menu" aria-expanded={open} aria-controls="mobile-nav">
+            <button type="button" onClick={() => setOpen(true)} className="inline-flex size-10 items-center justify-center rounded-[var(--t-radius)] hover:bg-t-muted lg:hidden" aria-label={t(A11Y.open, lang)} aria-expanded={open} aria-controls="mobile-nav">
               <Menu className="size-6" />
             </button>
           </div>
@@ -117,14 +120,14 @@ export function RetailHeader({ ctx, categories }: { ctx: SiteContext; categories
       {/* mobile drawer */}
       <div id="mobile-nav" className={cn("fixed inset-0 z-[60] lg:hidden", open ? "" : "pointer-events-none")} aria-hidden={!open}>
         <div className={cn("absolute inset-0 bg-black/50 transition-opacity", open ? "opacity-100" : "opacity-0")} onClick={() => setOpen(false)} />
-        <div className={cn("absolute inset-y-0 end-0 flex w-[85%] max-w-sm flex-col bg-t-bg text-t-fg shadow-2xl transition-transform", open ? "translate-x-0" : "translate-x-full rtl:-translate-x-full")} role="dialog" aria-modal="true" aria-label="Menu">
+        <div className={cn("absolute inset-y-0 end-0 flex w-[85%] max-w-sm flex-col bg-t-bg text-t-fg shadow-2xl transition-transform", open ? "translate-x-0" : "translate-x-full rtl:-translate-x-full")} role="dialog" aria-modal="true" aria-label={t(A11Y.menu, lang)}>
           <div className="flex items-center justify-between border-b-2 border-t-border px-4 py-3">
             <span className="font-heading text-lg font-extrabold uppercase text-t-primary">{ctx.tenant.name}</span>
-            <button type="button" onClick={() => setOpen(false)} className="rounded-[var(--t-radius)] p-2 hover:bg-t-muted" aria-label="Close menu">
+            <button type="button" onClick={() => setOpen(false)} className="rounded-[var(--t-radius)] p-2 hover:bg-t-muted" aria-label={t(A11Y.close, lang)}>
               <X className="size-6" />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label="Mobile">
+          <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label={t(A11Y.menu, lang)}>
             {ctx.nav.map((n) => (
               <Link key={n.href} href={n.href} className={cn("block px-3 py-3 text-base font-bold uppercase hover:bg-t-muted", isActive(n.href) && "text-t-primary")}>
                 {t(n.label, lang)}

@@ -297,7 +297,7 @@ function Home({ ctx }: TemplatePageProps) {
         banner: () => <Banner ctx={ctx} />,
         features: () => <FeaturesBlock ctx={ctx} variant="list" light className={cn("[&_h3]:uppercase [&_h3]:tracking-wide", CAPS)} />,
         about: () => <AboutBlock ctx={ctx} variant="image-left" className={cn("[&_img]:rounded-none [&_img]:border-2 [&_img]:border-t-secondary [&_img]:shadow-none", CAPS)} />,
-        stats: () => <StatsBlock ctx={ctx} variant="row" light className="border-t border-white/10" />,
+        stats: () => <StatsBlock ctx={ctx} variant="row" light className="border-t border-t-dark-fg/10" />,
         testimonials: () => <TestimonialsBlock ctx={ctx} variant="grid" columns={3} className={cn("bg-t-muted", CAPS)} />,
         faq: () => <FaqBlock ctx={ctx} variant="accordion" className={CAPS} />,
         cta: () => <CtaBlock ctx={ctx} variant="banner" className="[&_h2]:uppercase [&_h2]:tracking-tight [&_h2]:font-extrabold [&_h2]:text-4xl sm:[&_h2]:text-5xl" />,

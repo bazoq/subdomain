@@ -8,6 +8,7 @@ import { Languages, Menu, Plus, X } from "lucide-react";
 import type { SiteContext } from "@/templates/types";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Img } from "@/templates/ui";
 
 export function ClinicHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: string; href: string } }) {
   const pathname = usePathname() ?? "/";
@@ -27,8 +28,7 @@ export function ClinicHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: str
   const brand = (
     <span className="flex items-center gap-2.5">
       {ctx.settings.branding.logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-[150px] object-contain" />
+        <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-40 object-contain" />
       ) : (
         <>
           <span className="flex size-9 items-center justify-center rounded-[var(--t-radius)] bg-t-primary text-t-primary-fg" aria-hidden="true">

@@ -43,7 +43,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             ctx={ctx}
             variant="dark"
             cta={null}
-            className="[&_nav_a]:rounded-full [&_nav_a]:font-bold [&_nav_a:hover]:bg-white/20"
+            className="[&_nav_a]:rounded-full [&_nav_a]:font-bold [&_nav_a:hover]:bg-t-dark-fg/20"
             rightSlot={<CartButton ctx={lc} mode="drawer" showLabel className="bg-t-accent px-4 text-t-accent-fg hover:bg-t-accent/90" />}
           />
         </div>
@@ -171,7 +171,7 @@ function Banner({ ctx }: TemplatePageProps) {
             </div>
           </div>
           <div className="relative">
-            <div className={cn("absolute -inset-3 bg-white/20", BLOB)} aria-hidden="true" />
+            <div className={cn("absolute -inset-3 bg-t-primary-fg/20", BLOB)} aria-hidden="true" />
             <Img src={d.image} alt="" className={cn("relative aspect-[4/3] w-full object-cover", BLOB)} fallback={<Medal className="size-16 opacity-40" />} />
           </div>
         </div>

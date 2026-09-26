@@ -203,7 +203,7 @@ function PrescriptionSteps({ ctx }: TemplatePageProps) {
         <div className="overflow-hidden rounded-[var(--t-radius)] bg-t-primary text-t-primary-fg">
           <div className="grid gap-8 p-8 sm:p-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div>
-              <span className="inline-flex size-12 items-center justify-center rounded-full bg-white/15">
+              <span className="inline-flex size-12 items-center justify-center rounded-full bg-t-primary-fg/15">
                 <Cross className="size-6 fill-current" aria-hidden="true" />
               </span>
               <h2 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
@@ -215,7 +215,7 @@ function PrescriptionSteps({ ctx }: TemplatePageProps) {
             {points.length ? (
               <ol className="space-y-4">
                 {points.map((p, i) => (
-                  <li key={i} className="flex items-start gap-4 rounded-[var(--t-radius)] bg-white/10 p-4">
+                  <li key={i} className="flex items-start gap-4 rounded-[var(--t-radius)] bg-t-primary-fg/10 p-4">
                     <span className="font-heading flex size-9 shrink-0 items-center justify-center rounded-full bg-t-accent text-sm font-bold text-t-accent-fg">{i + 1}</span>
                     <span className="pt-1.5 text-sm font-medium leading-snug">{t(p.text, lang)}</span>
                   </li>

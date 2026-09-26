@@ -62,7 +62,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           rightSlot={<CartCountLink host={ctx.host} label={t(rs.yourOrder, ctx.lang)} className="rounded-full border border-t-border bg-t-card px-3 py-2 text-sm font-semibold text-t-primary" />}
           className="border-b-0 bg-t-accent/40 backdrop-blur [&_.t-btn-primary]:rounded-full [&_a>span.font-heading]:font-normal [&_a>span.font-heading]:text-t-primary [&_nav_a]:rounded-full"
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <Scallop token="muted" />
         <SiteFooter ctx={ctx} variant="light" className="border-t-0" />
         <CartBar ctx={rc} className="pb-20 sm:pb-6" />

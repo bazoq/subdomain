@@ -8,6 +8,7 @@ import { Languages, Menu, X } from "lucide-react";
 import type { SiteContext } from "@/templates/types";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Img } from "@/templates/ui";
 
 export function GlassHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: string; href: string } }) {
   const pathname = usePathname() ?? "/";
@@ -25,8 +26,7 @@ export function GlassHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: stri
   const langHref = `/api/lang?to=${other}&back=${encodeURIComponent(pathname)}`;
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
   const brand = ctx.settings.branding.logoUrl ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-8 w-auto max-w-[140px] object-contain" />
+    <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-8 w-auto max-w-36 object-contain" />
   ) : (
     <span className="font-heading bg-gradient-to-r from-t-primary to-t-accent bg-clip-text text-xl font-extrabold tracking-tight text-transparent">{ctx.tenant.name}</span>
   );

@@ -103,6 +103,28 @@ export function cartKey(item: Pick<CartItem, "productId" | "variantId">): string
 export const ORDER_STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"] as const;
 export type OrderStatusValue = (typeof ORDER_STATUSES)[number];
 
+/**
+ * Allowed status transitions for shop (COD) orders. CANCELLED and RETURNED are terminal because they
+ * release stock; re-opening them would need a fresh stock check, so staff must place a new order instead.
+ * SHIPPED -> CANCELLED covers the common "customer refused the parcel at the door" COD case.
+ */
+export const ORDER_TRANSITIONS: Record<OrderStatusValue, OrderStatusValue[]> = {
+  PENDING: ["CONFIRMED", "PROCESSING", "CANCELLED"],
+  CONFIRMED: ["PROCESSING", "SHIPPED", "CANCELLED"],
+  PROCESSING: ["SHIPPED", "CANCELLED"],
+  SHIPPED: ["DELIVERED", "RETURNED", "CANCELLED"],
+  DELIVERED: ["RETURNED"],
+  CANCELLED: [],
+  RETURNED: [],
+};
+
+export function canTransitionOrder(from: OrderStatusValue, to: OrderStatusValue): boolean {
+  return from === to || ORDER_TRANSITIONS[from].includes(to);
+}
+
+/** Statuses that hand stock back to the shelf. */
+export const STOCK_RELEASING_STATUSES: readonly OrderStatusValue[] = ["CANCELLED", "RETURNED"];
+
 export interface TimelineEntry {
   status: string;
   at: string;

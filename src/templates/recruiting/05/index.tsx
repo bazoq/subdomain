@@ -35,7 +35,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBar ctx={ctx} variant="primary" />
       <ClinicHeader ctx={ctx} cta={{ label: ctx.lang === "ur" ? "نرس کے طور پر رجسٹر کریں" : "Register as nurse", href: "/jobs" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="light" />
       <WhatsAppFloat ctx={ctx} />
     </div>

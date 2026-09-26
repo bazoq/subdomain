@@ -60,7 +60,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           rightSlot={<CartCountLink host={ctx.host} className="rounded-none border border-t-border bg-t-card px-3 py-2 text-sm font-semibold text-t-primary" />}
           className="border-b-2 border-t-border bg-t-muted/95 [&_a>span.font-heading]:tracking-tight [&_nav_a]:rounded-none"
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" />
         <CartBar ctx={rc} className="pb-20 sm:pb-6" />
         <CartDrawer ctx={rc} />

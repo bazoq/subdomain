@@ -65,7 +65,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         className="[&_a>span.font-heading]:text-t-accent [&_a.t-btn]:bg-t-accent [&_a.t-btn]:text-t-accent-fg"
       />
       <GeoDivider className="bg-t-dark" />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <GeoDivider className="bg-t-dark" />
       <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-accent" />
       <WhatsAppFloat ctx={ctx} />

@@ -8,6 +8,7 @@ import { Languages, Menu, Moon, Phone, X } from "lucide-react";
 import type { SiteContext } from "@/templates/types";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Img } from "@/templates/ui";
 
 export function CommunityHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: string; href: string } }) {
   const pathname = usePathname() ?? "/";
@@ -28,8 +29,7 @@ export function CommunityHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: 
   const brand = (
     <span className="flex items-center gap-3">
       {ctx.settings.branding.logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-10 w-auto max-w-[160px] object-contain brightness-0 invert" />
+        <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-10 w-auto max-w-40 object-contain brightness-0 invert" />
       ) : (
         <>
           <span className="flex size-11 items-center justify-center rounded-full bg-t-accent text-t-accent-fg" aria-hidden="true">

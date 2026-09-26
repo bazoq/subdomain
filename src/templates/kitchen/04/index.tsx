@@ -251,7 +251,7 @@ function Home({ ctx }: TemplatePageProps) {
         about: () => <AboutBlock ctx={ctx} variant="split" className="[&_img]:rounded-[2rem]" />,
         stats: () => (
           <div className="contents" style={TEAL_BAND}>
-            <StatsBlock ctx={ctx} variant="cards" light className="py-16 [&_.t-card]:rounded-[1.75rem] [&_.t-card]:border-white/20" />
+            <StatsBlock ctx={ctx} variant="cards" light className="py-16 [&_.t-card]:rounded-[1.75rem] [&_.t-card]:border-t-dark-fg/20" />
           </div>
         ),
         testimonials: () => <Bubbles ctx={ctx} />,

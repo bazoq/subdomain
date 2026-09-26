@@ -15,7 +15,7 @@ import { heroSection } from "@/templates/shared/sections";
 import { bannerSection, collectionsSection, featuredProductsSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
 import { Container, CtaButton, Img, SectionHeading, WhatsAppFloat } from "@/templates/ui";
-import { t, type LocalizedString } from "@/lib/i18n";
+import { ls, t, type LocalizedString } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { AboutBlock, AnnouncementBar, CtaBlock, FaqBlock, FeaturesBlock, GalleryBlock, PromoStrip, SiteFooter, StatsBlock, TestimonialsBlock, sectionData } from "@/modules/shared/ui";
 import type { HeadingData, LinkData } from "@/modules/shared/ui/section-types";
@@ -23,6 +23,8 @@ import { CartDrawer, EcommerceProviders, ProductGrid } from "@/modules/ecommerce
 import { getFeaturedProducts, getProducts } from "@/modules/ecommerce/queries";
 import type { ProductDTO } from "@/modules/ecommerce/types";
 import { EditorialHeader } from "./header";
+
+const SLIDE = ls("Slide", "سلائیڈ");
 
 /* ---------- ecommerce pack section shapes ---------- */
 type CollectionItem = { title: LocalizedString; subtitle?: LocalizedString; image?: string; href: string };
@@ -97,7 +99,7 @@ function Hero({ ctx }: TemplatePageProps) {
       {frames.length > 1 ? (
         <div className="flex justify-center gap-6 border-b border-t-border py-4">
           {frames.map((_, i) => (
-            <a key={i} href={`#zarnish-slide-${i}`} className={cn("text-t-muted-fg transition hover:text-t-accent", LABEL)} aria-label={`Slide ${i + 1}`}>
+            <a key={i} href={`#zarnish-slide-${i}`} className={cn("text-t-muted-fg transition hover:text-t-accent", LABEL)} aria-label={`${t(SLIDE, lang)} ${i + 1}`}>
               {String(i + 1).padStart(2, "0")}
             </a>
           ))}

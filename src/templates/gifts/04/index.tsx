@@ -169,7 +169,7 @@ function BloomCard({ product, ctx }: { product: ProductDTO; ctx: SiteContext }) 
             {name}
           </Link>
         </h3>
-        <div className="mt-3 flex items-center justify-between gap-3 transition duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
+        <div className="mt-3 flex items-center justify-between gap-3 transition duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:group-focus-within:translate-y-0 sm:group-focus-within:opacity-100">
           <PriceTag price={lowest} comparePrice={hasVariants ? null : product.comparePrice} from={hasVariants && lowest < product.price ? t(sui.from, lang) : undefined} />
           {inStock && !hasVariants ? (
             <QuickAddButton product={product} lang={lang} className="pointer-events-auto px-3 py-1.5 text-xs" />

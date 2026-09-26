@@ -44,7 +44,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBar ctx={ctx} variant="primary" />
       <GlassHeader ctx={ctx} cta={{ label: ctx.lang === "ur" ? "اپنا سی وی جمع کریں" : "Submit your CV", href: "/jobs" }} />
-      <div className="flex-1 pt-24">{children}</div>
+      <main id="main" className="flex-1 pt-24">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" className="rounded-t-[2.5rem]" />
       <WhatsAppFloat ctx={ctx} />
     </div>

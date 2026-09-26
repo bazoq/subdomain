@@ -51,7 +51,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           variant="dark"
           cta={null}
           className="border-b border-t-border [&>div>a>span]:uppercase [&>div>a>span]:tracking-[0.22em] [&>div>a>span]:text-t-primary [&>div>a>span]:[text-shadow:0_1px_0_var(--t-border)] [&_nav_a]:rounded-none [&_nav_a]:border-b-2 [&_nav_a]:border-transparent [&_nav_a]:uppercase [&_nav_a]:tracking-wider [&_nav_a]:text-xs [&_nav_a:hover]:border-t-primary [&_nav_a:hover]:bg-transparent [&_nav_a[aria-current=page]]:border-t-primary [&_nav_a[aria-current=page]]:text-t-primary"
-          rightSlot={<CartButton ctx={lc} mode="drawer" className="text-t-primary hover:bg-white/10" />}
+          rightSlot={<CartButton ctx={lc} mode="drawer" className="text-t-primary hover:bg-t-dark-fg/10" />}
         />
         <div className="flex-1">{children}</div>
         <SiteFooter ctx={ctx} variant="dark" className="border-t border-t-border" />

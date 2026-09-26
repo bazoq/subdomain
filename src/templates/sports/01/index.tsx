@@ -41,7 +41,8 @@ type BannerData = HeadingData & { text?: LocalizedString; image?: string; cta?: 
 async function loadProducts(ctx: SiteContext, d: FeaturedData): Promise<ProductDTO[]> {
   const take = Math.min(16, Math.max(4, Number(d.count) || 8));
   if (d.mode === "newest") return (await getProducts(ctx.tenant.id, { sort: "newest", take })).items;
-  return getFeaturedProducts(ctx.tenant.id, take);
+  const featured = await getFeaturedProducts(ctx.tenant.id, take);
+  return featured.length ? featured : (await getProducts(ctx.tenant.id, { sort: "featured", take })).items;
 }
 
 /** Remap the "dark" surface to the primary green so kit blocks render as green bands (tokens only). */
@@ -102,7 +103,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <p className="mt-6 max-w-xl text-lg leading-8 text-t-dark-fg/80">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-accent font-bold uppercase" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-white/40 text-t-dark-fg hover:bg-white/10" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-t-dark-fg/40 text-t-dark-fg hover:bg-t-dark-fg/10" />
           </div>
           {quick.length ? (
             <nav aria-label="Categories" className="mt-10 flex flex-wrap gap-2">
@@ -110,7 +111,7 @@ function Hero({ ctx }: TemplatePageProps) {
                 <Link
                   key={i}
                   href={c.href || "/shop"}
-                  className="inline-flex items-center gap-1 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur transition hover:bg-t-accent hover:text-t-accent-fg"
+                  className="inline-flex items-center gap-1 rounded-full border border-t-dark-fg/25 bg-t-dark-fg/10 px-4 py-1.5 text-sm font-semibold backdrop-blur transition hover:bg-t-accent hover:text-t-accent-fg"
                 >
                   {t(c.title, lang)} <ChevronRight className="size-3.5 rtl:rotate-180" />
                 </Link>

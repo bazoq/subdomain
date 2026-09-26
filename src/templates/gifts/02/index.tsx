@@ -68,7 +68,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
               <SmartLink href={bannerHref} ctx={ctx} className="t-btn t-btn-outline hidden px-4 py-2 text-sm text-t-accent md:inline-flex">
                 {t(CORPORATE, ctx.lang)}
               </SmartLink>
-              <CartButton ctx={lc} mode="drawer" className="hover:bg-white/10" />
+              <CartButton ctx={lc} mode="drawer" className="hover:bg-t-dark-fg/10" />
             </>
           }
         />

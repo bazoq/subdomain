@@ -147,11 +147,11 @@ async function Hero({ ctx }: TemplatePageProps) {
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
               {from ? (
-                <span className="rounded-[var(--t-radius)] bg-white/15 px-3 py-2 text-sm font-semibold backdrop-blur">
+                <span className="rounded-[var(--t-radius)] bg-t-secondary-fg/15 px-3 py-2 text-sm font-semibold backdrop-blur">
                   {t(sui.from, lang)} <span className="font-heading">{formatPKR(from)}</span>
                 </span>
               ) : (
-                <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-white/40 text-t-secondary-fg hover:bg-white/10" />
+                <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-t-secondary-fg/40 text-t-secondary-fg hover:bg-t-secondary-fg/10" />
               )}
             </div>
           </div>

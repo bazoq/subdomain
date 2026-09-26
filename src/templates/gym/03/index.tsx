@@ -45,7 +45,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={{ label: { en: "Book a class", ur: "کلاس بک کریں" }, href: "/join" }}
         className="border-b-0 bg-t-bg/90 [&_a>span.font-heading]:font-normal [&_a>span.font-heading]:tracking-[0.15em] [&_nav_a]:text-sm [&_nav_a]:font-normal [&_nav_a]:tracking-wide"
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="light" />
       <WhatsAppFloat ctx={ctx} />
     </div>

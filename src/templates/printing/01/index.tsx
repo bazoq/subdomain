@@ -167,7 +167,7 @@ function QuoteBand({ ctx }: TemplatePageProps) {
   return (
     <section id="cta" className="bg-t-accent text-t-accent-fg">
       <Container className="flex flex-col items-center gap-5 py-14 text-center sm:py-16">
-        <span className="flex size-12 items-center justify-center rounded-full bg-white/20" aria-hidden="true">
+        <span className="flex size-12 items-center justify-center rounded-full bg-t-accent-fg/20" aria-hidden="true">
           <Upload className="size-6" />
         </span>
         {title ? <h2 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2> : null}

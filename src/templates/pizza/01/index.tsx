@@ -63,7 +63,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             </div>
           }
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <Checkered />
         <SiteFooter ctx={ctx} variant="dark" showHours />
         <CartBar ctx={rc} className="pe-24 sm:pe-4" />

@@ -43,16 +43,16 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             ctx={ctx}
             variant="dark"
             cta={null}
-            className="[&_nav_a]:rounded-full [&_nav_a]:font-semibold [&_nav_a:hover]:bg-white/20"
+            className="[&_nav_a]:rounded-full [&_nav_a]:font-semibold [&_nav_a:hover]:bg-t-dark-fg/20"
             rightSlot={
               <>
                 <SmartLink href="whatsapp" ctx={ctx} className="t-btn t-btn-accent hidden rounded-full px-4 py-2 text-sm font-bold lg:inline-flex">
                   {t(sui.orderOnWhatsApp, ctx.lang)}
                 </SmartLink>
-                <Link href="/upload-prescription" className="t-btn hidden rounded-full border border-white/40 bg-white/10 px-3 py-2 text-sm font-semibold text-t-dark-fg hover:bg-white/20 md:inline-flex">
+                <Link href="/upload-prescription" className="t-btn hidden rounded-full border border-t-dark-fg/40 bg-t-dark-fg/10 px-3 py-2 text-sm font-semibold text-t-dark-fg hover:bg-t-dark-fg/20 md:inline-flex">
                   <FileHeart className="size-4" /> {t(ui.uploadPrescription, ctx.lang)}
                 </Link>
-                <CartButton ctx={lc} mode="drawer" className="hover:bg-white/20" />
+                <CartButton ctx={lc} mode="drawer" className="hover:bg-t-dark-fg/20" />
               </>
             }
           />
@@ -253,7 +253,7 @@ function Home({ ctx }: TemplatePageProps) {
         about: () => <AboutBlock ctx={ctx} variant="image-left" className="[&_img]:rounded-[2rem]" />,
         stats: () => (
           <div className="contents" style={GREEN_BAND}>
-            <StatsBlock ctx={ctx} variant="cards" light className="[&_.t-card]:rounded-[1.5rem] [&_.t-card]:border-white/20" />
+            <StatsBlock ctx={ctx} variant="cards" light className="[&_.t-card]:rounded-[1.5rem] [&_.t-card]:border-t-dark-fg/20" />
           </div>
         ),
         testimonials: () => <TestimonialsBlock ctx={ctx} variant="carousel" className="bg-t-muted [&_figure]:rounded-[1.5rem]" />,

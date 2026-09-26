@@ -13,7 +13,7 @@ import { section } from "@/templates/types";
 import { heroSection } from "@/templates/shared/sections";
 import { practiceAreasSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
-import { Container, CtaButton, Icon, SectionHeading, WhatsAppFloat } from "@/templates/ui";
+import { Container, CtaButton, Icon, SectionHeading, WhatsAppFloat, Img } from "@/templates/ui";
 import { t, type LocalizedString } from "@/lib/i18n";
 import { getServices } from "@/modules/shared/queries";
 import {
@@ -60,7 +60,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           ) : null
         }
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <GoldRule />
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
@@ -76,8 +76,7 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="relative isolate min-h-[70vh] overflow-hidden bg-t-dark text-t-dark-fg">
       {h.image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-50" />
+        <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-50" loading="eager" />
       ) : (
         <Gavel className="absolute -end-10 bottom-0 -z-10 size-96 text-t-primary/10" aria-hidden="true" />
       )}

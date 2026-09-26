@@ -36,7 +36,7 @@ async function loadProducts(ctx: SiteContext, d: FeaturedData): Promise<ProductD
 }
 
 /** indigo chrome: remap the "dark" surface onto the indigo primary for header/footer/stat bands */
-const INDIGO = { "--t-dark": "var(--t-primary)", "--t-dark-fg": "#ffffff" } as React.CSSProperties;
+const INDIGO = { "--t-dark": "var(--t-primary)", "--t-dark-fg": "var(--t-primary-fg)" } as React.CSSProperties;
 /** every section eyebrow becomes a small mustard chip */
 const CHIP = "[&_.t-eyebrow]:inline-block [&_.t-eyebrow]:bg-t-accent [&_.t-eyebrow]:px-2.5 [&_.t-eyebrow]:py-1 [&_.t-eyebrow]:text-t-accent-fg";
 /** block-print inspired geometry, tokens only */
@@ -59,17 +59,17 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             ctx={ctx}
             variant="dark"
             cta={null}
-            className="[&_nav_a]:rounded-none [&_nav_a]:text-sm [&_nav_a]:uppercase [&_nav_a]:tracking-[0.12em] [&_nav_a:hover]:bg-transparent [&_nav_a[aria-current=page]]:border-b-2 [&_nav_a[aria-current=page]]:border-t-accent [&_nav_a[aria-current=page]]:text-white"
+            className="[&_nav_a]:rounded-none [&_nav_a]:text-sm [&_nav_a]:uppercase [&_nav_a]:tracking-[0.12em] [&_nav_a:hover]:bg-transparent [&_nav_a[aria-current=page]]:border-b-2 [&_nav_a[aria-current=page]]:border-t-accent [&_nav_a[aria-current=page]]:text-t-dark-fg"
             rightSlot={
               <>
                 <form action="/shop" method="get" role="search" className="relative hidden items-center md:flex">
                   <label htmlFor="khaadi-q" className="sr-only">
                     {t(ui.search, ctx.lang)}
                   </label>
-                  <input id="khaadi-q" name="q" type="search" placeholder={t(sui.searchPlaceholder, ctx.lang)} className="h-10 w-48 border border-white/30 bg-white/10 ps-9 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-t-accent lg:w-64" />
-                  <Search className="pointer-events-none absolute start-3 size-4 text-white/70" aria-hidden="true" />
+                  <input id="khaadi-q" name="q" type="search" placeholder={t(sui.searchPlaceholder, ctx.lang)} className="h-10 w-48 border border-t-dark-fg/30 bg-t-dark-fg/10 ps-9 text-sm text-t-dark-fg placeholder:text-t-dark-fg/60 focus:outline-none focus:ring-2 focus:ring-t-accent lg:w-64" />
+                  <Search className="pointer-events-none absolute start-3 size-4 text-t-dark-fg/70" aria-hidden="true" />
                 </form>
-                <CartButton ctx={lc} mode="drawer" className="rounded-none hover:bg-white/10 [&>span]:rounded-none [&>span]:bg-t-accent [&>span]:text-t-accent-fg" />
+                <CartButton ctx={lc} mode="drawer" className="rounded-none hover:bg-t-dark-fg/10 [&>span]:rounded-none [&>span]:bg-t-accent [&>span]:text-t-accent-fg" />
               </>
             }
           />
@@ -145,7 +145,7 @@ function Collections({ ctx }: TemplatePageProps) {
               <Link href={c.href || "/shop"} className="group relative flex h-full items-end overflow-hidden bg-t-primary p-4">
                 <Img src={c.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-500 group-hover:scale-105 group-hover:opacity-90" fallback={<span />} />
                 <span className="absolute inset-0 bg-gradient-to-t from-t-secondary/85 via-t-secondary/20 to-transparent" aria-hidden="true" />
-                <span className="relative text-white">
+                <span className="relative text-t-secondary-fg">
                   {t(c.subtitle, ctx.lang) ? <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-t-accent">{t(c.subtitle, ctx.lang)}</span> : null}
                   <span className="font-heading mt-1 block text-lg leading-tight sm:text-2xl">{t(c.title, ctx.lang)}</span>
                 </span>
@@ -190,11 +190,11 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-20">
       <Container>
         <div className={cn("grid items-stretch lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
-          <div className="relative bg-t-primary p-8 text-white sm:p-12">
+          <div className="relative bg-t-primary p-8 text-t-primary-fg sm:p-12">
             <div className="absolute inset-y-0 end-0 w-6 opacity-40" style={PATTERN} aria-hidden="true" />
             {d.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{d.eyebrow}</span> : null}
             <h2 className="font-heading mt-5 text-3xl leading-tight sm:text-4xl">{title}</h2>
-            <p className="mt-4 max-w-md text-base text-white/80">{t(d.text, ctx.lang)}</p>
+            <p className="mt-4 max-w-md text-base text-t-primary-fg/80">{t(d.text, ctx.lang)}</p>
             <div className="mt-7">
               <CtaButton value={d.cta} ctx={ctx} className="t-btn bg-t-accent px-7 text-t-accent-fg hover:opacity-90" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
             </div>

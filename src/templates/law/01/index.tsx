@@ -41,7 +41,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
       {/* gold hairline signature */}
       <div className="h-0.5 w-full bg-t-accent" />
       <SiteHeader ctx={ctx} variant="light" cta={{ label: { en: "Book a consultation", ur: "مشاورت بک کریں" }, href: "/consultation" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>
@@ -82,9 +82,9 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="relative">
-          <div className="absolute -left-4 -top-4 h-full w-full border-2 border-t-accent" aria-hidden="true" />
+          <div className="absolute -start-4 -top-4 h-full w-full border-2 border-t-accent" aria-hidden="true" />
           <Img src={h.image} alt="" className="relative aspect-[4/5] w-full object-cover" fallback={<Scale className="size-16 opacity-30" />} />
-          <div className="absolute -bottom-6 -right-6 hidden bg-t-dark px-6 py-4 text-t-dark-fg shadow-xl md:block">
+          <div className="absolute -bottom-6 -end-6 hidden bg-t-dark px-6 py-4 text-t-dark-fg shadow-xl md:block">
             <p className="text-xs uppercase tracking-widest text-t-accent">Call the chambers</p>
             <a href={`tel:${ctx.settings.contact.phone}`} className="mt-1 flex items-center gap-2 font-heading text-xl font-bold">
               <Phone className="size-4" /> {ctx.settings.contact.phone || "+92 300 0000000"}

@@ -43,7 +43,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={{ label: { en: "Join now", ur: "ابھی شامل ہوں" }, href: "/join" }}
         className="border-b-2 border-t-primary [&_a>span.font-heading]:text-2xl [&_a>span.font-heading]:uppercase [&_a>span.font-heading]:tracking-wide [&_nav_a]:text-sm [&_nav_a]:font-semibold [&_nav_a]:uppercase [&_nav_a]:tracking-wider"
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" className="border-t-2 border-t-primary" />
       <WhatsAppFloat ctx={ctx} />
     </div>

@@ -41,7 +41,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBar ctx={ctx} variant="dark" />
       <SiteHeader ctx={ctx} variant="light" className="border-b-0 [&>div>a>span]:text-lg [&>div>a>span]:uppercase [&>div>a>span]:tracking-[0.2em] [&_nav_a]:text-xs [&_nav_a]:uppercase [&_nav_a]:tracking-wider" />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" showHours={false} />
       <WhatsAppFloat ctx={ctx} />
     </div>

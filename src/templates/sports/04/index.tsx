@@ -78,7 +78,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Container className="py-24 lg:py-36">
         <div className="max-w-2xl">
           {h.eyebrow ? (
-            <span className="inline-flex items-center gap-2 rounded-[var(--t-radius)] border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-[var(--t-radius)] border border-t-dark-fg/30 bg-t-dark-fg/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur">
               <Compass className="size-4 text-t-accent" /> {h.eyebrow}
             </span>
           ) : null}
@@ -98,7 +98,7 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
           <div className="mt-9 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-white/40 text-t-dark-fg hover:bg-white/10" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-t-dark-fg/40 text-t-dark-fg hover:bg-t-dark-fg/10" />
           </div>
         </div>
       </Container>

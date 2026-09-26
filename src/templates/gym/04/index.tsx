@@ -71,7 +71,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         className="[&_a>span.font-heading]:text-3xl [&_a>span.font-heading]:uppercase [&_a>span.font-heading]:tracking-[0.08em] [&_a>span.font-heading]:text-t-primary [&_nav_a]:text-sm [&_nav_a]:font-semibold [&_nav_a]:uppercase [&_nav_a]:tracking-[0.12em]"
       />
       <Hazard />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <Hazard />
       <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-primary" />
       <WhatsAppFloat ctx={ctx} />

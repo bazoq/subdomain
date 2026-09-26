@@ -80,7 +80,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             <CartCountLink host={ctx.host} label={t(ui.cart, lang)} className="rounded-[var(--t-radius)] border border-t-border px-3 py-1.5 text-sm font-semibold hover:bg-t-muted" />
           }
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" showHours />
         <CartBar ctx={rc} className="pe-24 sm:pe-4" />
         <CartDrawer ctx={rc} />

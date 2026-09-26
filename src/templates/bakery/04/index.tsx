@@ -70,7 +70,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           className="[&_a>span.font-heading]:font-normal [&_a>span.font-heading]:tracking-wide [&_a>span.font-heading]:text-t-accent [&_nav_a]:tracking-wide"
         />
         <div className="h-px w-full bg-t-accent" aria-hidden="true" />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <div className="h-px w-full bg-t-accent" aria-hidden="true" />
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-accent" />
         <CartBar ctx={rc} className="pb-20 sm:pb-6" />

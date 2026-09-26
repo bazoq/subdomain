@@ -41,7 +41,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <AnnouncementBar ctx={ctx} variant="primary" />
       <SiteHeader ctx={ctx} variant="light" className="[&>div>a>span]:font-semibold [&>div>a>span]:text-t-primary" />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="light" />
       <WhatsAppFloat ctx={ctx} />
     </div>

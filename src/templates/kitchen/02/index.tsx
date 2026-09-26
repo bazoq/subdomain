@@ -14,7 +14,7 @@ import { heroSection, promoSection } from "@/templates/shared/sections";
 import { bannerSection, collectionsSection, featuredProductsSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
 import { Container, CtaButton, Icon, Img, SectionHeading, WhatsAppFloat } from "@/templates/ui";
-import { t, ui, type LocalizedString } from "@/lib/i18n";
+import { ls, t, ui, type LocalizedString } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { AboutBlock, AnnouncementBar, CtaBlock, FaqBlock, FeaturesBlock, SiteFooter, StatsBlock, TestimonialsBlock, sectionData } from "@/modules/shared/ui";
 import type { HeadingData, LinkData, PromoData } from "@/modules/shared/ui/section-types";
@@ -22,6 +22,8 @@ import { CartDrawer, EcommerceProviders, ProductGrid } from "@/modules/ecommerce
 import { getCategories, getFeaturedProducts, getProducts } from "@/modules/ecommerce/queries";
 import type { ProductDTO } from "@/modules/ecommerce/types";
 import { RetailHeader } from "./header";
+
+const SLIDE = ls("Slide", "سلائیڈ");
 
 /* ---------- ecommerce pack section shapes ---------- */
 type CollectionItem = { title: LocalizedString; subtitle?: LocalizedString; image?: string; href: string };
@@ -50,7 +52,7 @@ async function Layout({ ctx, children }: TemplateLayoutProps) {
         <div className="flex-1">{children}</div>
         {/* trust band above the dark footer */}
         <div className="bg-t-dark text-t-dark-fg">
-          <Container className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-b border-white/10 py-5 text-xs font-bold uppercase tracking-wide">
+          <Container className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-b border-t-dark-fg/10 py-5 text-xs font-bold uppercase tracking-wide">
             {ctx.settings.commerce.codEnabled ? (
               <span className="inline-flex items-center gap-2">
                 <Banknote className="size-4 text-t-accent" /> {t(ui.cashOnDelivery, ctx.lang)}
@@ -113,7 +115,7 @@ function Hero({ ctx }: TemplatePageProps) {
           {frames.length > 1 ? (
             <div className="mt-3 flex justify-center gap-2">
               {frames.map((_, i) => (
-                <a key={i} href={`#chefline-slide-${i}`} className="size-2.5 rounded-full bg-t-border transition hover:bg-t-primary" aria-label={`Slide ${i + 1}`} />
+                <a key={i} href={`#chefline-slide-${i}`} className="size-2.5 rounded-full bg-t-border transition hover:bg-t-primary" aria-label={`${t(SLIDE, lang)} ${i + 1}`} />
               ))}
             </div>
           ) : null}

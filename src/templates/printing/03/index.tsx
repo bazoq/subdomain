@@ -13,7 +13,7 @@ import { section } from "@/templates/types";
 import { heroSection } from "@/templates/shared/sections";
 import { portfolioSection, servicesSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
-import { Container, CtaButton, Icon, SectionHeading, WhatsAppFloat } from "@/templates/ui";
+import { Container, CtaButton, Icon, Img, SectionHeading, WhatsAppFloat } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { getServices } from "@/modules/shared/queries";
 import {
@@ -88,10 +88,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const primary: LinkData = { label: t(h.primaryCta?.label, lang) ? h.primaryCta.label : ui.getQuote, href: h.primaryCta?.href || "/quote" };
   return (
     <section className="relative isolate overflow-hidden bg-t-dark text-t-dark-fg">
-      {h.image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25" />
-      ) : null}
+      {h.image ? <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25" /> : null}
       <span className="absolute -top-24 end-[-6rem] -z-10 h-[28rem] w-[28rem] rotate-12 bg-t-primary/20" aria-hidden="true" />
       <Container className="grid items-center gap-10 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
         <div className="t-fade-up">

@@ -42,7 +42,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col bg-t-bg text-t-fg">
       <AnnouncementBar ctx={ctx} variant="dark" />
       <SiteHeader ctx={ctx} variant="dark" className="border-b border-t-border [&_.font-heading]:text-t-primary [&_nav_a]:tracking-wide" cta={{ label: { en: "Request staff", ur: "عملہ طلب کریں" }, href: "/employers" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <div className="h-px w-full bg-t-primary/60" aria-hidden="true" />
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
@@ -65,7 +65,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <p className="mt-8 max-w-2xl text-lg leading-8 text-t-muted-fg lg:text-xl">{t(h.subtitle, lang)}</p>
           <div className="mt-10 flex flex-wrap items-center gap-6">
             <SmartLink href={h.primaryCta?.href || "/contact"} ctx={ctx} className="t-btn t-btn-outline border-t-primary px-8 py-4 text-t-primary hover:bg-t-primary hover:text-t-primary-fg">
-              <Lock className="size-4" /> {lang === "ur" ? "خفیہ رابطہ" : "Confidential enquiry"}
+              <Lock className="size-4" /> {t(h.primaryCta?.label, lang) || (lang === "ur" ? "خفیہ رابطہ" : "Confidential enquiry")}
             </SmartLink>
             {h.badges?.length ? (
               <ul className="flex flex-wrap gap-6 text-sm text-t-muted-fg">

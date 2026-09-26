@@ -47,7 +47,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={{ label: { en: "Apply now", ur: "ابھی درخواست دیں" }, href: "/jobs" }}
       />
       <div className="h-1.5 w-full bg-t-primary" aria-hidden="true" />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

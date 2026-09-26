@@ -121,6 +121,11 @@ export const checkoutInputSchema = z.object({
   giftMessage: optionalText(300),
   ageConfirmed: z.boolean().optional(),
   prescriptionMediaId: optionalText(60),
+  /** random client-generated key; a retry with the same key never creates a second order */
+  idempotencyKey: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{16,64}$/)
+    .optional(),
   website: z.string().max(0).optional(), // honeypot
 });
 export type CheckoutInput = z.input<typeof checkoutInputSchema>;

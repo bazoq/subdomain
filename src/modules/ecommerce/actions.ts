@@ -14,11 +14,14 @@ import { requireTenantAdminAction } from "@/server/auth/guards";
 import { clientIp, rateLimit } from "@/server/rate-limit";
 import { audit } from "@/server/audit";
 import { notifyTenant } from "@/server/notify";
-import { formatPKR, normalizePkPhone } from "@/lib/utils";
-import { t, ui } from "@/lib/i18n";
+import { formatPKR, normalizePkPhone, whatsappLink } from "@/lib/utils";
+import { t, ui, type Lang } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 import { buildAttributes, asTimeline, toOrderDTO, toShippingZoneDTO } from "./mappers";
 import { computeShipping, couponDiscount, orderLabel, phoneLast4 } from "./pricing";
+import { orderToken } from "./order-token";
+import { claimIdempotency, completeIdempotency, releaseIdempotency } from "./idempotency";
+import { m } from "./messages";
 import {
   categoryInputSchema,
   checkoutInputSchema,
@@ -29,7 +32,7 @@ import {
   productInputSchema,
   shippingZoneInputSchema,
 } from "./schemas";
-import type { OrderDTO, TimelineEntry } from "./types";
+import { canTransitionOrder, STOCK_RELEASING_STATUSES, type OrderDTO, type OrderStatusValue, type TimelineEntry } from "./types";
 import type { TenantContext } from "@/server/tenant";
 import type { TenantAdminContext } from "@/server/auth/guards";
 
@@ -37,13 +40,13 @@ import type { TenantAdminContext } from "@/server/auth/guards";
 
 type CouponRow = { id: string; code: string; type: string; value: number; minOrder: number; maxUses: number | null; usedCount: number; expiresAt: Date | null; isActive: boolean };
 
-function checkCoupon(c: CouponRow | null, subtotal: number): { ok: true; coupon: CouponRow; discount: number } | { ok: false; message: string } {
-  if (!c || !c.isActive) return { ok: false, message: "This coupon code is not valid." };
-  if (c.expiresAt && c.expiresAt.getTime() < Date.now()) return { ok: false, message: "This coupon has expired." };
-  if (c.maxUses != null && c.usedCount >= c.maxUses) return { ok: false, message: "This coupon has reached its usage limit." };
-  if (subtotal < c.minOrder) return { ok: false, message: `This coupon requires a minimum order of ${formatPKR(c.minOrder)}.` };
+function checkCoupon(c: CouponRow | null, subtotal: number, lang: Lang): { ok: true; coupon: CouponRow; discount: number } | { ok: false; message: string } {
+  if (!c || !c.isActive) return { ok: false, message: m("couponInvalid", lang) };
+  if (c.expiresAt && c.expiresAt.getTime() < Date.now()) return { ok: false, message: m("couponExpired", lang) };
+  if (c.maxUses != null && c.usedCount >= c.maxUses) return { ok: false, message: m("couponUsedUp", lang) };
+  if (subtotal < c.minOrder) return { ok: false, message: m("couponMin", lang, { amount: formatPKR(c.minOrder) }) };
   const discount = couponDiscount(c, subtotal);
-  if (discount <= 0) return { ok: false, message: "This coupon does not apply to your order." };
+  if (discount <= 0) return { ok: false, message: m("couponNoEffect", lang) };
   return { ok: true, coupon: c, discount };
 }
 
@@ -83,7 +86,7 @@ class CheckoutError extends Error {
 }
 
 /** Re-price every line from the database; throws CheckoutError on any problem. */
-async function priceLines(tc: TenantContext, lines: { productId: string; variantId: string | null; qty: number }[], lang: "en" | "ur"): Promise<PricedLine[]> {
+async function priceLines(tc: TenantContext, lines: { productId: string; variantId: string | null; qty: number }[], lang: Lang): Promise<PricedLine[]> {
   // merge duplicate lines
   const merged = new Map<string, { productId: string; variantId: string | null; qty: number }>();
   for (const l of lines) {
@@ -98,14 +101,15 @@ async function priceLines(tc: TenantContext, lines: { productId: string; variant
   const out: PricedLine[] = [];
   for (const l of merged.values()) {
     const p = byId.get(l.productId);
-    if (!p) throw new CheckoutError("One of the items in your cart is no longer available. Please review your cart.");
+    if (!p) throw new CheckoutError(m("itemUnavailable", lang));
     const name = t(p.name as { en: string; ur?: string }, lang) || (p.name as { en: string }).en;
     const variant = l.variantId ? p.variants.find((v) => v.id === l.variantId && v.isActive) : null;
-    if (l.variantId && !variant) throw new CheckoutError(`The selected option for "${name}" is no longer available.`);
-    if (!l.variantId && p.variants.some((v) => v.isActive)) throw new CheckoutError(`Please choose an option for "${name}".`);
+    if (l.variantId && !variant) throw new CheckoutError(m("optionUnavailable", lang, { name }));
+    if (!l.variantId && p.variants.some((v) => v.isActive)) throw new CheckoutError(m("chooseOption", lang, { name }));
     const available = variant ? variant.stock : p.stock;
     if (p.trackStock && l.qty > available) {
-      throw new CheckoutError(available > 0 ? `Only ${available} left in stock for "${name}${variant ? ` (${variant.name})` : ""}".` : `"${name}" is out of stock.`);
+      const label = `${name}${variant ? ` (${variant.name})` : ""}`;
+      throw new CheckoutError(available > 0 ? m("onlyLeft", lang, { n: available, name: label }) : m("outOfStock", lang, { name: label }));
     }
     out.push({
       productId: p.id,
@@ -122,54 +126,82 @@ async function priceLines(tc: TenantContext, lines: { productId: string; variant
   return out;
 }
 
-export async function placeOrder(input: unknown): Promise<ActionResult<{ number: number; label: string; phoneLast4: string }>> {
+export interface PlacedOrder {
+  number: number;
+  label: string;
+  /** access token for /order/[number]?t=… (non-guessable) */
+  token: string;
+  /** kept for older templates that build the tracking URL themselves */
+  phoneLast4: string;
+}
+
+const IDEM_SCOPE = "checkout";
+
+export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrder>> {
   const tc = await requireTenant();
   const lang = await currentLang();
   const parsed = checkoutInputSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
-  if (d.website) return fail("Unable to place order.");
+  if (d.website) return fail(m("unableToPlace", lang));
+
+  const tid = tc.tenant.id;
+  const commerce = tc.settings.commerce;
+  const placed = (number: number, phone: string): PlacedOrder => ({ number, label: orderLabel(commerce.orderPrefix, number), token: orderToken("shop", tid, number), phoneLast4: phoneLast4(phone) });
 
   const ip = await clientIp();
-  const rl = await rateLimit({ bucket: `checkout:${ip}`, limit: 5, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many attempts. Please wait a few minutes and try again.");
+  // Pakistani mobile networks put many customers behind one CGNAT address, so the per-IP limit is generous.
+  const rl = await rateLimit({ bucket: `checkout:${ip}`, limit: 10, windowSec: 600, tenantId: tid });
+  if (!rl.ok) return fail(m("tooManyAttempts", lang));
 
-  const commerce = tc.settings.commerce;
-  if (!commerce.codEnabled) return fail("Online ordering is currently paused. Please contact us on WhatsApp to order.");
+  if (!commerce.codEnabled) return fail(m("orderingPaused", lang));
 
   const phone = normalizePkPhone(d.phone);
-  if (!phone) return fail("Please fix the highlighted fields.", { phone: "Enter a valid Pakistani mobile number, e.g. 0300-1234567" });
-  if (commerce.ageConfirmation && !d.ageConfirmed) return fail("Please fix the highlighted fields.", { ageConfirmed: "You must confirm you are 18 or older." });
+  if (!phone) return fail(m("fixFields", lang), { phone: m("invalidPhone", lang) });
+  if (commerce.ageConfirmation && !d.ageConfirmed) return fail(m("fixFields", lang), { ageConfirmed: m("ageRequired", lang) });
+
+  // duplicate-submit protection: same key → same order
+  const idem = d.idempotencyKey ?? null;
+  if (idem) {
+    const claim = await claimIdempotency(tid, IDEM_SCOPE, idem);
+    if (claim.state === "done") {
+      const existing = await db.order.findFirst({ where: { tenantId: tid, number: claim.number, customerPhone: phone }, select: { number: true } });
+      if (existing) return success(t(ui.orderPlaced, lang), placed(existing.number, phone));
+    } else if (claim.state === "in_flight") {
+      return fail(m("duplicateInFlight", lang));
+    }
+  }
+  const release = async () => {
+    if (idem) await releaseIdempotency(tid, IDEM_SCOPE, idem);
+  };
 
   try {
     const lines = await priceLines(tc, d.items, lang);
     const subtotal = lines.reduce((n, l) => n + l.unitPrice * l.qty, 0);
-    if (commerce.minOrder > 0 && subtotal < commerce.minOrder) return fail(`Minimum order amount is ${formatPKR(commerce.minOrder)}.`);
+    if (commerce.minOrder > 0 && subtotal < commerce.minOrder) throw new CheckoutError(m("minOrder", lang, { amount: formatPKR(commerce.minOrder) }));
 
     // prescription
     const needsRx = lines.some((l) => l.requiresPrescription);
     let rxMediaId: string | null = null;
     if (needsRx) {
-      if (!d.prescriptionMediaId) return fail("Please fix the highlighted fields.", { prescriptionMediaId: "A prescription is required for one or more items." });
-      const media = await db.media.findFirst({ where: { id: d.prescriptionMediaId, tenantId: tc.tenant.id, visibility: "PRIVATE", confirmed: true }, select: { id: true } });
-      if (!media) return fail("Please fix the highlighted fields.", { prescriptionMediaId: "The uploaded prescription could not be verified. Please upload it again." });
+      if (!d.prescriptionMediaId) throw new CheckoutError(m("fixFields", lang), { prescriptionMediaId: m("rxRequired", lang) });
+      const media = await db.media.findFirst({ where: { id: d.prescriptionMediaId, tenantId: tid, visibility: "PRIVATE", confirmed: true }, select: { id: true } });
+      if (!media) throw new CheckoutError(m("fixFields", lang), { prescriptionMediaId: m("rxInvalid", lang) });
       rxMediaId = media.id;
     }
 
-    // shipping
-    const zones = (await db.shippingZone.findMany({ where: { tenantId: tc.tenant.id, isActive: true }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] })).map(toShippingZoneDTO);
+    // shipping (authoritative: zones + settings from the DB, city from the form)
+    const zones = (await db.shippingZone.findMany({ where: { tenantId: tid, isActive: true }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] })).map(toShippingZoneDTO);
     const quote = computeShipping({ zones, city: d.city, subtotal, commerce });
 
-    // coupon
+    // coupon (validated here; usage is claimed atomically inside the transaction)
     let discount = 0;
-    let couponId: string | null = null;
-    let couponCode: string | null = null;
+    let coupon: CouponRow | null = null;
     if (d.couponCode) {
-      const res = checkCoupon(await findCoupon(tc.tenant.id, d.couponCode), subtotal);
-      if (!res.ok) return fail("Please fix the highlighted fields.", { couponCode: res.message });
+      const res = checkCoupon(await findCoupon(tid, d.couponCode), subtotal, lang);
+      if (!res.ok) throw new CheckoutError(m("fixFields", lang), { couponCode: res.message });
       discount = res.discount;
-      couponId = res.coupon.id;
-      couponCode = res.coupon.code;
+      coupon = res.coupon;
     }
     const total = Math.max(0, subtotal - discount) + quote.fee;
     const now = new Date();
@@ -180,24 +212,24 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ number:
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const created = await db.$transaction(async (tx) => {
-          const agg = await tx.order.aggregate({ where: { tenantId: tc.tenant.id }, _max: { number: true } });
+          const agg = await tx.order.aggregate({ where: { tenantId: tid }, _max: { number: true } });
           const nextNumber = (agg._max.number ?? 0) + 1;
 
           const customer = await tx.customer.upsert({
-            where: { tenantId_phone: { tenantId: tc.tenant.id, phone } },
-            create: { tenantId: tc.tenant.id, phone, name: d.name, email: d.email || null, address: d.address, city: d.city },
+            where: { tenantId_phone: { tenantId: tid, phone } },
+            create: { tenantId: tid, phone, name: d.name, email: d.email || null, address: d.address, city: d.city },
             update: { name: d.name, ...(d.email ? { email: d.email } : {}), address: d.address, city: d.city },
           });
 
           let prescriptionId: string | null = null;
           if (rxMediaId) {
-            const rx = await tx.prescription.create({ data: { tenantId: tc.tenant.id, mediaId: rxMediaId, customerName: d.name, customerPhone: phone, notes: d.notes || null } });
+            const rx = await tx.prescription.create({ data: { tenantId: tid, mediaId: rxMediaId, customerName: d.name, customerPhone: phone, notes: d.notes || null } });
             prescriptionId = rx.id;
           }
 
           const order = await tx.order.create({
             data: {
-              tenantId: tc.tenant.id,
+              tenantId: tid,
               number: nextNumber,
               customerId: customer.id,
               customerName: d.name,
@@ -210,7 +242,7 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ number:
               shipping: quote.fee,
               discount,
               total,
-              couponCode,
+              couponCode: coupon?.code ?? null,
               paymentMethod: "COD",
               status: "PENDING",
               timeline: json(timeline),
@@ -220,7 +252,7 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ number:
               ip,
               items: {
                 create: lines.map((l) => ({
-                  tenantId: tc.tenant.id,
+                  tenantId: tid,
                   productId: l.productId,
                   variantId: l.variantId,
                   name: l.name,
@@ -234,14 +266,22 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ number:
             },
           });
 
+          // atomic stock guard: the row is only decremented when enough stock is still there
           for (const l of lines) {
             if (!l.trackStock) continue;
             const r = l.variantId
-              ? await tx.productVariant.updateMany({ where: { id: l.variantId, tenantId: tc.tenant.id, stock: { gte: l.qty } }, data: { stock: { decrement: l.qty } } })
-              : await tx.product.updateMany({ where: { id: l.productId, tenantId: tc.tenant.id, stock: { gte: l.qty } }, data: { stock: { decrement: l.qty } } });
-            if (!r.count) throw new CheckoutError(`"${l.name}" just went out of stock. Please update your cart.`);
+              ? await tx.productVariant.updateMany({ where: { id: l.variantId, tenantId: tid, stock: { gte: l.qty } }, data: { stock: { decrement: l.qty } } })
+              : await tx.product.updateMany({ where: { id: l.productId, tenantId: tid, stock: { gte: l.qty } }, data: { stock: { decrement: l.qty } } });
+            if (!r.count) throw new CheckoutError(m("justSoldOut", lang, { name: l.name }));
           }
-          if (couponId) await tx.coupon.updateMany({ where: { id: couponId, tenantId: tc.tenant.id }, data: { usedCount: { increment: 1 } } });
+          // atomic coupon usage guard (maxUses can not be exceeded by concurrent checkouts)
+          if (coupon) {
+            const r = await tx.coupon.updateMany({
+              where: { id: coupon.id, tenantId: tid, isActive: true, ...(coupon.maxUses != null ? { usedCount: { lt: coupon.maxUses } } : {}) },
+              data: { usedCount: { increment: 1 } },
+            });
+            if (!r.count) throw new CheckoutError(m("fixFields", lang), { couponCode: m("couponUsedUp", lang) });
+          }
           return order;
         });
         number = created.number;
@@ -252,26 +292,33 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ number:
         throw e;
       }
     }
-    if (!number) return fail(t(ui.somethingWrong, lang));
+    if (!number) throw new Error("order number allocation failed");
+    if (idem) await completeIdempotency(tid, IDEM_SCOPE, idem, number);
 
-    const label = orderLabel(commerce.orderPrefix, number);
+    const result = placed(number, phone);
     notifyTenant(tc, {
-      subject: `New order ${label} — ${formatPKR(total)} (${d.name}, ${d.city})`,
+      subject: `New order ${result.label} — ${formatPKR(total)} (${d.name}, ${d.city})`,
       text: [
         `${d.name} · ${phone}${d.email ? ` · ${d.email}` : ""}`,
         `${d.address}, ${d.city}`,
+        `WhatsApp customer: ${whatsappLink(phone)}`,
         "",
         ...lines.map((l) => `${l.qty} × ${l.name}${l.variantName ? ` (${l.variantName})` : ""} — ${formatPKR(l.unitPrice * l.qty)}`),
         "",
         `Subtotal ${formatPKR(subtotal)} · Shipping ${formatPKR(quote.fee)}${discount ? ` · Discount -${formatPKR(discount)}` : ""} · Total ${formatPKR(total)} (COD)`,
         d.notes ? `Notes: ${d.notes}` : "",
         needsRx ? "Prescription attached." : "",
-        `Open admin: /admin/orders/${orderId}`,
-      ].join("\n"),
+        `Open admin: https://${tc.host}/admin/orders/${orderId}`,
+      ]
+        .filter((line, i, arr) => line !== "" || arr[i - 1] !== "")
+        .join("\n"),
     }).catch(() => undefined);
 
-    return success(t(ui.orderPlaced, lang), { number, label, phoneLast4: phoneLast4(phone) });
+    // stock changed → storefront availability badges must not show stale counts
+    revalidatePath("/shop", "layout");
+    return success(t(ui.orderPlaced, lang), result);
   } catch (e) {
+    await release();
     if (e instanceof CheckoutError) return fail(e.message, e.fieldErrors);
     console.error("placeOrder failed", e);
     return fail(t(ui.somethingWrong, lang));
@@ -280,30 +327,35 @@ export async function placeOrder(input: unknown): Promise<ActionResult<{ number:
 
 export async function validateCoupon(code: unknown, subtotal: unknown): Promise<ActionResult<{ code: string; type: string; value: number; discount: number }>> {
   const tc = await requireTenant();
+  const lang = await currentLang();
   const c = typeof code === "string" ? code.trim().slice(0, 40) : "";
   const s = typeof subtotal === "number" && Number.isFinite(subtotal) ? Math.max(0, Math.floor(subtotal)) : 0;
-  if (!c) return fail("Enter a coupon code.");
+  if (!c) return fail(m("enterCoupon", lang));
   const ip = await clientIp();
-  const rl = await rateLimit({ bucket: `coupon:${ip}`, limit: 20, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many attempts. Please try again later.");
-  const res = checkCoupon(await findCoupon(tc.tenant.id, c), s);
+  const rl = await rateLimit({ bucket: `coupon:${ip}`, limit: 30, windowSec: 600, tenantId: tc.tenant.id });
+  if (!rl.ok) return fail(m("tooManyRequests", lang));
+  const res = checkCoupon(await findCoupon(tc.tenant.id, c), s, lang);
   if (!res.ok) return fail(res.message);
-  return success(`Coupon ${res.coupon.code} applied.`, { code: res.coupon.code, type: res.coupon.type, value: res.coupon.value, discount: res.discount });
+  return success(m("couponApplied", lang, { code: res.coupon.code }), { code: res.coupon.code, type: res.coupon.type, value: res.coupon.value, discount: res.discount });
 }
 
-/** Public order lookup: order number (with or without prefix) + the phone used at checkout. */
-export async function getOrderStatus(number: unknown, phone: unknown): Promise<ActionResult<OrderDTO>> {
+/**
+ * Public order lookup: order number (with or without prefix) + the full phone used at checkout.
+ * Returns the order plus an access token so the client can move to the bookmarkable /order/[n]?t=… URL.
+ */
+export async function getOrderStatus(number: unknown, phone: unknown): Promise<ActionResult<OrderDTO & { token: string }>> {
   const tc = await requireTenant();
+  const lang = await currentLang();
   const n = parseInt(String(number ?? "").replace(/\D/g, ""), 10);
   const p = typeof phone === "string" ? normalizePkPhone(phone) : null;
-  if (!Number.isFinite(n) || n <= 0) return fail("Enter your order number.", { number: "Enter a valid order number" });
-  if (!p) return fail("Enter the mobile number used at checkout.", { phone: "Enter a valid mobile number" });
+  if (!Number.isFinite(n) || n <= 0) return fail(m("enterOrderNumber", lang), { number: m("enterOrderNumber", lang) });
+  if (!p) return fail(m("enterPhoneUsed", lang), { phone: m("invalidPhone", lang) });
   const ip = await clientIp();
   const rl = await rateLimit({ bucket: `track:${ip}`, limit: 20, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many attempts. Please try again later.");
+  if (!rl.ok) return fail(m("tooManyRequests", lang));
   const order = await db.order.findFirst({ where: { tenantId: tc.tenant.id, number: n, customerPhone: p }, include: { items: { include: { product: { select: { slug: true } } } } } });
-  if (!order) return fail("No order found with these details.");
-  return success(undefined, toOrderDTO(order));
+  if (!order) return fail(m("orderNotFound", lang));
+  return success(undefined, { ...toOrderDTO(order), token: orderToken("shop", tc.tenant.id, order.number) });
 }
 
 /** Standalone prescription upload (medical stores). */

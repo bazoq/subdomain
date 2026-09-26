@@ -44,7 +44,7 @@ function BlackHeading({ eyebrow, title, lang, action }: { eyebrow?: string; titl
     <div className="mb-8 flex flex-wrap items-center justify-between gap-4 bg-t-secondary px-5 py-4 sm:px-7">
       <div>
         {eyebrow ? <span className="block text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{eyebrow}</span> : null}
-        {ttl ? <h2 className="font-heading text-2xl font-medium uppercase tracking-wide text-white sm:text-3xl">{ttl}</h2> : null}
+        {ttl ? <h2 className="font-heading text-2xl font-medium uppercase tracking-wide text-t-secondary-fg sm:text-3xl">{ttl}</h2> : null}
       </div>
       {action}
     </div>
@@ -74,11 +74,11 @@ function SneakerCard({ product, ctx, className }: { product: ProductDTO; ctx: Si
         <Img src={product.images[0]} alt={name} className="aspect-square w-full object-cover transition duration-500 group-hover:scale-105" fallback={<Footprints className="size-12 text-t-primary/40" />} />
         {pct ? <span className="absolute start-0 top-0 bg-t-primary px-2 py-1 text-[11px] font-bold uppercase text-t-primary-fg">-{pct}%</span> : null}
         {!isInStock(product) ? (
-          <span className="absolute inset-x-0 bottom-0 bg-t-secondary/90 py-1.5 text-center text-[11px] font-bold uppercase tracking-widest text-white">{t(ui.outOfStock, ctx.lang)}</span>
+          <span className="absolute inset-x-0 bottom-0 bg-t-secondary/90 py-1.5 text-center text-[11px] font-bold uppercase tracking-widest text-t-secondary-fg">{t(ui.outOfStock, ctx.lang)}</span>
         ) : sizes.length ? (
           <span className="absolute inset-x-0 bottom-0 flex translate-y-full flex-wrap gap-1 bg-t-secondary/95 p-2 transition duration-300 group-hover:translate-y-0">
             {sizes.map((s) => (
-              <span key={s} className="min-w-8 border border-white/40 px-1.5 py-0.5 text-center text-[11px] font-bold text-white">
+              <span key={s} className="min-w-8 border border-t-secondary-fg/40 px-1.5 py-0.5 text-center text-[11px] font-bold text-t-secondary-fg">
                 {s}
               </span>
             ))}
@@ -109,7 +109,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           variant="light"
           cta={null}
           className="border-b-4 border-t-secondary [&_nav_a]:text-xs [&_nav_a]:font-semibold [&_nav_a]:uppercase [&_nav_a]:tracking-[0.18em]"
-          rightSlot={<CartButton ctx={lc} mode="drawer" showLabel className="rounded-[var(--t-radius)] bg-t-primary px-3 text-t-primary-fg hover:bg-t-primary/90 [&>span]:bg-t-secondary [&>span]:text-white" />}
+          rightSlot={<CartButton ctx={lc} mode="drawer" showLabel className="rounded-[var(--t-radius)] bg-t-primary px-3 text-t-primary-fg hover:bg-t-primary/90 [&>span]:bg-t-secondary [&>span]:text-t-secondary-fg" />}
         />
         <div className="flex-1">{children}</div>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-primary" />
@@ -134,7 +134,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <p className="mt-5 max-w-md text-base leading-7 text-t-muted-fg sm:text-lg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary px-7 font-semibold uppercase tracking-wide" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn bg-t-secondary px-7 font-semibold uppercase tracking-wide text-white hover:opacity-90" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn bg-t-secondary px-7 font-semibold uppercase tracking-wide text-t-secondary-fg hover:opacity-90" />
           </div>
           {h.badges?.length ? (
             <ul className="mt-9 flex flex-wrap gap-x-7 gap-y-2">
@@ -174,7 +174,7 @@ function Collections({ ctx }: TemplatePageProps) {
                 </span>
                 <span className="flex items-center justify-between gap-3 bg-t-secondary px-4 py-3">
                   <span>
-                    <span className="font-heading block text-lg font-medium uppercase tracking-wide text-white">{t(c.title, ctx.lang)}</span>
+                    <span className="font-heading block text-lg font-medium uppercase tracking-wide text-t-secondary-fg">{t(c.title, ctx.lang)}</span>
                     {t(c.subtitle, ctx.lang) ? <span className="block text-[11px] uppercase tracking-widest text-t-primary">{t(c.subtitle, ctx.lang)}</span> : null}
                   </span>
                   <ArrowRight className="size-5 shrink-0 text-t-primary transition group-hover:translate-x-1 rtl:rotate-180" aria-hidden="true" />
@@ -220,10 +220,10 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-14 sm:py-20">
       <Container>
         <div className={cn("grid items-stretch border-2 border-t-secondary lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
-          <div className="bg-t-secondary p-8 text-white sm:p-12">
+          <div className="bg-t-secondary p-8 text-t-secondary-fg sm:p-12">
             {d.eyebrow ? <span className="block text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{d.eyebrow}</span> : null}
             <h2 className="font-heading mt-4 text-3xl font-medium uppercase leading-tight tracking-wide sm:text-4xl">{title}</h2>
-            <p className="mt-4 max-w-md text-sm leading-7 text-white/75 sm:text-base">{t(d.text, ctx.lang)}</p>
+            <p className="mt-4 max-w-md text-sm leading-7 text-t-secondary-fg/75 sm:text-base">{t(d.text, ctx.lang)}</p>
             <div className="mt-8">
               <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-primary px-7 font-semibold uppercase tracking-wide" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
             </div>
@@ -241,7 +241,7 @@ function Home({ ctx }: TemplatePageProps) {
     <>
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
-        promo: () => <PromoStrip ctx={ctx} className="bg-t-secondary text-white [&_p]:uppercase [&_p]:tracking-wide" />,
+        promo: () => <PromoStrip ctx={ctx} className="bg-t-secondary text-t-secondary-fg [&_p]:uppercase [&_p]:tracking-wide" />,
         collections: () => <Collections ctx={ctx} />,
         featuredProducts: () => <Products ctx={ctx} />,
         banner: () => <Banner ctx={ctx} />,

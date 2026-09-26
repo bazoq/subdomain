@@ -59,7 +59,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           ) : null
         }
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>
@@ -75,8 +75,7 @@ async function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="relative isolate overflow-hidden bg-t-dark text-t-dark-fg">
       {h.image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+        <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" loading="eager" />
       ) : null}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-t-dark/70 via-t-dark/60 to-t-dark" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 h-1 bg-t-accent" aria-hidden="true" />

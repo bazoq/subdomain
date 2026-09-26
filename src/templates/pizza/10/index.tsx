@@ -62,7 +62,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         />
         {/* bubbly bottom edge of the header */}
         <div aria-hidden="true" className="-mt-px h-5 w-full bg-t-primary" style={{ borderBottomLeftRadius: "50% 100%", borderBottomRightRadius: "50% 100%" }} />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <div aria-hidden="true" className="h-5 w-full bg-t-dark" style={{ borderTopLeftRadius: "50% 100%", borderTopRightRadius: "50% 100%" }} />
         <SiteFooter ctx={ctx} variant="dark" showHours className="[&_.t-btn]:rounded-full" />
         <CartBar ctx={rc} className="pe-24 sm:pe-4" />

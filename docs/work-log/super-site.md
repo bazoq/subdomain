@@ -1,0 +1,23 @@
+# Stream: super-site
+
+Owner: super-site agent. Started 2026-09-27.
+
+## Ownership (only edit these)
+- `src/app/(super)/**` (incl. `loading.tsx` / `error.tsx` / `not-found.tsx` anywhere beneath)
+- `src/components/super-site/**`, `src/components/admin/super/**`, `src/server/super/**`
+- `src/lib/guides.ts`, `src/config/brand.ts`, `src/config/site.ts`
+- `public/**` (super-site assets only)
+- `src/app/sitemap.ts`, `src/app/robots.ts`, `src/app/manifest.ts`, `src/app/global-error.tsx` (created only because absent)
+
+Everything else -> `## Handoffs` at the bottom.
+
+## [2026-09-27 03:10] Audit complete (no code changed yet)
+- FOUND (to fix, in order):
+  1. SEO: root layout has no `metadataBase`, OG/Twitter defaults, canonical; no JSON-LD anywhere; no `sitemap.ts` / `robots.ts` / `manifest.ts` / opengraph image. `proxy.ts` matcher skips `robots.txt|sitemap.xml|manifest.webmanifest`, so `src/app/sitemap.ts` would answer on EVERY host -> must be host-aware (root host -> super sitemap; tenant host -> tenant sitemap; demo tenants -> disallow).
+  2. Gallery: public pages ignore `TemplateSetting.enabled/featured/sortOrder` (super admin toggles have no effect). `TemplateMini` renders a Google Fonts `<link>` per card (84 requests on /templates) and does `hex + "66"` alpha concat (98 `#fff` 3-digit colours in catalog -> invalid colours). Card image link has no accessible name (`aria-hidden` child only). `/templates?style=` chip row would list ~130 tags.
+  3. Blog: `/blog/general` (category used by admin "General" posts) 404s; no Article JSON-LD; no reading time; cover `<img alt="">`; Urdu font (`font-urdu`) never loaded in super layout.
+  4. LeadForm: `e.currentTarget.reset()` after `await` -> TypeError on success in React; inputs have placeholders but no labels; honeypot triggers a zod field error instead of a silent drop. Pricing page contains "Prices are placeholders..." copy, hard-coded `siteforge.pk`, string prices (no `formatPKR`).
+  5. Super admin: EDITOR role (described as "blog, leads") can run every tenant/template/domain action - no role check outside users-actions; nav not filtered; several pages lack `metadata.title`; blog delete button has no pending state.
+  6. No `loading.tsx` / `error.tsx` / `not-found.tsx` under `(super)`; no `global-error.tsx`; multiple root layouts mean unmatched root-host URLs need a `(site)/[...rest]` catch-all to reach a branded 404.
+  7. Header mobile toggle lacks `aria-expanded`/`aria-controls`; no skip link; "Sign in" in the public header points at the platform owner's login (confusing for business owners).
+- NEXT: implement fix 1 (SEO foundation: site.ts helpers, seo.tsx, root layout metadata, sitemap/robots/manifest, OG image).

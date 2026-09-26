@@ -47,7 +47,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={{ label: { en: "Request corporate account", ur: "کارپوریٹ اکاؤنٹ کی درخواست" }, href: "/contact" }}
         className="bg-t-muted/95 [&_a>span.font-heading]:text-t-primary"
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

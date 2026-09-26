@@ -47,8 +47,7 @@ function Header({ ctx }: TemplatePageProps) {
             <Stamp className="size-5" />
           </span>
           {ctx.settings.branding.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-[150px] object-contain" />
+            <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-40 object-contain" />
           ) : (
             <span className="font-heading text-xl font-bold tracking-tight text-t-primary lg:text-2xl">{ctx.tenant.name}</span>
           )}
@@ -96,7 +95,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col bg-t-bg">
       <AnnouncementBar ctx={ctx} variant="primary" />
       <Header ctx={ctx} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

@@ -50,7 +50,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
     <div className="flex min-h-screen flex-col bg-t-bg text-t-fg">
       <AnnouncementBar ctx={ctx} variant="primary" className="font-mono text-sm" />
       <TerminalHeader ctx={ctx} cta={{ label: ctx.lang === "ur" ? "سی وی جمع کریں" : "submit_cv()", href: "/jobs" }} />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" className="border-t border-t-border" />
       <WhatsAppFloat ctx={ctx} />
     </div>

@@ -58,8 +58,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           <Container className="flex flex-col items-center py-5">
             <Link href="/" className="flex flex-col items-center gap-2" aria-label={ctx.tenant.name}>
               {ctx.settings.branding.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-12 w-auto max-w-[220px] object-contain" />
+                <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} loading="eager" className="h-12 w-auto max-w-56 object-contain" />
               ) : (
                 <>
                   <span className="flex size-9 items-center justify-center border border-t-primary text-t-primary">

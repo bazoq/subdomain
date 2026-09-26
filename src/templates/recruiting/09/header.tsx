@@ -8,6 +8,7 @@ import { Languages, Menu, X } from "lucide-react";
 import type { SiteContext } from "@/templates/types";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Img } from "@/templates/ui";
 
 export function TerminalHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: string; href: string } }) {
   const pathname = usePathname() ?? "/";
@@ -27,8 +28,7 @@ export function TerminalHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: s
   const brand = (
     <span className="flex items-center gap-2.5">
       {ctx.settings.branding.logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-[150px] object-contain" />
+        <Img src={ctx.settings.branding.logoUrl} alt={ctx.tenant.name} className="h-9 w-auto max-w-40 object-contain" />
       ) : (
         <>
           <span className="rounded-[var(--t-radius)] border border-t-primary/50 bg-t-primary/10 px-2 py-1 font-mono text-base font-bold text-t-primary" aria-hidden="true">

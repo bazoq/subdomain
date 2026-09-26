@@ -169,7 +169,7 @@ function TeamKitsBanner({ ctx }: TemplatePageProps) {
             <p className="mt-4 max-w-lg opacity-85">{t(d.text, lang)}</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-accent font-bold" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-              <SmartLink href="/shop" ctx={ctx} className="t-btn t-btn-outline border-white/40 text-t-secondary-fg hover:bg-white/10">
+              <SmartLink href="/shop" ctx={ctx} className="t-btn t-btn-outline border-t-secondary-fg/40 text-t-secondary-fg hover:bg-t-secondary-fg/10">
                 {t(ui.shop, lang)}
               </SmartLink>
             </div>
