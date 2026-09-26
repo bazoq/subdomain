@@ -129,11 +129,15 @@ export function ImagesField({
   async function handleFiles(files: FileList | File[]) {
     const list = Array.from(files).slice(0, Math.max(0, max - value.length));
     setError(null);
+    let current = value;
     for (const f of list) {
       setBusy((b) => b + 1);
       try {
         const res = await uploadFile(f, { folder, visibility: "PUBLIC", tenantId });
-        if (res.url) onChange([...valueRef.current, res.url]);
+        if (res.url) {
+          current = [...current, res.url];
+          onChange(current);
+        }
       } catch (e) {
         setError((e as Error).message);
       } finally {
@@ -141,9 +145,6 @@ export function ImagesField({
       }
     }
   }
-  const valueRef = React.useRef(value);
-  valueRef.current = value;
-
   function move(i: number, dir: -1 | 1) {
     const j = i + dir;
     if (j < 0 || j >= value.length) return;

@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils";
 
 export function GlassHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: string; href: string } }) {
   const pathname = usePathname() ?? "/";
-  const [open, setOpen] = React.useState(false);
-  React.useEffect(() => setOpen(false), [pathname]);
+  // drawer state is keyed by pathname so navigating closes it without an effect
+  const [openAt, setOpenAt] = React.useState<string | null>(null);
+  const open = openAt === pathname;
+  const setOpen = (v: boolean) => setOpenAt(v ? pathname : null);
   React.useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenAt(null);
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);

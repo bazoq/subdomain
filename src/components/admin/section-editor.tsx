@@ -165,7 +165,7 @@ function FieldControl({
             <Label htmlFor={id}>{f.label}</Label>
             <Cmp id={id} value={v.en ?? ""} onChange={(e) => onChange({ ...v, en: e.target.value })} className={multi && f.type === "richtext" ? "min-h-[140px]" : undefined} />
             {f.help ? <Help>{f.help}</Help> : null}
-            {f.type === "richtext" ? <Help>Plain text or simple markdown (blank line = new paragraph, "- " = bullet).</Help> : null}
+            {f.type === "richtext" ? <Help>Plain text or simple markdown (blank line = new paragraph, &quot;- &quot; = bullet).</Help> : null}
           </div>
           {urduEnabled ? (
             <div dir="rtl">
@@ -255,7 +255,7 @@ function FieldControl({
               <Input value={v.href ?? ""} placeholder="/shop, #about, https://…, whatsapp, tel" onChange={(e) => onChange({ ...v, href: e.target.value })} />
             </div>
           </div>
-          {f.help ? <Help>{f.help}</Help> : <Help>Use "whatsapp" or "tel" to link to your WhatsApp / phone from Settings.</Help>}
+          {f.help ? <Help>{f.help}</Help> : <Help>Use &quot;whatsapp&quot; or &quot;tel&quot; to link to your WhatsApp / phone from Settings.</Help>}
         </div>
       );
     }

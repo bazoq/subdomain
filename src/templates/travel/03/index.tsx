@@ -13,7 +13,7 @@ import { section } from "@/templates/types";
 import { heroSection } from "@/templates/shared/sections";
 import { destinationsSection, featuredPackagesSection, umrahSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
-import { Container, CtaButton, Icon, Img, SectionHeading, SmartLink, WhatsAppFloat } from "@/templates/ui";
+import { Container, CtaButton, Img, SectionHeading, SmartLink, WhatsAppFloat } from "@/templates/ui";
 import { t, type LocalizedString } from "@/lib/i18n";
 import { formatPKR } from "@/lib/utils";
 import {
