@@ -106,7 +106,7 @@ function Hero({ ctx }: TemplatePageProps) {
 }
 
 /* ---------- Collections: overlapping polaroid cards ---------- */
-const TILT = ["lg:-rotate-3", "lg:rotate-1", "lg:rotate-4", "lg:-rotate-2"];
+const TILT = ["lg:-rotate-3", "lg:rotate-1", "lg:rotate-3", "lg:-rotate-2"];
 
 function Collections({ ctx }: TemplatePageProps) {
   const d = sectionData<CollectionsData>(ctx, collectionsSection);

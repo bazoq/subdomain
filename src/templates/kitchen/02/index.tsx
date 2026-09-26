@@ -113,7 +113,7 @@ function Hero({ ctx }: TemplatePageProps) {
           {frames.length > 1 ? (
             <div className="mt-3 flex justify-center gap-2">
               {frames.map((_, i) => (
-                <a key={i} href={`#chefline-slide-${i}`} className="size-2.5 rounded-full bg-t-mutedationsfg bg-t-border transition hover:bg-t-primary" aria-label={`Slide ${i + 1}`} />
+                <a key={i} href={`#chefline-slide-${i}`} className="size-2.5 rounded-full bg-t-border transition hover:bg-t-primary" aria-label={`Slide ${i + 1}`} />
               ))}
             </div>
           ) : null}

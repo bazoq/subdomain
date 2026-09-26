@@ -19,7 +19,7 @@ export function RetailHeader({ ctx, categories }: { ctx: SiteContext; categories
   const setOpen = (v: boolean) => setOpenAt(v ? pathname : null);
   React.useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenAt(null);
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);

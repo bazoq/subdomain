@@ -85,11 +85,10 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   const deals = section(ctx, dealsSection);
   const r = ctx.settings.restaurant;
-  const types = [
-    r.delivery ? { label: t(ui.delivery, lang), icon: <Bike className="size-4" /> } : null,
-    r.pickup ? { label: t(ui.pickup, lang), icon: <ShoppingBag className="size-4" /> } : null,
-    r.dineIn ? { label: t(ui.dineIn, lang), icon: <Utensils className="size-4" /> } : null,
-  ].filter((x): x is { label: string; icon: React.ReactNode } => x !== null);
+  const types: { label: string; icon: React.ReactNode }[] = [];
+  if (r.delivery) types.push({ label: t(ui.delivery, lang), icon: <Bike className="size-4" /> });
+  if (r.pickup) types.push({ label: t(ui.pickup, lang), icon: <ShoppingBag className="size-4" /> });
+  if (r.dineIn) types.push({ label: t(ui.dineIn, lang), icon: <Utensils className="size-4" /> });
   return (
     <section className="relative overflow-hidden bg-t-primary text-t-primary-fg">
       <div aria-hidden="true" className="pointer-events-none absolute -end-20 -top-20 size-80 rounded-full bg-white/15 blur-2xl" />

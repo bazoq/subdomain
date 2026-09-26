@@ -27,7 +27,7 @@ async function loadProducts(ctx: SiteContext, mode: string, count: number): Prom
 }
 
 /** Weight / size chips from the spec table (dumbbells, plates and racks are sold by these). */
-function loadChips(p: ProductDTO): { key: string; value: string }[] {
+function specChips(p: ProductDTO): { key: string; value: string }[] {
   return [...p.specs, ...p.attributes].filter((x) => x.value && /weight|kg|size|length|load|resistance|material/i.test(x.key)).slice(0, 2);
 }
 
@@ -63,7 +63,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-dark">
       <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" fallback={<Dumbbell className="size-24 text-t-primary/30" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/70 to-t-bg/20" aria-hidden="true" />
-      <div className="absolute -start-24 top-1/3 h-24 w-[140%] -rotate-6 bg-t-primary/85 mix-blend-multiply" aria-hidden="true" />
+      <div className="absolute -start-24 top-1/3 h-24 w-[140%] -rotate-6 bg-t-primary/80" aria-hidden="true" />
       <Container className="relative py-24 lg:py-32">
         <div className="max-w-3xl">
           {h.eyebrow ? (
@@ -137,7 +137,7 @@ function IronCard({ product, ctx }: { product: ProductDTO; ctx: SiteContext }) {
   const inStock = isInStock(product);
   const hasVariants = product.variants.length > 0;
   const lowest = minPrice(product);
-  const chips = loadChips(product);
+  const chips = specChips(product);
   return (
     <article className="group flex flex-col border border-t-border bg-t-card transition hover:border-t-primary">
       <Link href={href} aria-label={name} className="relative block overflow-hidden bg-t-muted">
@@ -164,12 +164,7 @@ function IronCard({ product, ctx }: { product: ProductDTO; ctx: SiteContext }) {
           </ul>
         ) : null}
         <div className="mt-auto flex items-end justify-between gap-2 pt-4">
-          <PriceTag
-            price={lowest}
-            comparePrice={hasVariants ? null : product.comparePrice}
-            from={hasVariants && lowest < product.price ? t(sui.from, lang) : undefined}
-            className="[&>span:nth-child(1)]:text-t-accent [&_span.font-heading]:text-t-accent"
-          />
+          <PriceTag price={lowest} comparePrice={hasVariants ? null : product.comparePrice} from={hasVariants && lowest < product.price ? t(sui.from, lang) : undefined} />
           {inStock && !hasVariants ? <QuickAddButton product={product} lang={lang} className="hidden rounded-none sm:inline-flex" /> : null}
         </div>
       </div>

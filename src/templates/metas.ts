@@ -2,20 +2,57 @@
 import type { TemplateComponents, TemplateMeta } from "@/templates/types";
 
 import { meta as bakery_01 } from "@/templates/bakery/01/meta";
+import { meta as bakery_02 } from "@/templates/bakery/02/meta";
+import { meta as bakery_03 } from "@/templates/bakery/03/meta";
+import { meta as bakery_04 } from "@/templates/bakery/04/meta";
+import { meta as bakery_05 } from "@/templates/bakery/05/meta";
 import { meta as blades_01 } from "@/templates/blades/01/meta";
 import { meta as blades_02 } from "@/templates/blades/02/meta";
 import { meta as blades_03 } from "@/templates/blades/03/meta";
+import { meta as blades_04 } from "@/templates/blades/04/meta";
+import { meta as clothing_01 } from "@/templates/clothing/01/meta";
+import { meta as clothing_02 } from "@/templates/clothing/02/meta";
+import { meta as clothing_03 } from "@/templates/clothing/03/meta";
+import { meta as clothing_04 } from "@/templates/clothing/04/meta";
+import { meta as electronics_01 } from "@/templates/electronics/01/meta";
+import { meta as electronics_02 } from "@/templates/electronics/02/meta";
+import { meta as electronics_03 } from "@/templates/electronics/03/meta";
 import { meta as gifts_01 } from "@/templates/gifts/01/meta";
 import { meta as gifts_02 } from "@/templates/gifts/02/meta";
 import { meta as gifts_03 } from "@/templates/gifts/03/meta";
 import { meta as gifts_04 } from "@/templates/gifts/04/meta";
+import { meta as gym_01 } from "@/templates/gym/01/meta";
+import { meta as gym_02 } from "@/templates/gym/02/meta";
+import { meta as gym_03 } from "@/templates/gym/03/meta";
+import { meta as gym_04 } from "@/templates/gym/04/meta";
+import { meta as gym_05 } from "@/templates/gym/05/meta";
+import { meta as kitchen_01 } from "@/templates/kitchen/01/meta";
+import { meta as kitchen_02 } from "@/templates/kitchen/02/meta";
+import { meta as kitchen_03 } from "@/templates/kitchen/03/meta";
+import { meta as kitchen_04 } from "@/templates/kitchen/04/meta";
 import { meta as law_01 } from "@/templates/law/01/meta";
 import { meta as law_02 } from "@/templates/law/02/meta";
 import { meta as law_03 } from "@/templates/law/03/meta";
 import { meta as law_04 } from "@/templates/law/04/meta";
 import { meta as law_05 } from "@/templates/law/05/meta";
 import { meta as law_06 } from "@/templates/law/06/meta";
+import { meta as medical_01 } from "@/templates/medical/01/meta";
+import { meta as medical_02 } from "@/templates/medical/02/meta";
+import { meta as medical_03 } from "@/templates/medical/03/meta";
 import { meta as pizza_01 } from "@/templates/pizza/01/meta";
+import { meta as pizza_02 } from "@/templates/pizza/02/meta";
+import { meta as pizza_03 } from "@/templates/pizza/03/meta";
+import { meta as pizza_04 } from "@/templates/pizza/04/meta";
+import { meta as pizza_05 } from "@/templates/pizza/05/meta";
+import { meta as pizza_06 } from "@/templates/pizza/06/meta";
+import { meta as pizza_07 } from "@/templates/pizza/07/meta";
+import { meta as pizza_08 } from "@/templates/pizza/08/meta";
+import { meta as pizza_09 } from "@/templates/pizza/09/meta";
+import { meta as pizza_10 } from "@/templates/pizza/10/meta";
+import { meta as printing_01 } from "@/templates/printing/01/meta";
+import { meta as printing_02 } from "@/templates/printing/02/meta";
+import { meta as printing_03 } from "@/templates/printing/03/meta";
+import { meta as printing_04 } from "@/templates/printing/04/meta";
 import { meta as realestate_01 } from "@/templates/realestate/01/meta";
 import { meta as realestate_02 } from "@/templates/realestate/02/meta";
 import { meta as realestate_03 } from "@/templates/realestate/03/meta";
@@ -29,7 +66,15 @@ import { meta as recruiting_07 } from "@/templates/recruiting/07/meta";
 import { meta as recruiting_08 } from "@/templates/recruiting/08/meta";
 import { meta as recruiting_09 } from "@/templates/recruiting/09/meta";
 import { meta as recruiting_10 } from "@/templates/recruiting/10/meta";
+import { meta as shoes_01 } from "@/templates/shoes/01/meta";
+import { meta as shoes_02 } from "@/templates/shoes/02/meta";
+import { meta as shoes_03 } from "@/templates/shoes/03/meta";
+import { meta as shoes_04 } from "@/templates/shoes/04/meta";
 import { meta as sports_01 } from "@/templates/sports/01/meta";
+import { meta as sports_02 } from "@/templates/sports/02/meta";
+import { meta as sports_03 } from "@/templates/sports/03/meta";
+import { meta as sports_04 } from "@/templates/sports/04/meta";
+import { meta as sports_05 } from "@/templates/sports/05/meta";
 import { meta as travel_01 } from "@/templates/travel/01/meta";
 import { meta as travel_02 } from "@/templates/travel/02/meta";
 import { meta as travel_03 } from "@/templates/travel/03/meta";
@@ -43,20 +88,57 @@ import { meta as travel_10 } from "@/templates/travel/10/meta";
 
 export const TEMPLATE_METAS: TemplateMeta[] = [
   bakery_01,
+  bakery_02,
+  bakery_03,
+  bakery_04,
+  bakery_05,
   blades_01,
   blades_02,
   blades_03,
+  blades_04,
+  clothing_01,
+  clothing_02,
+  clothing_03,
+  clothing_04,
+  electronics_01,
+  electronics_02,
+  electronics_03,
   gifts_01,
   gifts_02,
   gifts_03,
   gifts_04,
+  gym_01,
+  gym_02,
+  gym_03,
+  gym_04,
+  gym_05,
+  kitchen_01,
+  kitchen_02,
+  kitchen_03,
+  kitchen_04,
   law_01,
   law_02,
   law_03,
   law_04,
   law_05,
   law_06,
+  medical_01,
+  medical_02,
+  medical_03,
   pizza_01,
+  pizza_02,
+  pizza_03,
+  pizza_04,
+  pizza_05,
+  pizza_06,
+  pizza_07,
+  pizza_08,
+  pizza_09,
+  pizza_10,
+  printing_01,
+  printing_02,
+  printing_03,
+  printing_04,
   realestate_01,
   realestate_02,
   realestate_03,
@@ -70,7 +152,15 @@ export const TEMPLATE_METAS: TemplateMeta[] = [
   recruiting_08,
   recruiting_09,
   recruiting_10,
+  shoes_01,
+  shoes_02,
+  shoes_03,
+  shoes_04,
   sports_01,
+  sports_02,
+  sports_03,
+  sports_04,
+  sports_05,
   travel_01,
   travel_02,
   travel_03,
@@ -85,20 +175,57 @@ export const TEMPLATE_METAS: TemplateMeta[] = [
 
 export const TEMPLATE_LOADERS: Record<string, () => Promise<{ components: TemplateComponents }>> = {
   "bakery-01": () => import("@/templates/bakery/01"),
+  "bakery-02": () => import("@/templates/bakery/02"),
+  "bakery-03": () => import("@/templates/bakery/03"),
+  "bakery-04": () => import("@/templates/bakery/04"),
+  "bakery-05": () => import("@/templates/bakery/05"),
   "blades-01": () => import("@/templates/blades/01"),
   "blades-02": () => import("@/templates/blades/02"),
   "blades-03": () => import("@/templates/blades/03"),
+  "blades-04": () => import("@/templates/blades/04"),
+  "clothing-01": () => import("@/templates/clothing/01"),
+  "clothing-02": () => import("@/templates/clothing/02"),
+  "clothing-03": () => import("@/templates/clothing/03"),
+  "clothing-04": () => import("@/templates/clothing/04"),
+  "electronics-01": () => import("@/templates/electronics/01"),
+  "electronics-02": () => import("@/templates/electronics/02"),
+  "electronics-03": () => import("@/templates/electronics/03"),
   "gifts-01": () => import("@/templates/gifts/01"),
   "gifts-02": () => import("@/templates/gifts/02"),
   "gifts-03": () => import("@/templates/gifts/03"),
   "gifts-04": () => import("@/templates/gifts/04"),
+  "gym-01": () => import("@/templates/gym/01"),
+  "gym-02": () => import("@/templates/gym/02"),
+  "gym-03": () => import("@/templates/gym/03"),
+  "gym-04": () => import("@/templates/gym/04"),
+  "gym-05": () => import("@/templates/gym/05"),
+  "kitchen-01": () => import("@/templates/kitchen/01"),
+  "kitchen-02": () => import("@/templates/kitchen/02"),
+  "kitchen-03": () => import("@/templates/kitchen/03"),
+  "kitchen-04": () => import("@/templates/kitchen/04"),
   "law-01": () => import("@/templates/law/01"),
   "law-02": () => import("@/templates/law/02"),
   "law-03": () => import("@/templates/law/03"),
   "law-04": () => import("@/templates/law/04"),
   "law-05": () => import("@/templates/law/05"),
   "law-06": () => import("@/templates/law/06"),
+  "medical-01": () => import("@/templates/medical/01"),
+  "medical-02": () => import("@/templates/medical/02"),
+  "medical-03": () => import("@/templates/medical/03"),
   "pizza-01": () => import("@/templates/pizza/01"),
+  "pizza-02": () => import("@/templates/pizza/02"),
+  "pizza-03": () => import("@/templates/pizza/03"),
+  "pizza-04": () => import("@/templates/pizza/04"),
+  "pizza-05": () => import("@/templates/pizza/05"),
+  "pizza-06": () => import("@/templates/pizza/06"),
+  "pizza-07": () => import("@/templates/pizza/07"),
+  "pizza-08": () => import("@/templates/pizza/08"),
+  "pizza-09": () => import("@/templates/pizza/09"),
+  "pizza-10": () => import("@/templates/pizza/10"),
+  "printing-01": () => import("@/templates/printing/01"),
+  "printing-02": () => import("@/templates/printing/02"),
+  "printing-03": () => import("@/templates/printing/03"),
+  "printing-04": () => import("@/templates/printing/04"),
   "realestate-01": () => import("@/templates/realestate/01"),
   "realestate-02": () => import("@/templates/realestate/02"),
   "realestate-03": () => import("@/templates/realestate/03"),
@@ -112,7 +239,15 @@ export const TEMPLATE_LOADERS: Record<string, () => Promise<{ components: Templa
   "recruiting-08": () => import("@/templates/recruiting/08"),
   "recruiting-09": () => import("@/templates/recruiting/09"),
   "recruiting-10": () => import("@/templates/recruiting/10"),
+  "shoes-01": () => import("@/templates/shoes/01"),
+  "shoes-02": () => import("@/templates/shoes/02"),
+  "shoes-03": () => import("@/templates/shoes/03"),
+  "shoes-04": () => import("@/templates/shoes/04"),
   "sports-01": () => import("@/templates/sports/01"),
+  "sports-02": () => import("@/templates/sports/02"),
+  "sports-03": () => import("@/templates/sports/03"),
+  "sports-04": () => import("@/templates/sports/04"),
+  "sports-05": () => import("@/templates/sports/05"),
   "travel-01": () => import("@/templates/travel/01"),
   "travel-02": () => import("@/templates/travel/02"),
   "travel-03": () => import("@/templates/travel/03"),
