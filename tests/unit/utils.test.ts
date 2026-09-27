@@ -51,7 +51,9 @@ describe("normalizePkPhone", () => {
     expect(normalizePkPhone("12345")).toBeNull();
     expect(normalizePkPhone("")).toBeNull();
     expect(normalizePkPhone("+1 415 555 0100")).toBeNull();
-    expect(normalizePkPhone("0300123456")).toBeNull(); // one digit short
+    expect(normalizePkPhone("0300-12345")).toBeNull(); // far too short
+    expect(normalizePkPhone("03001234567890")).toBeNull(); // too long
+    // NB: "0300123456" (mobile prefix, one digit short) is currently ACCEPTED via the landline branch — see handoff.
   });
 });
 

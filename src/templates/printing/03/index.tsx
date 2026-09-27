@@ -73,7 +73,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         className="[&>div>a>span]:uppercase [&>div>a>span]:text-t-primary [&_nav_a]:text-sm [&_nav_a]:font-semibold [&_nav_a]:uppercase [&_nav_a]:tracking-wide"
         rightSlot={<TurnaroundBadge ctx={ctx} />}
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

@@ -97,7 +97,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <p className="mt-6 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary px-7 py-3.5 text-base font-bold uppercase tracking-widest" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn border-2 border-t-secondary px-7 py-3.5 text-base font-bold uppercase tracking-widest text-t-fg hover:bg-t-secondary hover:text-t-accent-fg" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn border-2 border-t-secondary px-7 py-3.5 text-base font-bold uppercase tracking-widest text-t-fg hover:bg-t-secondary hover:text-t-secondary-fg" />
           </div>
           {h.badges?.length ? (
             <ul className="mt-9 flex flex-wrap gap-2">
@@ -113,8 +113,8 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="relative">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 border-4 border-t-primary" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full border-4 border-t-secondary object-cover" fallback={<Dumbbell className="size-14 text-t-fg/30" />} />
+          <div className="absolute inset-0 translate-x-3 translate-y-3 border-4 border-t-primary rtl:-translate-x-3" aria-hidden="true" />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/5] w-full border-4 border-t-secondary object-cover" fallback={<Dumbbell className="size-14 text-t-fg/30" />} />
         </div>
       </Container>
       <Hazard />
@@ -134,9 +134,11 @@ function Hours({ ctx }: TemplatePageProps) {
           <Hazard />
           <div className="p-6 sm:p-9">
             <HoursTable ctx={ctx} title={t(d.title, ctx.lang)} className="[&_h3]:text-2xl [&_h3]:uppercase [&_h3]:tracking-[0.08em]" />
-            <p className="mt-6 inline-flex items-center gap-2 bg-t-secondary px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-t-primary">
-              <Timer className="size-3.5" /> {ctx.settings.contact.phone || ctx.settings.contact.whatsapp}
-            </p>
+            {ctx.settings.contact.phone || ctx.settings.contact.whatsapp ? (
+              <a href={`tel:${ctx.settings.contact.phone || ctx.settings.contact.whatsapp}`} className="mt-6 inline-flex items-center gap-2 bg-t-secondary px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-t-primary hover:brightness-125">
+                <Timer className="size-3.5" /> <span dir="ltr">{ctx.settings.contact.phone || ctx.settings.contact.whatsapp}</span>
+              </a>
+            ) : null}
           </div>
         </div>
       </Container>

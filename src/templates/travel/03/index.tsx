@@ -60,7 +60,7 @@ async function Hero({ ctx }: TemplatePageProps) {
   const next = Array.from(new Set(pkgs.flatMap((p) => parseDepartures(p.departures, true).slice(0, 1)))).sort().slice(0, 4);
   return (
     <section className="relative -mt-16 flex min-h-[92vh] items-end overflow-hidden bg-t-dark text-t-dark-fg lg:-mt-20">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Mountain className="size-28 opacity-20" />} />
+      <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Mountain className="size-28 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-dark via-t-dark/40 to-t-dark/30" aria-hidden="true" />
       <Container className="relative pb-20 pt-40 lg:pb-28">
         <div className="max-w-4xl t-fade-up">
@@ -76,12 +76,12 @@ async function Hero({ ctx }: TemplatePageProps) {
             <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline text-t-dark-fg" />
           </div>
           {next.length ? (
-            <div className="mt-10 inline-flex flex-wrap items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm backdrop-blur">
+            <div className="mt-10 inline-flex flex-wrap items-center gap-3 rounded-full border border-t-dark-fg/20 bg-t-dark-fg/10 px-4 py-2 text-sm backdrop-blur">
               <span className="flex items-center gap-2 font-semibold text-t-accent">
                 <CalendarDays className="size-4" /> {lang === "ur" ? "اگلی روانگیاں" : "Next departures"}
               </span>
               {next.map((d) => (
-                <span key={d} className="rounded-full bg-white/15 px-2.5 py-0.5">
+                <span key={d} className="rounded-full bg-t-dark-fg/15 px-2.5 py-0.5">
                   {new Date(d).toLocaleDateString("en-PK", { day: "numeric", month: "short" })}
                 </span>
               ))}

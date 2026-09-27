@@ -88,7 +88,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative order-1 mx-auto w-full max-w-md lg:order-2 lg:max-w-none">
           <div className="absolute -end-4 -top-4 h-full w-full rounded-[2rem] bg-t-accent/60" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full rounded-[2rem] object-cover" fallback={<Heart className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/5] w-full rounded-[2rem] object-cover" fallback={<Heart className="size-16 opacity-30" />} />
           {ctx.settings.contact.phone ? (
             <a href={`tel:${ctx.settings.contact.phone}`} className="absolute -bottom-5 start-6 flex items-center gap-3 rounded-full bg-t-card px-5 py-3 text-sm shadow-lg ring-1 ring-t-border">
               <span className="flex size-9 items-center justify-center rounded-full bg-t-primary text-t-primary-fg">

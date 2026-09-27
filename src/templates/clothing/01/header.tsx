@@ -10,7 +10,7 @@ import { ls, t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /** chrome labels for assistive tech (the platform ui dictionary has no menu strings) */
-const A11Y = { open: ls("Open menu", "مینیو کھولیں"), close: ls("Close menu", "مینیو بند کریں"), menu: ls("Menu", "مینیو"), lang: ls("Switch language", "زبان بدلیں") };
+const A11Y = { open: ls("Open menu", "مینیو کھولیں"), close: ls("Close menu", "مینیو بند کریں"), menu: ls("Menu", "مینیو"), main: ls("Main navigation", "مرکزی نیویگیشن"), lang: ls("Switch language", "زبان بدلیں") };
 import { Img } from "@/templates/ui";
 import { CartButton } from "@/modules/ecommerce/ui/cart-button";
 
@@ -56,7 +56,7 @@ export function EditorialHeader({ ctx }: { ctx: SiteContext }) {
   return (
     <header className={cn("sticky top-0 z-50 border-b border-t-border bg-t-bg/95 backdrop-blur transition-transform duration-300", hidden && "-translate-y-full")}>
       <div className="t-container grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 lg:h-20">
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Main">
+        <nav className="hidden items-center gap-6 lg:flex" aria-label={t(A11Y.main, lang)}>
           {ctx.nav.map((n) => (
             <Link key={n.href} href={n.href} aria-current={isActive(n.href) ? "page" : undefined} className={cn(navLink, isActive(n.href) && "text-t-accent")}>
               {t(n.label, lang)}

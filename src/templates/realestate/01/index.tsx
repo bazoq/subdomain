@@ -75,7 +75,7 @@ async function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="relative isolate overflow-hidden bg-t-dark text-t-dark-fg">
       {h.image ? (
-        <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" loading="eager" />
+        <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" loading="eager" fetchPriority="high" />
       ) : null}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-t-dark/70 via-t-dark/60 to-t-dark" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 h-1 bg-t-accent" aria-hidden="true" />
@@ -86,7 +86,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-t-dark-fg/80">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-accent" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-white/40 text-t-dark-fg hover:bg-white/10" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-t-dark-fg/40 text-t-dark-fg hover:bg-t-dark-fg/10" />
           </div>
         </div>
         <div className="t-fade-up mt-12 text-t-fg [animation-delay:150ms]">

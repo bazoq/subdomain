@@ -57,6 +57,8 @@ type Attached = { id: string; name: string };
 /** Print quote request → Lead(formKey "quote") with product/spec fields in `data` and private files in `fileIds`. */
 export function QuoteFormClient({ lang, services, defaultServiceId, className }: { lang: "en" | "ur"; services: QuoteServiceOption[]; defaultServiceId?: string; className?: string }) {
   const s = OPTS[lang];
+  const uid = React.useId();
+  const fid = (k: string) => `${uid}-${k}`;
   const [state, action, pending] = useActionState(submitLead, idle);
   const formRef = React.useRef<HTMLFormElement>(null);
   const [files, setFiles] = React.useState<Attached[]>([]);
@@ -90,24 +92,39 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
     (form.elements.namedItem("subject") as HTMLInputElement).value = serviceLabel ? `Quote: ${serviceLabel}` : "Quote request";
   }
 
-  const err = (k: string) => (!state.ok && state.fieldErrors?.[k] ? <p className="mt-1 text-xs text-red-600">{state.fieldErrors[k]}</p> : null);
+  const fieldError = (k: string) => (!state.ok && state.fieldErrors?.[k]) || null;
+  const err = (k: string) => {
+    const msg = fieldError(k);
+    return msg ? (
+      <p id={`${fid(k)}-err`} className="mt-1 text-xs text-red-600" role="alert">
+        {msg}
+      </p>
+    ) : null;
+  };
+  const aria = (k: string) => ({ "aria-invalid": fieldError(k) ? true : undefined, "aria-describedby": fieldError(k) ? `${fid(k)}-err` : undefined });
   const lbl = "mb-1 block text-xs font-semibold uppercase tracking-wide text-t-muted-fg";
 
   return (
-    <form ref={formRef} action={action} onSubmit={onSubmit} className={cn("space-y-5", className)}>
+    <form ref={formRef} action={action} onSubmit={onSubmit} className={cn("space-y-5", className)} noValidate>
       <input type="hidden" name="formKey" value="quote" />
       <input type="hidden" name="extra" value="" />
       <input type="hidden" name="subject" value="" />
       <input type="hidden" name="fileIds" value={files.map((f) => f.id).join(",")} />
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-      {state.message ? <div className={cn("rounded-[var(--t-radius)] px-4 py-3 text-sm", state.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>{state.message}</div> : null}
+      {state.message ? (
+        <div role={state.ok ? "status" : "alert"} className={cn("rounded-[var(--t-radius)] px-4 py-3 text-sm", state.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>
+          {state.message}
+        </div>
+      ) : null}
 
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="font-heading mb-3 text-lg font-bold">{lang === "ur" ? "کیا پرنٹ کروانا ہے؟" : "What do you need printed?"}</legend>
         <div className="sm:col-span-2">
-          <label className={lbl}>{s.service}</label>
+          <label htmlFor={fid("service")} className={lbl}>
+            {s.service} *
+          </label>
           {services.length ? (
-            <select name="x_serviceId" className="t-input" value={serviceId} onChange={(e) => setServiceId(e.target.value)} required>
+            <select id={fid("service")} name="x_serviceId" className="t-input" value={serviceId} onChange={(e) => setServiceId(e.target.value)} required>
               <option value="" disabled>
                 {s.service}
               </option>
@@ -119,25 +136,31 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
               <option value="other">{s.other}</option>
             </select>
           ) : (
-            <input name="x_service" className="t-input" required placeholder={lang === "ur" ? "مثلاً بزنس کارڈ، فلائر، بینر" : "e.g. Business cards, flyers, banner, packaging"} />
+            <input id={fid("service")} name="x_service" className="t-input" required maxLength={120} placeholder={lang === "ur" ? "مثلاً بزنس کارڈ، فلائر، بینر" : "e.g. Business cards, flyers, banner, packaging"} />
           )}
         </div>
         <div>
-          <label className={lbl}>{s.qty}</label>
-          <input name="x_quantity" type="number" min={1} inputMode="numeric" required className="t-input" placeholder="500" />
+          <label htmlFor={fid("qty")} className={lbl}>
+            {s.qty} *
+          </label>
+          <input id={fid("qty")} name="x_quantity" type="number" min={1} max={10_000_000} inputMode="numeric" required className="t-input" placeholder="500" />
         </div>
         <div>
-          <label className={lbl}>{s.size}</label>
-          <input name="x_size" className="t-input" list="quote-sizes" placeholder={s.sizes[0]} />
-          <datalist id="quote-sizes">
+          <label htmlFor={fid("size")} className={lbl}>
+            {s.size}
+          </label>
+          <input id={fid("size")} name="x_size" className="t-input" list={fid("sizes")} maxLength={80} placeholder={s.sizes[0]} />
+          <datalist id={fid("sizes")}>
             {s.sizes.map((x) => (
               <option key={x} value={x} />
             ))}
           </datalist>
         </div>
         <div>
-          <label className={lbl}>{s.paper}</label>
-          <select name="x_material" className="t-input" defaultValue="">
+          <label htmlFor={fid("material")} className={lbl}>
+            {s.paper}
+          </label>
+          <select id={fid("material")} name="x_material" className="t-input" defaultValue="">
             <option value="">—</option>
             {s.papers.map((x) => (
               <option key={x} value={x}>
@@ -147,8 +170,10 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
           </select>
         </div>
         <div>
-          <label className={lbl}>{s.sides}</label>
-          <select name="x_sides" className="t-input" defaultValue={s.sidesOpts[0]}>
+          <label htmlFor={fid("sides")} className={lbl}>
+            {s.sides}
+          </label>
+          <select id={fid("sides")} name="x_sides" className="t-input" defaultValue={s.sidesOpts[0]}>
             {s.sidesOpts.map((x) => (
               <option key={x} value={x}>
                 {x}
@@ -157,8 +182,10 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
           </select>
         </div>
         <div>
-          <label className={lbl}>{s.finishing}</label>
-          <select name="x_finishing" className="t-input" defaultValue="">
+          <label htmlFor={fid("finishing")} className={lbl}>
+            {s.finishing}
+          </label>
+          <select id={fid("finishing")} name="x_finishing" className="t-input" defaultValue="">
             <option value="">—</option>
             {s.finishings.map((x) => (
               <option key={x} value={x}>
@@ -168,20 +195,26 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
           </select>
         </div>
         <div>
-          <label className={lbl}>{s.deadline}</label>
-          <input name="x_deadline" type="date" min={today} className="t-input" />
+          <label htmlFor={fid("deadline")} className={lbl}>
+            {s.deadline}
+          </label>
+          <input id={fid("deadline")} name="x_deadline" type="date" min={today} className="t-input" />
         </div>
         <label className="flex items-center gap-2 text-sm sm:col-span-2">
           <input type="checkbox" name="x_rush" value="Yes" className="size-4 accent-[var(--t-primary)]" /> {s.urgent}
         </label>
         <div className="sm:col-span-2">
-          <label className={lbl}>{s.notes}</label>
-          <textarea name="message" rows={4} className="t-input" />
+          <label htmlFor={fid("message")} className={lbl}>
+            {s.notes}
+          </label>
+          <textarea id={fid("message")} name="message" rows={4} maxLength={3000} className="t-input" {...aria("message")} />
           {err("message")}
         </div>
         <div className="sm:col-span-2">
-          <label className={lbl}>{s.files}</label>
-          <ul className="mb-2 space-y-1.5">
+          <p id={fid("files-label")} className={lbl}>
+            {s.files}
+          </p>
+          <ul className="mb-2 space-y-1.5" aria-labelledby={fid("files-label")}>
             {files.map((f) => (
               <li key={f.id} className="flex items-center gap-2 rounded-[var(--t-radius)] bg-t-muted px-3 py-2 text-sm">
                 <FileText className="size-4 text-t-primary" />
@@ -211,15 +244,24 @@ export function QuoteFormClient({ lang, services, defaultServiceId, className }:
       <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className="font-heading mb-3 text-lg font-bold">{lang === "ur" ? "آپ کی معلومات" : "Your details"}</legend>
         <div>
-          <input name="name" required placeholder={t(ui.name, lang)} className="t-input" />
+          <label htmlFor={fid("name")} className="sr-only">
+            {t(ui.name, lang)}
+          </label>
+          <input id={fid("name")} name="name" required autoComplete="name" maxLength={80} placeholder={`${t(ui.name, lang)} *`} className="t-input" {...aria("name")} />
           {err("name")}
         </div>
         <div>
-          <input name="phone" required inputMode="tel" placeholder={`${t(ui.phone, lang)} (03XX-XXXXXXX)`} className="t-input" />
+          <label htmlFor={fid("phone")} className="sr-only">
+            {t(ui.phone, lang)}
+          </label>
+          <input id={fid("phone")} name="phone" required inputMode="tel" autoComplete="tel" maxLength={20} placeholder={`${t(ui.phone, lang)} * (03XX-XXXXXXX)`} className="t-input" {...aria("phone")} />
           {err("phone")}
         </div>
         <div className="sm:col-span-2">
-          <input name="email" type="email" placeholder={t(ui.email, lang)} className="t-input" />
+          <label htmlFor={fid("email")} className="sr-only">
+            {t(ui.email, lang)}
+          </label>
+          <input id={fid("email")} name="email" type="email" autoComplete="email" maxLength={120} placeholder={t(ui.email, lang)} className="t-input" {...aria("email")} />
           {err("email")}
         </div>
       </fieldset>

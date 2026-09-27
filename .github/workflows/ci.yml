@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Everything below is a dummy value. The build never opens a database connection (all tenant
+  # pages are dynamic, the Prisma client connects lazily) but `src/config/env.ts` validates the
+  # shape of the environment at import time, and with NODE_ENV=production it also enforces the
+  # production rules (real-looking ROOT_DOMAIN, strong non-placeholder SESSION_SECRET).
+  ROOT_DOMAIN: ci.siteforge.invalid
+  NEXT_PUBLIC_ROOT_DOMAIN: ci.siteforge.invalid
+  DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+  DIRECT_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+  SESSION_SECRET: kR9vT2mZ8qL4wN6hP1xC3bJ7dF5gY0sA2uE9iO4rQ6tW8yHv
+  NEXT_TELEMETRY_DISABLED: "1"
+  CI: "true"
+
+jobs:
+  check:
+    name: lint · typecheck · test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install (runs `prisma generate` via postinstall)
+        run: npm ci
+
+      - name: Generate template registry
+        run: npm run gen:templates
+
+      - name: Registry is committed and up to date
+        run: git diff --exit-code -- src/templates/metas.ts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test -- --reporter=default --reporter=github-actions
+
+  build:
+    name: production build (Node 22)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Build (gen:templates + prisma generate + next build)
+        run: npm run build
+
+      - name: Health route is part of the build output
+        run: test -d .next/server/app/api/health || (echo "api/health missing from build" && exit 1)

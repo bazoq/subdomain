@@ -29,8 +29,12 @@ export const getProperties = cache(async (tenantId: string, opts: PropertyListOp
   if (opts.purpose && isPurpose(opts.purpose)) and.push({ purpose: opts.purpose });
   if (opts.type && isPropertyType(opts.type)) and.push({ type: opts.type });
   if (opts.city) and.push({ city: { equals: opts.city, mode: "insensitive" } });
-  if (opts.minPrice && opts.minPrice > 0) and.push({ price: { gte: Math.round(opts.minPrice) } });
-  if (opts.maxPrice && opts.maxPrice > 0) and.push({ price: { lte: Math.round(opts.maxPrice) } });
+  // swap an inverted range (min > max) instead of returning an empty result
+  let minPrice = opts.minPrice && opts.minPrice > 0 ? Math.round(opts.minPrice) : undefined;
+  let maxPrice = opts.maxPrice && opts.maxPrice > 0 ? Math.round(opts.maxPrice) : undefined;
+  if (minPrice != null && maxPrice != null && minPrice > maxPrice) [minPrice, maxPrice] = [maxPrice, minPrice];
+  if (minPrice != null) and.push({ price: { gte: minPrice } });
+  if (maxPrice != null) and.push({ price: { lte: maxPrice } });
   if (opts.bedrooms && opts.bedrooms > 0) and.push({ bedrooms: { gte: Math.round(opts.bedrooms) } });
   if (opts.featured) and.push({ isFeatured: true });
   const q = opts.q?.trim();

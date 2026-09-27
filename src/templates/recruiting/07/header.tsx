@@ -55,7 +55,7 @@ export function CommunityHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: 
         </Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
           {ctx.nav.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={isActive(n.href) ? "page" : undefined} className={cn("rounded-full px-4 py-2 text-lg font-bold transition hover:bg-white/15", isActive(n.href) && "bg-white/15 underline decoration-t-accent decoration-4 underline-offset-8")}>
+            <Link key={n.href} href={n.href} aria-current={isActive(n.href) ? "page" : undefined} className={cn("rounded-full px-4 py-2 text-lg font-bold transition hover:bg-t-primary-fg/15", isActive(n.href) && "bg-t-primary-fg/15 underline decoration-t-accent decoration-4 underline-offset-8")}>
               {t(n.label, ctx.lang)}
             </Link>
           ))}
@@ -65,7 +65,7 @@ export function CommunityHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: 
           <Link href={cta.href} className="t-btn t-btn-accent hidden px-5 py-2.5 text-base md:inline-flex">
             {cta.label}
           </Link>
-          <button type="button" onClick={() => setOpen(true)} className="inline-flex size-12 items-center justify-center rounded-full hover:bg-white/15 lg:hidden" aria-label="Open menu" aria-expanded={open} aria-controls="mobile-nav">
+          <button type="button" onClick={() => setOpen(true)} className="inline-flex size-12 items-center justify-center rounded-full hover:bg-t-primary-fg/15 lg:hidden" aria-label="Open menu" aria-expanded={open} aria-controls="mobile-nav">
             <Menu className="size-7" />
           </button>
         </div>
@@ -76,7 +76,7 @@ export function CommunityHeader({ ctx, cta }: { ctx: SiteContext; cta: { label: 
         <div className={cn("absolute inset-y-0 end-0 flex w-[88%] max-w-sm flex-col bg-t-bg text-t-fg shadow-2xl transition-transform", open ? "translate-x-0" : "translate-x-full rtl:-translate-x-full")} role="dialog" aria-modal="true" aria-label="Menu">
           <div className="flex items-center justify-between bg-t-primary px-4 py-3 text-t-primary-fg">
             {brand}
-            <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-white/15" aria-label="Close menu">
+            <button type="button" onClick={() => setOpen(false)} className="rounded-full p-2 hover:bg-t-primary-fg/15" aria-label="Close menu">
               <X className="size-7" />
             </button>
           </div>

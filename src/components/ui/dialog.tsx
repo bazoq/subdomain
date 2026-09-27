@@ -13,6 +13,74 @@ function focusables(root: HTMLElement | null): HTMLElement[] {
 }
 
 /**
+ * Focus management for any modal surface (dialog, drawer, sheet). While `active`:
+ * moves focus inside, keeps Tab/Shift+Tab within the container, closes on Escape,
+ * locks body scroll and restores focus to the previously focused element on close.
+ * Callbacks are read through refs so re-renders of the caller never re-run the trap.
+ */
+export function useFocusTrap(
+  ref: React.RefObject<HTMLElement | null>,
+  active: boolean,
+  opts: { onEscape?: () => void; initialFocus?: React.RefObject<HTMLElement | null>; lockScroll?: boolean } = {},
+) {
+  const onEscape = React.useRef(opts.onEscape);
+  const initialFocus = React.useRef(opts.initialFocus);
+  const lockScroll = opts.lockScroll ?? true;
+  React.useEffect(() => {
+    onEscape.current = opts.onEscape;
+    initialFocus.current = opts.initialFocus;
+  });
+
+  React.useEffect(() => {
+    if (!active) return;
+    const returnTo = document.activeElement as HTMLElement | null;
+    const prevOverflow = document.body.style.overflow;
+    if (lockScroll) document.body.style.overflow = "hidden";
+
+    const raf = requestAnimationFrame(() => {
+      const root = ref.current;
+      if (root?.contains(document.activeElement) && document.activeElement !== root) return; // caller already focused something
+      const target = initialFocus.current?.current ?? focusables(root).find((el) => !el.hasAttribute("data-dialog-close")) ?? root;
+      target?.focus({ preventScroll: true });
+    });
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onEscape.current?.();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const root = ref.current;
+      const list = focusables(root);
+      if (list.length === 0) {
+        e.preventDefault();
+        root?.focus();
+        return;
+      }
+      const first = list[0];
+      const last = list[list.length - 1];
+      const activeEl = document.activeElement as HTMLElement | null;
+      const inside = root?.contains(activeEl) ?? false;
+      if (e.shiftKey && (activeEl === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (activeEl === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("keydown", onKey);
+      if (lockScroll) document.body.style.overflow = prevOverflow;
+      if (returnTo && document.contains(returnTo)) returnTo.focus({ preventScroll: true });
+    };
+  }, [active, ref, lockScroll]);
+}
+
+/**
  * Accessible modal dialog: role=dialog + aria-modal, labelled by its title, focus trap,
  * focus restore on close, Escape and backdrop click to close, body scroll lock.
  * Renders as a bottom sheet on phones and a centred panel on larger screens.
@@ -38,54 +106,10 @@ export function Dialog({
   initialFocus?: React.RefObject<HTMLElement | null>;
 }) {
   const panelRef = React.useRef<HTMLDivElement>(null);
-  const returnFocus = React.useRef<HTMLElement | null>(null);
   const titleId = React.useId();
   const descId = React.useId();
 
-  React.useEffect(() => {
-    if (!open) return;
-    returnFocus.current = document.activeElement as HTMLElement | null;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const raf = requestAnimationFrame(() => {
-      const target = initialFocus?.current ?? focusables(panelRef.current).find((el) => !el.hasAttribute("data-dialog-close")) ?? panelRef.current;
-      target?.focus({ preventScroll: true });
-    });
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-        return;
-      }
-      if (e.key !== "Tab") return;
-      const list = focusables(panelRef.current);
-      if (list.length === 0) {
-        e.preventDefault();
-        panelRef.current?.focus();
-        return;
-      }
-      const first = list[0];
-      const last = list[list.length - 1];
-      const active = document.activeElement as HTMLElement | null;
-      const inside = panelRef.current?.contains(active) ?? false;
-      if (e.shiftKey && (active === first || !inside)) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && (active === last || !inside)) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      cancelAnimationFrame(raf);
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-      returnFocus.current?.focus?.({ preventScroll: true });
-    };
-  }, [open, onClose, initialFocus]);
+  useFocusTrap(panelRef, open, { onEscape: onClose, initialFocus });
 
   if (!open) return null;
   return (

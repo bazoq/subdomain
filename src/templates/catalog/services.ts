@@ -254,6 +254,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Services grid with 'From Rs' tags; process with upload/approve/print icons; portfolio masonry.",
       layout: "Bold colour accents, grid, CMYK motifs.",
     },
+    features: ["Services grid with 'From Rs' tags", "Upload / approve / print process icons", "Portfolio masonry", "CMYK colour bar header"],
     demo: { name: "PrintPress Digital", city: "Lahore" },
   },
   {
@@ -270,7 +271,8 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Portfolio gallery central; services as letterpress-style cards with embossed borders (CSS).",
       layout: "Paper textures, square corners, serif.",
     },
-    overrides: { hero: { eyebrow: "Wedding cards · Packaging · Stationery", title: { en: "Printed with craft and care" } } },
+    overrides: { hero: { eyebrow: "Wedding cards · Packaging · Stationery", title: { en: "Printed with craft and care", ur: "مہارت اور خیال سے چھپا ہوا" } } },
+    features: ["Portfolio-central home page", "Letterpress-style embossed service cards", "Kraft & black craft palette"],
     demo: { name: "Paper & Ink Press", city: "Karachi" },
   },
   {
@@ -287,6 +289,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Price estimator on home; services with turnaround chips; process compact.",
       layout: "Urgent, condensed type, orange/black.",
     },
+    features: ["Price estimator on the home page", "Turnaround chips on services", "Compact process strip"],
     demo: { name: "QuickPrint 24", city: "Islamabad" },
   },
   {
@@ -303,7 +306,8 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Portfolio as wide landscape tiles; services with size/material notes; brands strip of clients.",
       layout: "Dark, wide, yellow accents.",
     },
-    overrides: { hero: { eyebrow: "Flex · Signboards · Vehicle branding", title: { en: "Big prints for big impressions" } } },
+    overrides: { hero: { eyebrow: "Flex · Signboards · Vehicle branding", title: { en: "Big prints for big impressions", ur: "بڑے تاثر کے لیے بڑے پرنٹس" } } },
+    features: ["Wide landscape portfolio tiles", "Size/material notes on services", "Client logo strip"],
     demo: { name: "Signage Studio", city: "Lahore" },
   },
 ];

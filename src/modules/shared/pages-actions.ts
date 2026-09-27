@@ -8,9 +8,13 @@ import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized } from "@/modules/shared/validation";
 
-/** Slugs that would collide with built-in routes. */
-const RESERVED = new Set(["admin", "api", "shop", "cart", "checkout", "order", "menu", "track", "jobs", "packages", "properties", "services", "team", "gallery", "contact", "blog", "p", "faq", "plans", "classes", "join", "quote", "consultation"]);
+/** Slugs that would collide with built-in routes (public pages, APIs, Next internals). */
+const RESERVED = new Set([
+  "admin", "api", "_next", "shop", "cart", "checkout", "order", "menu", "track", "reserve", "jobs", "employers", "packages", "properties", "services", "team", "gallery",
+  "contact", "blog", "p", "faq", "plans", "classes", "join", "quote", "consultation", "custom-cake", "upload-prescription", "login", "logout", "sitemap.xml", "robots.txt",
+]);
 
 const pageSchema = z.object({
   title: localizedString.refine((v) => v.en.trim().length > 0, "Title is required"),
@@ -48,8 +52,8 @@ export async function upsertPage(id: string | null, input: unknown): Promise<Act
     const seo = { ...(d.seo.title ? { title: d.seo.title } : {}), ...(d.seo.description ? { description: d.seo.description } : {}) };
     const data = {
       slug: await uniqueSlug(ctx.tenant.id, d.slug || d.title.en, id),
-      title: json(d.title),
-      content: json(d.content),
+      title: json(sanitizeLocalized(d.title)),
+      content: json(sanitizeLocalized(d.content)),
       showInNav: d.showInNav,
       enabled: d.enabled,
       seo: json(seo),
@@ -80,8 +84,11 @@ export async function deletePage(id: string): Promise<ActionResult> {
 export async function togglePage(id: string, field: "enabled" | "showInNav", value: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (field !== "enabled" && field !== "showInNav") return fail("Invalid field.");
+    if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.sitePage.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });
     if (!count) return fail("Not found.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: `page.${field}`, entity: "SitePage", entityId: id, meta: { value } });
     revalidatePath("/", "layout");
     return success(field === "enabled" ? (value ? "Page enabled." : "Page disabled.") : value ? "Added to navigation." : "Removed from navigation.");
   } catch (e) {

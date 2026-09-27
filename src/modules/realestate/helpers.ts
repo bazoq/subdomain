@@ -1,6 +1,7 @@
 import type { Property } from "@/generated/prisma/client";
 import { type Lang, t } from "@/lib/i18n";
 import { formatPKR } from "@/lib/utils";
+import { googleMapsEmbedUrl, isHttpUrl } from "@/modules/shared/validation";
 import {
   AREA_UNIT_LABELS,
   AREA_UNITS,
@@ -48,18 +49,24 @@ export function areaText(p: Pick<Property, "areaValue" | "areaUnit">, lang: Lang
   return `${n} ${areaUnitLabel(p.areaUnit, lang)}`;
 }
 
-/** Google Maps embed URL if `mapUrl` is embeddable, otherwise null (render as a link instead). */
+/**
+ * Google Maps embed URL if `mapUrl` is an https google.com/maps embed link, otherwise null
+ * (the detail page then renders a plain external link — never an iframe to an arbitrary host).
+ */
 export function mapEmbedUrl(mapUrl: string | null | undefined): string | null {
-  if (!mapUrl) return null;
-  if (/^https:\/\/(www\.)?google\.[a-z.]+\/maps\/embed/.test(mapUrl) || /output=embed/.test(mapUrl)) return mapUrl;
-  return null;
+  return googleMapsEmbedUrl(mapUrl);
 }
 
-/** YouTube embed URL for watch / youtu.be / shorts links, otherwise null. */
+/** YouTube embed URL for watch / youtu.be / shorts links (https only), otherwise null. */
 export function videoEmbedUrl(videoUrl: string | null | undefined): string | null {
-  if (!videoUrl) return null;
-  const m = /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/.exec(videoUrl);
+  if (!videoUrl || !isHttpUrl(videoUrl)) return null;
+  const m = /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/.exec(videoUrl.trim());
   return m ? `https://www.youtube-nocookie.com/embed/${m[1]}` : null;
+}
+
+/** External link target for video/map when not embeddable: http(s) only. */
+export function safeExternalUrl(url: string | null | undefined): string | null {
+  return isHttpUrl(url) ? url.trim() : null;
 }
 
 export function propertiesHref(params: Record<string, string | number | undefined | null>): string {

@@ -76,19 +76,19 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:28px_28px]" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.15fr_1fr] lg:py-28">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-flex items-center rounded-[var(--t-radius)] bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-accent">{h.eyebrow}</span> : null}
+          {h.eyebrow ? <span className="inline-flex items-center rounded-[var(--t-radius)] bg-t-primary-fg/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-accent">{h.eyebrow}</span> : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-white/80">{t(h.subtitle, lang)}</p>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-t-primary-fg/80">{t(h.subtitle, lang)}</p>
           <div className="mt-8">
             <JobSearchBar ctx={ctx} className="text-t-fg" />
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-accent" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline text-white" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline text-t-primary-fg" />
           </div>
         </div>
         <div className="relative hidden lg:block">
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-2xl ring-1 ring-white/10" fallback={<Briefcase className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-2xl ring-1 ring-t-primary-fg/10" fallback={<Briefcase className="size-16 opacity-30" />} />
           {h.badges?.length ? (
             <ul className="absolute -bottom-6 start-6 flex gap-3">
               {h.badges.slice(0, 2).map((b, i) => (

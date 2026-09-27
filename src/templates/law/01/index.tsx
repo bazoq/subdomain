@@ -83,13 +83,15 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative">
           <div className="absolute -start-4 -top-4 h-full w-full border-2 border-t-accent" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full object-cover" fallback={<Scale className="size-16 opacity-30" />} />
-          <div className="absolute -bottom-6 -end-6 hidden bg-t-dark px-6 py-4 text-t-dark-fg shadow-xl md:block">
-            <p className="text-xs uppercase tracking-widest text-t-accent">Call the chambers</p>
-            <a href={`tel:${ctx.settings.contact.phone}`} className="mt-1 flex items-center gap-2 font-heading text-xl font-bold">
-              <Phone className="size-4" /> {ctx.settings.contact.phone || "+92 300 0000000"}
-            </a>
-          </div>
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/5] w-full object-cover" fallback={<Scale className="size-16 opacity-30" />} />
+          {ctx.settings.contact.phone ? (
+            <div className="absolute -bottom-6 -end-6 hidden bg-t-dark px-6 py-4 text-t-dark-fg shadow-xl md:block">
+              <p className="text-xs uppercase tracking-widest text-t-accent">{ctx.lang === "ur" ? "چیمبرز کو کال کریں" : "Call the chambers"}</p>
+              <a href={`tel:${ctx.settings.contact.phone}`} className="mt-1 flex items-center gap-2 font-heading text-xl font-bold hover:text-t-accent">
+                <Phone className="size-4" /> <span dir="ltr">{ctx.settings.contact.phone}</span>
+              </a>
+            </div>
+          ) : null}
         </div>
       </Container>
     </section>

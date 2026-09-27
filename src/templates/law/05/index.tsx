@@ -76,7 +76,7 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="relative isolate min-h-[70vh] overflow-hidden bg-t-dark text-t-dark-fg">
       {h.image ? (
-        <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-50" loading="eager" />
+        <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-50" loading="eager" fetchPriority="high" />
       ) : (
         <Gavel className="absolute -end-10 bottom-0 -z-10 size-96 text-t-primary/10" aria-hidden="true" />
       )}

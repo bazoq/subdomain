@@ -64,16 +64,16 @@ async function Hero({ ctx }: TemplatePageProps) {
       <Container className="relative grid items-center gap-14 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
         <div className="t-fade-up">
           {h.eyebrow ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full border border-t-primary-fg/20 bg-t-primary-fg/10 px-4 py-1.5 text-xs font-semibold backdrop-blur">
               <Sparkles className="size-3.5 text-t-accent" /> {h.eyebrow}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-white/80">{t(h.subtitle, lang)}</p>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-t-primary-fg/80">{t(h.subtitle, lang)}</p>
           <JobSearchBar ctx={ctx} className="mt-8 rounded-3xl text-t-fg [&_.t-btn]:rounded-2xl [&_.t-input]:rounded-2xl" />
           <div className="mt-6 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-accent rounded-full" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline rounded-full text-white" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline rounded-full text-t-primary-fg" />
           </div>
         </div>
         <div className="relative hidden min-h-[26rem] lg:block">
@@ -104,7 +104,7 @@ async function Hero({ ctx }: TemplatePageProps) {
               </Link>
             ))
           ) : (
-            <Img src={h.image} alt="" className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-2xl" />
+            <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-2xl" />
           )}
         </div>
       </Container>
@@ -219,7 +219,7 @@ function EmployersCta({ ctx }: TemplatePageProps) {
         <div className="relative grid overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-t-primary to-t-secondary text-t-primary-fg lg:grid-cols-[1.2fr_1fr]">
           <div className="p-8 sm:p-12 lg:p-14">
             <h2 className="font-heading text-3xl font-extrabold sm:text-4xl">{t(d.title, ctx.lang)}</h2>
-            <p className="mt-4 max-w-lg leading-7 text-white/80">{t(d.text, ctx.lang)}</p>
+            <p className="mt-4 max-w-lg leading-7 text-t-primary-fg/80">{t(d.text, ctx.lang)}</p>
             <div className="mt-8">
               <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-accent rounded-full" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
             </div>

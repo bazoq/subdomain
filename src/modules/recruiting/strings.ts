@@ -48,6 +48,11 @@ export const rs = {
   submitApplication: ls("Submit Application", "درخواست جمع کریں"),
   applied: ls("Your application has been received. We will contact shortlisted candidates.", "آپ کی درخواست موصول ہو گئی ہے۔ ہم منتخب امیدواروں سے رابطہ کریں گے۔"),
   applyAnother: ls("Browse more jobs", "مزید نوکریاں دیکھیں"),
+  alreadyApplied: ls("We already have your application for this job. We will contact shortlisted candidates.", "اس نوکری کے لیے آپ کی درخواست پہلے ہی موصول ہو چکی ہے۔ ہم منتخب امیدواروں سے رابطہ کریں گے۔"),
+  jobUnavailable: ls("This job is no longer available.", "یہ نوکری اب دستیاب نہیں ہے۔"),
+  jobClosed: ls("Applications for this job are closed.", "اس نوکری کے لیے درخواستیں بند ہو چکی ہیں۔"),
+  cvInvalid: ls("Your CV could not be verified. Please upload it again.", "آپ کے سی وی کی تصدیق نہیں ہو سکی۔ براہ کرم دوبارہ اپ لوڈ کریں۔"),
+  cvWrongType: ls("Please upload your CV as a PDF or Word document.", "براہ کرم سی وی PDF یا Word فائل کی صورت میں اپ لوڈ کریں۔"),
   // employer form
   employerTitle: ls("Hire staff through us", "ہمارے ذریعے عملہ بھرتی کریں"),
   companyName: ls("Company name", "کمپنی کا نام"),

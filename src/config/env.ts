@@ -51,7 +51,14 @@ const schema = z
     R2_PUBLIC_URL: z.string().url().optional(),
 
     RESEND_API_KEY: z.string().optional(),
-    NOTIFY_FROM_EMAIL: z.string().email().optional(),
+    // Either a bare address or the RFC 5322 display form `Name <address>` (as in .env.example).
+    NOTIFY_FROM_EMAIL: z
+      .string()
+      .trim()
+      .regex(/^(?:[^<>\r\n"]{1,80}\s)?<?[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+>?$/, "must be an email address or `Name <address>`")
+      .optional(),
+    /** Shared secret for scheduled maintenance calls (Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`). */
+    CRON_SECRET: z.string().min(16, "must be at least 16 characters").optional(),
   })
   .superRefine((e, ctx) => {
     const prod = e.NODE_ENV === "production";

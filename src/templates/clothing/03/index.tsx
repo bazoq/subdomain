@@ -67,7 +67,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             <p className="font-heading text-sm italic tracking-wide text-t-primary">{tagline}</p>
           </div>
         ) : null}
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="light" className="border-t-2 border-t-accent" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

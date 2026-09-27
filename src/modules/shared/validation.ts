@@ -42,8 +42,35 @@ export const zEmailOptional = z.string().trim().email("Invalid email").max(120).
 
 const HTTP_URL = /^https?:\/\/[^\s]+$/i;
 
+/** True for absolute `http(s)://` URLs only (rejects javascript:, data:, protocol-relative). */
+export function isHttpUrl(v: string | null | undefined): v is string {
+  return !!v && HTTP_URL.test(v.trim());
+}
+
 /** `https://…` or `http://…` (no javascript:/data: schemes). Empty string allowed. */
 export const zHttpUrlOrEmpty = z.union([z.literal(""), z.string().trim().max(1000).regex(HTTP_URL, "Enter a full URL starting with https://")]);
+
+/**
+ * Google Maps *embed* URL suitable for an iframe `src`, or null.
+ * Accepts only https on google.com / maps.google.com (incl. country TLDs such as google.com.pk)
+ * with an embed path (`/maps/embed…`) or `output=embed`. Everything else (share links, other hosts,
+ * javascript:) renders as a plain "open in maps" link instead.
+ */
+export function googleMapsEmbedUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let u: URL;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "https:") return null;
+  if (!/^(www\.|maps\.)?google\.(com|com\.[a-z]{2}|co\.[a-z]{2}|[a-z]{2})$/.test(u.hostname)) return null;
+  const isMapsPath = u.pathname === "/maps" || u.pathname.startsWith("/maps/");
+  if (!isMapsPath) return null;
+  const embed = u.pathname.startsWith("/maps/embed") || u.searchParams.get("output") === "embed";
+  return embed ? u.toString() : null;
+}
 
 /** Image sources may be absolute http(s) URLs or site-relative paths. Empty allowed. */
 export function isSafeImageUrl(v: string): boolean {

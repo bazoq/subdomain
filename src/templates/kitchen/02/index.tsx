@@ -49,7 +49,7 @@ async function Layout({ ctx, children }: TemplateLayoutProps) {
       <div className="flex min-h-screen flex-col bg-t-bg text-t-fg">
         <AnnouncementBar ctx={ctx} variant="accent" />
         <RetailHeader ctx={ctx} categories={categories} />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         {/* trust band above the dark footer */}
         <div className="bg-t-dark text-t-dark-fg">
           <Container className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 border-b border-t-dark-fg/10 py-5 text-xs font-bold uppercase tracking-wide">

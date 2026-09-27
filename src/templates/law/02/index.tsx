@@ -80,7 +80,7 @@ function Hero({ ctx }: TemplatePageProps) {
             ))}
           </ul>
         ) : null}
-        {h.image ? <Img src={h.image} alt="" className="mt-12 aspect-[21/9] w-full rounded-[var(--t-radius)] object-cover grayscale" /> : null}
+        {h.image ? <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="mt-12 aspect-[21/9] w-full rounded-[var(--t-radius)] object-cover grayscale" /> : null}
       </Container>
     </section>
   );

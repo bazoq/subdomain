@@ -111,7 +111,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           className="border-b-4 border-t-secondary [&_nav_a]:text-xs [&_nav_a]:font-semibold [&_nav_a]:uppercase [&_nav_a]:tracking-[0.18em]"
           rightSlot={<CartButton ctx={lc} mode="drawer" showLabel className="rounded-[var(--t-radius)] bg-t-primary px-3 text-t-primary-fg hover:bg-t-primary/90 [&>span]:bg-t-secondary [&>span]:text-t-secondary-fg" />}
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-primary" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { t, ui } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -9,25 +10,38 @@ import type { OrderDTO, StoreCtx } from "../types";
 import { OrderSummary } from "./order-summary";
 import { sui } from "./strings";
 
-/** Order number + phone lookup → shows the order summary on success. */
+/**
+ * Order number + full phone lookup. On success the summary is shown immediately and the URL is replaced with the
+ * tokenised, bookmarkable `/order/[n]?t=…` link (the server re-renders it as a verified page).
+ */
 export function OrderTracker({ ctx, initialNumber = "", title, className }: { ctx: StoreCtx; initialNumber?: string; title?: string; className?: string }) {
   const lang = ctx.lang;
+  const router = useRouter();
   const [number, setNumber] = React.useState(initialNumber);
   const [phone, setPhone] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [order, setOrder] = React.useState<OrderDTO | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
     setError(null);
+    setFieldErrors({});
     const res = await getOrderStatus(number, phone);
     setBusy(false);
-    if (res.ok && res.data) setOrder(res.data);
-    else {
+    if (res.ok && res.data) {
+      const { token, ...dto } = res.data;
+      setOrder(dto);
+      if (token) router.replace(`/order/${dto.number}?t=${encodeURIComponent(token)}`);
+    } else {
       setOrder(null);
-      setError(res.ok ? t(sui.orderNotFound, lang) : res.message);
+      if (!res.ok) {
+        setError(res.message || t(sui.orderNotFound, lang));
+        setFieldErrors(res.fieldErrors ?? {});
+      } else setError(t(sui.orderNotFound, lang));
     }
   }
 
@@ -42,8 +56,10 @@ export function OrderTracker({ ctx, initialNumber = "", title, className }: { ct
     );
   }
 
+  const err = (k: string) => (fieldErrors[k] ? <p className="mt-1 text-xs text-red-600">{fieldErrors[k]}</p> : null);
+
   return (
-    <form onSubmit={onSubmit} className={cn("t-card mx-auto max-w-md p-5 sm:p-6", className)}>
+    <form onSubmit={onSubmit} className={cn("t-card mx-auto max-w-md p-5 sm:p-6", className)} noValidate>
       <h2 className="font-heading text-xl font-semibold">{title ?? t(sui.trackTitle, lang)}</h2>
       <p className="mt-1 text-sm text-t-muted-fg">{t(sui.trackHelp, lang)}</p>
       {error ? (
@@ -57,12 +73,14 @@ export function OrderTracker({ ctx, initialNumber = "", title, className }: { ct
             {t(ui.orderNumber, lang)}
           </label>
           <input id="track-number" required inputMode="numeric" value={number} onChange={(e) => setNumber(e.target.value)} placeholder={`${ctx.commerce.orderPrefix}-1024`} className="t-input" />
+          {err("number")}
         </div>
         <div>
           <label htmlFor="track-phone" className="mb-1 block text-sm font-medium">
             {t(ui.phone, lang)}
           </label>
-          <input id="track-phone" required type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="03XX-XXXXXXX" className="t-input" />
+          <input id="track-phone" required type="tel" inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="03XX-XXXXXXX" className="t-input" />
+          {err("phone")}
         </div>
       </div>
       <button type="submit" disabled={busy} className="t-btn t-btn-primary mt-5 w-full disabled:opacity-60">

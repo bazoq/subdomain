@@ -39,8 +39,8 @@ export default async function TenantRootLayout({ children }: { children: React.R
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href={fontsHref} />
-        <meta name="theme-color" content={vars["--t-primary"]} />
+        {fontsHref ? <link rel="stylesheet" href={fontsHref} /> : null}
+        <meta name="theme-color" content={vars["--t-primary"] ?? undefined} />
       </head>
       <body className="min-h-screen bg-t-bg text-t-fg antialiased">{children}</body>
     </html>

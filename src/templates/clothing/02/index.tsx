@@ -74,7 +74,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             </>
           }
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" className="border-t border-t-border [&_h3]:text-t-primary" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />
@@ -99,7 +99,7 @@ function Hero({ ctx }: TemplatePageProps) {
         <Container className="relative py-20 sm:py-28 lg:py-36">
           <div className="t-fade-up">
             {h.eyebrow ? <span className="inline-block bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{h.eyebrow}</span> : null}
-            <h1 className="font-heading mt-6 max-w-4xl text-6xl font-normal uppercase leading-[0.88] tracking-tight sm:text-8xl lg:text-[8rem]">{t(h.title, lang)}</h1>
+            <h1 className="font-heading mt-6 max-w-4xl text-5xl font-normal uppercase leading-[0.88] tracking-tight sm:text-7xl lg:text-[8rem]">{t(h.title, lang)}</h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-t-muted-fg">{t(h.subtitle, lang)}</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary px-7 text-sm font-bold uppercase tracking-[0.18em]" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
@@ -198,7 +198,7 @@ async function Products({ ctx }: TemplatePageProps) {
           ctx={ctx}
           columns={4}
           showQuickAdd
-          className="[&_article]:rounded-none [&_article]:border-t-border [&_article_button]:rounded-none [&_article_button]:uppercase [&_article_button]:tracking-[0.15em] [&_article_button]:opacity-0 [&_article_button]:transition [&_article:hover_button]:opacity-100 [&_article_button:focus-visible]:opacity-100 [&_article_span.font-heading]:text-t-primary"
+          className="[&_article]:rounded-none [&_article]:border-t-border [&_article_button]:rounded-none [&_article_button]:uppercase [&_article_button]:tracking-[0.15em] [@media(hover:hover)]:[&_article_button]:opacity-0 [&_article_button]:transition [&_article:hover_button]:opacity-100 [&_article_button:focus-visible]:opacity-100 [&_article_span.font-heading]:text-t-primary"
         />
       </Container>
     </section>

@@ -95,6 +95,8 @@ function Hero({ ctx }: TemplatePageProps) {
           <span className="absolute inset-0 -rotate-3 rounded-[14rem_14rem_2.5rem_2.5rem] bg-t-accent/60" aria-hidden="true" />
           <Img
             src={h.image}
+            loading="eager"
+            fetchPriority="high"
             alt=""
             className="relative aspect-[4/5] w-full rounded-[14rem_14rem_2.5rem_2.5rem] object-cover shadow-lg"
             fallback={<HeartPulse className="size-14 text-t-primary/40" />}

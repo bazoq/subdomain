@@ -30,10 +30,21 @@ export function EmployerRequestForm({ ctx, className }: { ctx: SiteContext; clas
     (form.elements.namedItem("subject") as HTMLInputElement).value = `Employer request: ${extra.company || ""}`.trim();
   }
 
-  const err = (k: string) => (!state.ok && state.fieldErrors?.[k] ? <p className="mt-1 text-xs text-red-600">{state.fieldErrors[k]}</p> : null);
-  const field = (id: string, label: string, input: React.ReactNode, key?: string) => (
+  const uid = React.useId();
+  const fid = (k: string) => `${uid}-${k}`;
+  const fieldError = (k: string) => (!state.ok && state.fieldErrors?.[k]) || null;
+  const err = (k: string) => {
+    const msg = fieldError(k);
+    return msg ? (
+      <p id={`${fid(k)}-err`} className="mt-1 text-xs text-red-600" role="alert">
+        {msg}
+      </p>
+    ) : null;
+  };
+  const aria = (k: string) => ({ "aria-invalid": fieldError(k) ? true : undefined, "aria-describedby": fieldError(k) ? `${fid(k)}-err` : undefined });
+  const field = (k: string, label: string, input: React.ReactNode, key?: string) => (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium">
+      <label htmlFor={fid(k)} className="mb-1 block text-sm font-medium">
         {label}
       </label>
       {input}
@@ -42,26 +53,26 @@ export function EmployerRequestForm({ ctx, className }: { ctx: SiteContext; clas
   );
 
   return (
-    <form ref={formRef} action={action} onSubmit={onSubmit} className={cn("space-y-4", className)}>
+    <form ref={formRef} action={action} onSubmit={onSubmit} className={cn("space-y-4", className)} noValidate>
       <input type="hidden" name="formKey" value="employer_request" />
       <input type="hidden" name="extra" value="" />
       <input type="hidden" name="subject" value="" />
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
       {state.message ? (
-        <div className={cn("rounded-[var(--t-radius)] px-4 py-3 text-sm", state.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")} role="status">
+        <div className={cn("rounded-[var(--t-radius)] px-4 py-3 text-sm", state.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")} role={state.ok ? "status" : "alert"}>
           {state.message}
         </div>
       ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
-        {field("er-company", `${t(rs.companyName, lang)} *`, <input id="er-company" name="x_company" required maxLength={120} className="t-input" />)}
-        {field("er-name", `${t(rs.contactPerson, lang)} *`, <input id="er-name" name="name" required autoComplete="name" className="t-input" />, "name")}
-        {field("er-phone", `${t(rs.yourPhone, lang)} *`, <input id="er-phone" name="phone" required inputMode="tel" placeholder="03XX-XXXXXXX" className="t-input" />, "phone")}
-        {field("er-email", t(rs.yourEmail, lang), <input id="er-email" name="email" type="email" className="t-input" />, "email")}
-        {field("er-positions", `${t(rs.positionsNeeded, lang)} *`, <input id="er-positions" name="x_positions" required maxLength={200} className="t-input" />)}
-        {field("er-count", t(rs.headcount, lang), <input id="er-count" name="x_count" type="number" min={1} max={10000} defaultValue={1} className="t-input" />)}
-        {field("er-location", t(rs.workLocation, lang), <input id="er-location" name="x_location" maxLength={120} placeholder="Riyadh, Saudi Arabia" className="t-input" />)}
+        {field("company", `${t(rs.companyName, lang)} *`, <input id={fid("company")} name="x_company" required maxLength={120} autoComplete="organization" className="t-input" />)}
+        {field("name", `${t(rs.contactPerson, lang)} *`, <input id={fid("name")} name="name" required autoComplete="name" maxLength={80} className="t-input" {...aria("name")} />, "name")}
+        {field("phone", `${t(rs.yourPhone, lang)} *`, <input id={fid("phone")} name="phone" required inputMode="tel" autoComplete="tel" maxLength={20} placeholder="03XX-XXXXXXX" className="t-input" {...aria("phone")} />, "phone")}
+        {field("email", t(rs.yourEmail, lang), <input id={fid("email")} name="email" type="email" autoComplete="email" maxLength={120} className="t-input" {...aria("email")} />, "email")}
+        {field("positions", `${t(rs.positionsNeeded, lang)} *`, <input id={fid("positions")} name="x_positions" required maxLength={200} className="t-input" />)}
+        {field("count", t(rs.headcount, lang), <input id={fid("count")} name="x_count" type="number" min={1} max={10000} defaultValue={1} inputMode="numeric" className="t-input" />)}
+        {field("location", t(rs.workLocation, lang), <input id={fid("location")} name="x_location" maxLength={120} placeholder="Riyadh, Saudi Arabia" className="t-input" />)}
       </div>
-      {field("er-message", t(rs.employerMessage, lang), <textarea id="er-message" name="message" rows={4} maxLength={3000} className="t-input" />, "message")}
+      {field("message", t(rs.employerMessage, lang), <textarea id={fid("message")} name="message" rows={4} maxLength={3000} className="t-input" {...aria("message")} />, "message")}
       <button type="submit" disabled={pending} className="t-btn t-btn-primary w-full disabled:opacity-60 sm:w-auto">
         {pending ? t(ui.loading, lang) : t(rs.sendRequest, lang)}
       </button>

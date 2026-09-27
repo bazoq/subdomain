@@ -8,6 +8,7 @@ import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized, zImageUrlOrEmpty } from "@/modules/shared/validation";
 
 const serviceSchema = z.object({
   name: localizedString.refine((v) => v.en.trim().length > 0, "Name is required"),
@@ -16,8 +17,8 @@ const serviceSchema = z.object({
   description: localizedString.default({ en: "" }),
   priceFrom: z.union([z.coerce.number().int().min(0).max(1_000_000_000), z.literal(""), z.null()]).optional(),
   priceNote: z.string().trim().max(120).optional().or(z.literal("")),
-  imageUrl: z.string().max(1000).optional().or(z.literal("")),
-  icon: z.string().trim().max(60).optional().or(z.literal("")),
+  imageUrl: zImageUrlOrEmpty,
+  icon: z.string().trim().max(60).regex(/^[A-Za-z0-9_-]*$/, "Icon name only").optional().or(z.literal("")),
   features: z.array(localizedString).max(30).default([]),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
@@ -46,14 +47,14 @@ export async function upsertService(id: string | null, input: unknown): Promise<
     const priceFrom = d.priceFrom === "" || d.priceFrom == null ? null : d.priceFrom;
     const data = {
       slug,
-      name: json(d.name),
-      summary: json(d.summary),
-      description: json(d.description),
+      name: json(sanitizeLocalized(d.name)),
+      summary: json(sanitizeLocalized(d.summary)),
+      description: json(sanitizeLocalized(d.description)),
       priceFrom,
       priceNote: d.priceNote || null,
-      imageUrl: d.imageUrl || null,
+      imageUrl: d.imageUrl?.trim() || null,
       icon: d.icon || null,
-      features: json(d.features.filter((f) => f.en.trim())),
+      features: json(d.features.filter((f) => f.en.trim()).map(sanitizeLocalized)),
       isFeatured: d.isFeatured,
       isActive: d.isActive,
       sortOrder: d.sortOrder,
@@ -90,8 +91,11 @@ export async function deleteService(id: string): Promise<ActionResult> {
 export async function toggleService(id: string, field: "isActive" | "isFeatured", value: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (field !== "isActive" && field !== "isFeatured") return fail("Invalid field.");
+    if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.service.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });
     if (!count) return fail("Not found.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: `service.${field}`, entity: "Service", entityId: id, meta: { value } });
     revalidatePath("/", "layout");
     return success(field === "isActive" ? (value ? "Shown on website." : "Hidden from website.") : value ? "Marked as featured." : "Removed from featured.");
   } catch (e) {

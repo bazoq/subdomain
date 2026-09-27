@@ -56,7 +56,7 @@ async function Hero({ ctx }: TemplatePageProps) {
       <Container className="grid items-center gap-12 py-14 lg:grid-cols-[0.95fr_1.05fr] lg:py-24">
         <div className="relative order-2 lg:order-1">
           <div className="absolute -start-6 -top-6 size-40 rounded-full bg-t-accent/60 blur-2xl" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full rounded-[2.5rem] object-cover shadow-2xl" fallback={<Users className="size-20 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/5] w-full rounded-[2.5rem] object-cover shadow-2xl" fallback={<Users className="size-20 opacity-30" />} />
           {story ? (
             <figure className="relative -mt-16 ms-4 me-4 rounded-3xl bg-t-card p-6 shadow-xl sm:-mt-20 sm:ms-8 sm:me-0 sm:max-w-md">
               <Quote className="size-7 text-t-primary" aria-hidden="true" />

@@ -79,7 +79,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             </>
           }
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

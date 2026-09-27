@@ -30,47 +30,58 @@ export function InquiryForm({
     if (state.ok) formRef.current?.reset();
   }, [state.ok]);
 
-  const err = (k: string) => (!state.ok && state.fieldErrors?.[k] ? <p className="mt-1 text-xs text-red-600">{state.fieldErrors[k]}</p> : null);
+  const uid = React.useId();
+  const fid = (k: string) => `${uid}-${k}`;
+  const fieldError = (k: string) => (!state.ok && state.fieldErrors?.[k]) || null;
+  const err = (k: string) => {
+    const msg = fieldError(k);
+    return msg ? (
+      <p id={`${fid(k)}-err`} className="mt-1 text-xs text-red-600" role="alert">
+        {msg}
+      </p>
+    ) : null;
+  };
+  const aria = (k: string) => ({ "aria-invalid": fieldError(k) ? true : undefined, "aria-describedby": fieldError(k) ? `${fid(k)}-err` : undefined });
 
   return (
-    <form ref={formRef} action={action} className={cn("space-y-3", className)}>
+    <form ref={formRef} action={action} className={cn("space-y-3", className)} noValidate>
       <input type="hidden" name="formKey" value="property_inquiry" />
       <input type="hidden" name="extra" value={extra} />
       <input type="hidden" name="subject" value={`Inquiry: ${property.title}`} />
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
       {state.message ? (
-        <div className={cn("rounded-[var(--t-radius)] px-4 py-3 text-sm", state.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")} role="status">
+        <div className={cn("rounded-[var(--t-radius)] px-4 py-3 text-sm", state.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")} role={state.ok ? "status" : "alert"}>
           {state.message}
         </div>
       ) : null}
       <div className={cn("grid gap-3", !compact && "sm:grid-cols-2")}>
         <div>
-          <label htmlFor="pi-name" className="sr-only">
+          <label htmlFor={fid("name")} className="sr-only">
             {t(rs.yourName, lang)}
           </label>
-          <input id="pi-name" name="name" required autoComplete="name" placeholder={`${t(rs.yourName, lang)} *`} className="t-input" />
+          <input id={fid("name")} name="name" required autoComplete="name" maxLength={80} placeholder={`${t(rs.yourName, lang)} *`} className="t-input" {...aria("name")} />
           {err("name")}
         </div>
         <div>
-          <label htmlFor="pi-phone" className="sr-only">
+          <label htmlFor={fid("phone")} className="sr-only">
             {t(rs.yourPhone, lang)}
           </label>
-          <input id="pi-phone" name="phone" required inputMode="tel" autoComplete="tel" placeholder={`${t(rs.yourPhone, lang)} *`} className="t-input" />
+          <input id={fid("phone")} name="phone" required inputMode="tel" autoComplete="tel" maxLength={20} placeholder={`${t(rs.yourPhone, lang)} *`} className="t-input" {...aria("phone")} />
           {err("phone")}
         </div>
       </div>
       <div>
-        <label htmlFor="pi-email" className="sr-only">
+        <label htmlFor={fid("email")} className="sr-only">
           {t(rs.yourEmail, lang)}
         </label>
-        <input id="pi-email" name="email" type="email" autoComplete="email" placeholder={t(rs.yourEmail, lang)} className="t-input" />
+        <input id={fid("email")} name="email" type="email" autoComplete="email" maxLength={120} placeholder={t(rs.yourEmail, lang)} className="t-input" {...aria("email")} />
         {err("email")}
       </div>
       <div>
-        <label htmlFor="pi-msg" className="sr-only">
+        <label htmlFor={fid("msg")} className="sr-only">
           {t(rs.message, lang)}
         </label>
-        <textarea id="pi-msg" name="message" rows={3} maxLength={3000} defaultValue={t(rs.inquiryPlaceholder, lang)} className="t-input" />
+        <textarea id={fid("msg")} name="message" rows={3} maxLength={3000} defaultValue={t(rs.inquiryPlaceholder, lang)} className="t-input" {...aria("message")} />
         {err("message")}
       </div>
       <button type="submit" disabled={pending} className="t-btn t-btn-primary w-full disabled:opacity-60">

@@ -51,9 +51,9 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           variant="dark"
           cta={{ label: ui.shop, href: "/shop" }}
           className="[&>div>a>span]:uppercase [&>div>a>span]:tracking-tight [&_nav_a]:rounded-none [&_nav_a]:font-heading [&_nav_a]:text-base [&_nav_a]:uppercase [&_nav_a]:tracking-wider [&_nav_a[aria-current=page]]:text-t-accent [&_.t-btn]:uppercase [&_.t-btn]:tracking-wider"
-          rightSlot={<CartButton ctx={lc} mode="drawer" className="rounded-none hover:bg-white/10" />}
+          rightSlot={<CartButton ctx={lc} mode="drawer" className="rounded-none hover:bg-t-dark-fg/10" />}
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

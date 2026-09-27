@@ -6,6 +6,7 @@ import { t, ui } from "@/lib/i18n";
 import { PageHero } from "@/modules/shared/ui/page-hero";
 import { PostCard } from "@/modules/shared/ui/posts-block";
 import { PublicPagination } from "@/modules/shared/ui/pagination";
+import { publicPostsWhere } from "@/modules/shared/queries";
 
 const PAGE_SIZE = 9;
 type Props = { searchParams: Promise<{ page?: string }> };
@@ -19,7 +20,7 @@ export default async function BlogPage({ searchParams }: Props) {
   const ctx = await getSiteContext();
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
-  const where = { tenantId: ctx.tenant.id, published: true };
+  const where = publicPostsWhere(ctx.tenant.id);
   const [rows, total] = await Promise.all([
     db.tenantPost.findMany({ where, orderBy: { publishedAt: "desc" }, take: PAGE_SIZE, skip: (page - 1) * PAGE_SIZE }),
     db.tenantPost.count({ where }),

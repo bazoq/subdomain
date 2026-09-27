@@ -63,6 +63,7 @@ export const sui = {
   couponApplied: ls("Coupon applied", "کوپن لگ گیا"),
   removeCoupon: ls("Remove", "ہٹائیں"),
   placingOrder: ls("Placing order…", "آرڈر دیا جا رہا ہے…"),
+  orderingPaused: ls("Online ordering is currently paused. Please contact us on WhatsApp to place an order.", "آن لائن آرڈرنگ فی الحال معطل ہے۔ آرڈر کے لیے واٹس ایپ پر رابطہ کریں۔"),
   orderReceived: ls("Thank you! Your order has been received.", "شکریہ! آپ کا آرڈر موصول ہو گیا ہے۔"),
   orderReceivedSub: ls("We will call or WhatsApp you shortly to confirm. Please keep your phone reachable.", "ہم جلد ہی تصدیق کے لیے کال یا واٹس ایپ کریں گے۔ اپنا فون قابلِ رسائی رکھیں۔"),
   yourOrderNumber: ls("Your order number", "آپ کا آرڈر نمبر"),

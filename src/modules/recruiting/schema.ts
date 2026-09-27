@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { localizedString } from "@/lib/i18n";
+import { zEmailOptional, zPhone } from "@/modules/shared/validation";
 import { APPLICATION_STATUSES } from "./constants";
 
 const isoDate = /^\d{4}-\d{2}-\d{2}$/;
@@ -52,13 +53,13 @@ export const emptyJob: JobFormValue = {
 export const applySchema = z.object({
   jobId: z.string().trim().min(1).max(40),
   name: z.string().trim().min(2, "Please enter your name").max(80),
-  phone: z.string().trim().min(7, "Please enter a valid mobile number").max(20),
-  email: z.string().trim().email("Invalid email").max(120).optional().or(z.literal("")),
+  phone: zPhone,
+  email: zEmailOptional,
   city: z.string().trim().max(80).optional().or(z.literal("")),
   experience: z.string().trim().max(60).optional().or(z.literal("")),
   coverLetter: z.string().trim().max(3000).optional().or(z.literal("")),
   cvMediaId: z.string().trim().min(1, "Please upload your CV").max(40),
-  website: z.string().max(0).optional(), // honeypot
+  website: z.string().max(200).optional(), // honeypot (must be empty)
 });
 export type ApplyInput = z.input<typeof applySchema>;
 

@@ -94,7 +94,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="relative order-2 lg:order-1">
-          <Img src={h.image} alt="" className="aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover" fallback={<Leaf className="size-16 opacity-25" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover" fallback={<Leaf className="size-16 opacity-25" />} />
           <span className="absolute -bottom-5 end-6 hidden items-center gap-2 rounded-[var(--t-radius)] bg-t-primary px-4 py-3 text-sm font-semibold text-t-primary-fg shadow-lg sm:flex">
             <Leaf className="size-4" /> {t(L.fresh, lang)}
           </span>

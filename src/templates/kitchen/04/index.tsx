@@ -57,7 +57,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             rightSlot={<CartButton ctx={lc} mode="drawer" className="rounded-full bg-t-accent px-3 text-t-accent-fg hover:bg-t-accent/90 [&>span]:bg-t-secondary [&>span]:text-t-primary-fg" />}
           />
         </div>
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         {wa ? (
           <div className="bg-t-accent text-t-accent-fg">
             <Container className="flex flex-col items-center justify-center gap-3 py-6 text-center sm:flex-row">

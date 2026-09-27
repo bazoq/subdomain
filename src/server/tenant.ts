@@ -28,10 +28,19 @@ export const getTenantByHost = cache(async (host: string): Promise<TenantContext
   };
 });
 
-/** Host of the current request as forwarded by proxy.ts. */
+const HOSTNAME_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
+
+/**
+ * Host of the current request as forwarded by proxy.ts (`x-tenant-host` / `x-request-host` are
+ * stripped from inbound requests and re-set there, so they are trustworthy). The raw `Host`
+ * header is only a fallback for code paths the proxy did not cover; anything that is not a
+ * plain hostname collapses to "" so it can never reach a database lookup.
+ */
 export async function currentHost(): Promise<string> {
   const h = await headers();
-  return (h.get("x-tenant-host") ?? h.get("x-request-host") ?? h.get("host") ?? "").split(":")[0].toLowerCase();
+  const raw = (h.get("x-tenant-host") ?? h.get("x-request-host") ?? h.get("host") ?? "").trim().toLowerCase();
+  const host = raw.replace(/:\d{1,5}$/, "").replace(/\.$/, "");
+  return HOSTNAME_RE.test(host) && host.length <= 253 ? host : "";
 }
 
 /** Resolve the tenant from the current request (server components / actions / route handlers). */

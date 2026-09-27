@@ -77,11 +77,11 @@ async function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-t-primary via-t-primary to-t-secondary text-t-primary-fg">
       <div className="pointer-events-none absolute -end-24 -top-24 size-96 rounded-full bg-t-accent/30 blur-3xl" aria-hidden="true" />
-      <div className="pointer-events-none absolute -start-24 bottom-0 size-80 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute -start-24 bottom-0 size-80 rounded-full bg-t-primary-fg/10 blur-3xl" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_1fr] lg:py-28">
         <div className="t-fade-up">
           {h.eyebrow ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full bg-t-primary-fg/15 px-3 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur">
               <Plane className="size-3.5" /> {h.eyebrow}
             </span>
           ) : null}
@@ -93,7 +93,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           </div>
         </div>
         <div className="relative">
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-2xl ring-4 ring-white/20" fallback={<Plane className="size-16 opacity-40" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-2xl ring-4 ring-t-primary-fg/20" fallback={<Plane className="size-16 opacity-40" />} />
         </div>
       </Container>
       {/* ticket-shaped search card */}
@@ -113,7 +113,7 @@ async function Hero({ ctx }: TemplatePageProps) {
       </Container>
       {/* badge / airline strip */}
       {h.badges?.length ? (
-        <div className="relative border-t border-white/15 bg-t-secondary/40 backdrop-blur">
+        <div className="relative border-t border-t-primary-fg/15 bg-t-secondary/40 backdrop-blur">
           <Container className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 py-3 text-sm font-semibold uppercase tracking-widest text-t-primary-fg/85">
             {h.badges.map((b, i) => (
               <span key={i} className="flex items-center gap-2">
@@ -169,8 +169,8 @@ function StubCard({ s, ctx }: { s: Service; ctx: TemplatePageProps["ctx"] }) {
 }
 
 async function Services({ ctx }: TemplatePageProps) {
-  const h = ctx.sections.services?.data as HeadingData | undefined;
-  const rows = await getServices(ctx.tenant.id, { take: 6 });
+  const h = ctx.sections.services?.data as (HeadingData & { count?: number }) | undefined;
+  const rows = await getServices(ctx.tenant.id, { take: h?.count || 6 });
   if (!rows.length) return null;
   return (
     <section id="services" className="bg-t-muted py-16 sm:py-20">

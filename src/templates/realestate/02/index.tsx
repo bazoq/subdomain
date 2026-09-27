@@ -102,7 +102,7 @@ async function Hero({ ctx }: TemplatePageProps) {
         ) : null}
         {h.image ? (
           <div className="mt-12 overflow-hidden rounded-[var(--t-radius)]">
-            <Img src={h.image} alt="" className="aspect-[21/9] w-full object-cover" />
+            <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[21/9] w-full object-cover" />
           </div>
         ) : null}
       </Container>

@@ -108,7 +108,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative flex min-h-[88vh] items-center overflow-hidden bg-t-dark">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Sparkles className="size-24 opacity-20" />} />
+      <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Sparkles className="size-24 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/40 to-t-bg/20" aria-hidden="true" />
       <Container className="relative py-24 text-center">
         {h.eyebrow ? <span className="text-xs font-semibold uppercase tracking-[0.4em] text-t-primary">{h.eyebrow}</span> : null}

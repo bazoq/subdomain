@@ -63,7 +63,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-t-accent via-t-primary to-t-secondary text-t-primary-fg">
-      {h.image ? <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-multiply" /> : null}
+      {h.image ? <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-multiply" /> : null}
       <div className="pointer-events-none absolute start-1/2 top-8 size-40 -translate-x-1/2 rounded-full bg-t-accent shadow-[0_0_120px_40px_rgba(255,255,255,0.25)] rtl:translate-x-1/2 sm:size-56" aria-hidden="true" />
       <Container className="relative pb-40 pt-24 text-center lg:pt-32">
         {h.eyebrow ? (
@@ -78,7 +78,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline text-t-primary-fg" />
         </div>
         <div className="mt-10 flex justify-center">
-          <PackageTabs ctx={ctx} showEmpty className="[&_a]:border-white/30 [&_a]:bg-white/10 [&_a]:text-t-primary-fg [&_a]:backdrop-blur [&_a:hover]:bg-white/25 [&_a:hover]:text-t-primary-fg [&_a[aria-current=page]]:bg-t-secondary [&_a[aria-current=page]]:border-t-secondary" />
+          <PackageTabs ctx={ctx} showEmpty className="[&_a]:border-t-primary-fg/30 [&_a]:bg-t-primary-fg/10 [&_a]:text-t-primary-fg [&_a]:backdrop-blur [&_a:hover]:bg-t-primary-fg/25 [&_a:hover]:text-t-primary-fg [&_a[aria-current=page]]:bg-t-secondary [&_a[aria-current=page]]:border-t-secondary" />
         </div>
       </Container>
       <Skyline className="absolute inset-x-0 bottom-0 h-24 w-full text-t-secondary sm:h-32" />
@@ -95,12 +95,12 @@ function Postcard({ pkg, ctx }: { pkg: TravelPackage; ctx: TemplatePageProps["ct
       <div className="relative overflow-hidden rounded-[calc(var(--t-radius)-4px)]">
         <Img src={pkg.images[0]} alt={title} className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" fallback={<Sunset className="size-10 opacity-30" />} />
         <div className="absolute inset-0 bg-gradient-to-t from-t-primary/60 to-transparent" aria-hidden="true" />
-        <span className="absolute end-3 top-3 flex size-14 rotate-6 items-center justify-center rounded-sm border-2 border-dashed border-white/80 bg-t-accent/90 text-[10px] font-extrabold uppercase leading-tight text-t-accent-fg">
+        <span className="absolute end-3 top-3 flex size-14 rotate-6 items-center justify-center rounded-sm border-2 border-dashed border-t-accent-fg/80 bg-t-accent/90 text-[10px] font-extrabold uppercase leading-tight text-t-accent-fg">
           {pkg.days}D
           <br />
           {pkg.nights}N
         </span>
-        <span className="absolute bottom-3 start-3 flex items-center gap-1 text-xs font-semibold text-white">
+        <span className="absolute bottom-3 start-3 flex items-center gap-1 text-xs font-semibold text-t-primary-fg">
           <MapPin className="size-3.5" /> {pkg.destination}
         </span>
       </div>

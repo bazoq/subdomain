@@ -87,7 +87,7 @@ function Hero({ ctx }: TemplatePageProps) {
           </div>
         </div>
         <div className="relative order-1 min-h-72 lg:order-2">
-          <Img src={h.image} alt="" className="h-full w-full object-cover lg:absolute lg:inset-0" fallback={<HardHat className="size-20 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="h-full w-full object-cover lg:absolute lg:inset-0" fallback={<HardHat className="size-20 opacity-30" />} />
           <div className="absolute inset-x-0 bottom-0 h-3 bg-t-primary" aria-hidden="true" />
           {h.badges?.length ? (
             <ul className="absolute start-4 top-4 flex flex-col gap-2">

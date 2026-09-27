@@ -71,7 +71,7 @@ function Hero({ ctx }: TemplatePageProps) {
           </div>
         </div>
         <div className="relative mt-16">
-          <Img src={h.image} alt="" className="aspect-[21/9] w-full rounded-[var(--t-radius)] object-cover" fallback={<Flower2 className="size-14 text-t-primary/40" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[21/9] w-full rounded-[var(--t-radius)] object-cover" fallback={<Flower2 className="size-14 text-t-primary/40" />} />
         </div>
         {h.badges?.length ? (
           <ul className="mt-10 flex flex-wrap justify-center gap-x-10 gap-y-3 text-sm text-t-muted-fg">

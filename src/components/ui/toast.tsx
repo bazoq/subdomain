@@ -14,8 +14,9 @@ type Ctx = {
 const ToastContext = React.createContext<Ctx | null>(null);
 
 /**
- * Toast stack. Announced to assistive tech through live regions (errors assertive, the rest
- * polite), pauses auto-dismiss while hovered/focused, full-width on phones.
+ * Toast stack. Announced to assistive tech through two persistent live regions (errors
+ * assertive, the rest polite) so each message is read exactly once; pauses auto-dismiss
+ * while hovered/focused, full-width on phones.
  */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
@@ -67,6 +68,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
+        role="region"
+        aria-label="Notifications"
         className="pointer-events-none fixed inset-x-3 bottom-3 z-[100] flex flex-col gap-2 sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-80"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
@@ -85,7 +88,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            role={t.kind === "error" ? "alert" : "status"}
             onMouseEnter={() => pause(t.id)}
             onMouseLeave={() => resume(t.id)}
             onFocus={() => pause(t.id)}

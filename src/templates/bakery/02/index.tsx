@@ -80,8 +80,8 @@ function Hero({ ctx }: TemplatePageProps) {
       <Kraft />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
         <div className="relative order-2 lg:order-1">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 border-2 border-t-primary/40" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/3] w-full border-2 border-t-border object-cover" fallback={<Croissant className="size-14 text-t-primary/40" />} />
+          <div className="absolute inset-0 translate-x-3 translate-y-3 border-2 border-t-primary/40 rtl:-translate-x-3" aria-hidden="true" />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/3] w-full border-2 border-t-border object-cover" fallback={<Croissant className="size-14 text-t-primary/40" />} />
           {h.badges?.length ? (
             <ul className="relative -mt-6 ms-4 flex flex-wrap gap-2">
               {h.badges.map((b, i) => (
@@ -274,9 +274,15 @@ function Home({ ctx }: TemplatePageProps) {
       })}
       <section className="border-t-2 border-t-border bg-t-bg py-8">
         <Container className="flex flex-col items-center justify-between gap-3 text-sm text-t-muted-fg sm:flex-row">
-          <span className="inline-flex items-center gap-2">
-            <Wheat className="size-4 text-t-primary" /> {t(rs.callUs, ctx.lang)}: {ctx.settings.contact.phone || ctx.settings.contact.whatsapp}
-          </span>
+          {ctx.settings.contact.phone || ctx.settings.contact.whatsapp ? (
+            <a href={`tel:${ctx.settings.contact.phone || ctx.settings.contact.whatsapp}`} className="inline-flex items-center gap-2 hover:text-t-primary">
+              <Wheat className="size-4 text-t-primary" /> {t(rs.callUs, ctx.lang)}: <span dir="ltr">{ctx.settings.contact.phone || ctx.settings.contact.whatsapp}</span>
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-2">
+              <Wheat className="size-4 text-t-primary" /> {ctx.tenant.name}
+            </span>
+          )}
           <SmartLink href="/menu" ctx={ctx} className="font-semibold text-t-primary hover:underline">
             {t(rs.seeFullMenu, ctx.lang)} <ArrowRight className="inline size-4 rtl:rotate-180" />
           </SmartLink>

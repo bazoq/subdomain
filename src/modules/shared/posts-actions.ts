@@ -8,15 +8,16 @@ import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized, zImageUrlOrEmpty } from "@/modules/shared/validation";
 
 const postSchema = z.object({
   title: localizedString.refine((v) => v.en.trim().length > 0, "Title is required"),
   slug: z.string().trim().max(80).optional().or(z.literal("")),
   excerpt: localizedString.default({ en: "" }),
   content: localizedString.default({ en: "" }),
-  coverUrl: z.string().max(1000).optional().or(z.literal("")),
+  coverUrl: zImageUrlOrEmpty,
   published: z.boolean().default(false),
-  /** ISO date (yyyy-mm-dd) or empty => now when publishing */
+  /** ISO date (yyyy-mm-dd) or empty => now when publishing. A future date schedules the post. */
   publishedAt: z.string().max(30).optional().or(z.literal("")),
 });
 export type PostInput = z.infer<typeof postSchema>;
@@ -47,17 +48,18 @@ export async function upsertPost(id: string | null, input: unknown): Promise<Act
     }
     const data = {
       slug: await uniqueSlug(ctx.tenant.id, d.slug || d.title.en, id),
-      title: json(d.title),
-      excerpt: json(d.excerpt),
-      content: json(d.content),
-      coverUrl: d.coverUrl || null,
+      title: json(sanitizeLocalized(d.title)),
+      excerpt: json(sanitizeLocalized(d.excerpt)),
+      content: json(sanitizeLocalized(d.content)),
+      coverUrl: d.coverUrl?.trim() || null,
       published: d.published,
       publishedAt,
     };
     const row = id ? await db.tenantPost.update({ where: { id }, data }) : await db.tenantPost.create({ data: { ...data, tenantId: ctx.tenant.id } });
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: id ? "post.update" : "post.create", entity: "TenantPost", entityId: row.id });
     revalidatePath("/", "layout");
-    return success(id ? "Post updated." : "Post created.", { id: row.id });
+    const scheduled = d.published && publishedAt && publishedAt.getTime() > Date.now();
+    return success(scheduled ? `Post scheduled for ${publishedAt!.toISOString().slice(0, 10)}.` : id ? "Post updated." : "Post created.", { id: row.id });
   } catch (e) {
     return fail((e as Error).message);
   }
@@ -79,6 +81,7 @@ export async function deletePost(id: string): Promise<ActionResult> {
 export async function togglePostPublished(id: string, published: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (typeof published !== "boolean") return fail("Invalid value.");
     const existing = await db.tenantPost.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { publishedAt: true } });
     if (!existing) return fail("Not found.");
     await db.tenantPost.update({ where: { id }, data: { published, publishedAt: published ? (existing.publishedAt ?? new Date()) : existing.publishedAt } });

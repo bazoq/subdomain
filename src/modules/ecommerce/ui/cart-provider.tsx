@@ -11,10 +11,51 @@ import { cartKey, type CartItem, type StoreCtx } from "../types";
 const MAX_LINES = 50;
 const EMPTY: CartItem[] = [];
 
-function isCartItem(x: unknown): x is CartItem {
-  if (!x || typeof x !== "object") return false;
+const HARD_MAX_QTY = 99;
+
+const optStr = (v: unknown): string | undefined => (typeof v === "string" && v ? v : undefined);
+
+/**
+ * Validate + clamp one persisted cart line. localStorage is user-editable, so every numeric field is coerced into the
+ * range the server accepts (qty 1..maxQty..99, non-negative integer price); anything unusable is dropped.
+ * Prices here are only a preview — the server re-prices every line at checkout.
+ */
+function sanitizeCartItem(x: unknown): CartItem | null {
+  if (!x || typeof x !== "object") return null;
   const o = x as Record<string, unknown>;
-  return typeof o.productId === "string" && typeof o.slug === "string" && typeof o.name === "string" && typeof o.unitPrice === "number" && typeof o.qty === "number";
+  if (typeof o.productId !== "string" || !o.productId || typeof o.slug !== "string" || typeof o.name !== "string" || !o.name) return null;
+  if (typeof o.unitPrice !== "number" || !Number.isFinite(o.unitPrice) || o.unitPrice < 0) return null;
+  const maxQty = typeof o.maxQty === "number" && Number.isFinite(o.maxQty) && o.maxQty > 0 ? Math.min(HARD_MAX_QTY, Math.floor(o.maxQty)) : HARD_MAX_QTY;
+  const qtyRaw = typeof o.qty === "number" && Number.isFinite(o.qty) ? Math.floor(o.qty) : 1;
+  const qty = Math.max(1, Math.min(maxQty, qtyRaw));
+  return {
+    productId: o.productId,
+    variantId: optStr(o.variantId),
+    slug: o.slug,
+    name: o.name,
+    variantName: optStr(o.variantName),
+    imageUrl: optStr(o.imageUrl),
+    unitPrice: Math.floor(o.unitPrice),
+    qty,
+    requiresPrescription: o.requiresPrescription === true,
+    maxQty,
+  };
+}
+
+/** Sanitize every line and merge duplicates (same product + variant) so the server never sees repeated keys. */
+function sanitizeCart(raw: unknown): CartItem[] {
+  if (!Array.isArray(raw)) return EMPTY;
+  const byKey = new Map<string, CartItem>();
+  for (const entry of raw) {
+    const item = sanitizeCartItem(entry);
+    if (!item) continue;
+    const key = cartKey(item);
+    const existing = byKey.get(key);
+    if (existing) byKey.set(key, { ...existing, qty: Math.min(existing.maxQty, existing.qty + item.qty) });
+    else byKey.set(key, item);
+    if (byKey.size >= MAX_LINES) break;
+  }
+  return Array.from(byKey.values());
 }
 
 class CartStore {
@@ -28,10 +69,7 @@ class CartStore {
     this.loaded = true;
     try {
       const raw = window.localStorage.getItem(this.key);
-      if (raw) {
-        const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) this.items = parsed.filter(isCartItem).slice(0, MAX_LINES);
-      }
+      if (raw) this.items = sanitizeCart(JSON.parse(raw));
     } catch {
       this.items = EMPTY;
     }
@@ -142,7 +180,7 @@ function CartProviderInner({ host, store, children }: { host: string; store: Sto
   const [isOpen, setOpen] = React.useState(false);
 
   const api = React.useMemo<CartApi>(() => {
-    const clampQty = (item: Pick<CartItem, "maxQty">, qty: number) => Math.max(1, Math.min(item.maxQty > 0 ? item.maxQty : 99, Math.floor(qty)));
+    const clampQty = (item: Pick<CartItem, "maxQty">, qty: number) => Math.max(1, Math.min(item.maxQty > 0 ? Math.min(item.maxQty, HARD_MAX_QTY) : HARD_MAX_QTY, Math.floor(Number.isFinite(qty) ? qty : 1)));
     return {
       items,
       count: items.reduce((n, i) => n + i.qty, 0),

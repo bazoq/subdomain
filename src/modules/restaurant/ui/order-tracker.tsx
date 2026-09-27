@@ -12,7 +12,7 @@ import { ACTIVE_FOOD_STATUSES, statusLabel, type FoodOrderStatusKey, type OrderT
 export function OrderTracker({
   ctx,
   number,
-  phoneKey,
+  token,
   type,
   initialStatus,
   initialTimeline,
@@ -22,8 +22,8 @@ export function OrderTracker({
 }: {
   ctx: RestaurantCtx;
   number: number;
-  /** last 4 digits of the customer phone (the `p` query param) */
-  phoneKey: string;
+  /** HMAC access token for this order (the `t` query param) */
+  token: string;
   type: OrderType;
   initialStatus: FoodOrderStatusKey;
   initialTimeline: TimelineEntry[];
@@ -40,7 +40,8 @@ export function OrderTracker({
     if (!active) return;
     let stopped = false;
     const tick = async () => {
-      const res = await getFoodOrderStatus(number, phoneKey).catch(() => null);
+      if (document.visibilityState === "hidden") return; // don't burn the rate limit in background tabs
+      const res = await getFoodOrderStatus(number, token).catch(() => null);
       if (stopped || !res || !res.ok || !res.data) return;
       setStatus(res.data.status);
       setTimeline(res.data.timeline);
@@ -50,7 +51,7 @@ export function OrderTracker({
       stopped = true;
       window.clearInterval(id);
     };
-  }, [active, number, phoneKey]);
+  }, [active, number, token]);
 
   const steps: FoodOrderStatusKey[] = type === "DELIVERY" ? ["NEW", "ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "COMPLETED"] : ["NEW", "ACCEPTED", "PREPARING", "READY", "COMPLETED"];
   const idx = steps.indexOf(status);

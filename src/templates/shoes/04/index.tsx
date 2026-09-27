@@ -60,7 +60,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             ))}
           </Container>
         </div>
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:font-normal [&_h3]:tracking-[0.25em] [&_h3]:text-t-accent" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

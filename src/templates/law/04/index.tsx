@@ -75,7 +75,7 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="relative min-h-72 lg:min-h-0">
-          <Img src={h.image} alt="" className="h-full w-full object-cover lg:absolute lg:inset-0" fallback={<Building2 className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="h-full w-full object-cover lg:absolute lg:inset-0" fallback={<Building2 className="size-16 opacity-30" />} />
           <div className="absolute inset-0 bg-gradient-to-tr from-t-secondary/70 via-t-secondary/10 to-transparent" aria-hidden="true" />
           {h.badges?.length ? (
             <ul className="absolute bottom-6 start-6 end-6 flex flex-wrap gap-2">
@@ -140,7 +140,7 @@ function ComplianceSteps({ ctx }: TemplatePageProps) {
     <section id="process" className="bg-t-dark py-16 text-t-dark-fg sm:py-20">
       <Container>
         <SectionHeading eyebrow={d.eyebrow} title={d.title} align="left" lang={ctx.lang} light />
-        <ol className={cn("grid gap-px bg-white/10", d.steps.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3")}>
+        <ol className={cn("grid gap-px bg-t-dark-fg/10", d.steps.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3")}>
           {d.steps.map((s, i) => (
             <li key={i} className="bg-t-dark p-6">
               <div className="flex items-center justify-between">

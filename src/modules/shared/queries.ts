@@ -40,12 +40,17 @@ export const getService = cache(async (tenantId: string, slug: string) =>
   db.service.findFirst({ where: { tenantId, slug, isActive: true } }),
 );
 
+/** Posts that are published AND whose publish date has passed (future dates = scheduled, hidden). */
+export function publicPostsWhere(tenantId: string) {
+  return { tenantId, published: true, publishedAt: { lte: new Date() } };
+}
+
 export const getPosts = cache(async (tenantId: string, take = 12) =>
-  db.tenantPost.findMany({ where: { tenantId, published: true }, orderBy: { publishedAt: "desc" }, take }),
+  db.tenantPost.findMany({ where: publicPostsWhere(tenantId), orderBy: { publishedAt: "desc" }, take }),
 );
 
 export const getPost = cache(async (tenantId: string, slug: string) =>
-  db.tenantPost.findFirst({ where: { tenantId, slug, published: true } }),
+  db.tenantPost.findFirst({ where: { ...publicPostsWhere(tenantId), slug } }),
 );
 
 export const getPage = cache(async (tenantId: string, slug: string) =>

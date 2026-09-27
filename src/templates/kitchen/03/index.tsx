@@ -47,7 +47,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           {/* neutral band behind the transparent header on inner pages; the home hero slides under it */}
           <div className="h-16 w-full bg-t-dark lg:h-20" aria-hidden="true" />
           <SiteHeader ctx={ctx} variant="transparent" cta={null} className="[&_nav_a]:text-xs [&_nav_a]:font-medium [&_nav_a]:uppercase [&_nav_a]:tracking-[0.18em]" rightSlot={<CartButton ctx={lc} mode="drawer" />} />
-          <div className="flex-1">{children}</div>
+          <main id="main" className="flex-1">{children}</main>
         </div>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:tracking-[0.2em]" />
         <CartDrawer ctx={lc} />

@@ -92,7 +92,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative">
           <div className="absolute -inset-3 border border-t-primary/20" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/3] w-full object-cover" fallback={<MapPinned className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/3] w-full object-cover" fallback={<MapPinned className="size-16 opacity-30" />} />
           {h.badges?.length ? (
             <ul className="relative -mt-6 ms-4 me-4 grid grid-cols-2 gap-2">
               {h.badges.map((b, i) => (
@@ -153,9 +153,9 @@ function BigStats({ ctx }: TemplatePageProps) {
   if (!d || !d.items?.length) return null;
   return (
     <section id="stats" className="relative overflow-hidden bg-t-dark py-16 text-t-dark-fg sm:py-20">
-      <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:2.5rem_2.5rem]" aria-hidden="true" />
+      <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(to_right,var(--t-dark-fg)_1px,transparent_1px),linear-gradient(to_bottom,var(--t-dark-fg)_1px,transparent_1px)] [background-size:2.5rem_2.5rem]" aria-hidden="true" />
       <Container className="relative">
-        <dl className={cn("grid gap-px bg-white/10", d.items.length >= 4 ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-2 sm:grid-cols-3")}>
+        <dl className={cn("grid gap-px bg-t-dark-fg/10", d.items.length >= 4 ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-2 sm:grid-cols-3")}>
           {d.items.map((it, i) => (
             <div key={i} className="bg-t-dark p-6 sm:p-8">
               <dd className="font-heading text-4xl font-bold tracking-tight text-t-accent sm:text-5xl">{it.value}</dd>

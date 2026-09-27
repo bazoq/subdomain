@@ -12,7 +12,7 @@ import { heroSection } from "@/templates/shared/sections";
 import { bannerSection, collectionsSection, featuredProductsSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
 import { Container, CtaButton, Icon, Img, SectionHeading, WhatsAppFloat } from "@/templates/ui";
-import { t, ui, type LocalizedString } from "@/lib/i18n";
+import { ls, t, ui, type LocalizedString } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   AboutBlock,
@@ -37,6 +37,9 @@ import type { ProductDTO } from "@/modules/ecommerce/types";
 type CollectionsData = HeadingData & { items?: { title: LocalizedString; subtitle?: LocalizedString; image?: string; href: string }[] };
 type FeaturedData = HeadingData & { mode?: string; count?: number; cta?: LinkData };
 type BannerData = HeadingData & { text?: LocalizedString; image?: string; cta?: LinkData; align?: string };
+
+/** chrome label for the hero category nav (no matching key in the platform ui dictionary) */
+const CATEGORIES = ls("Categories", "زمرے");
 
 async function loadProducts(ctx: SiteContext, d: FeaturedData): Promise<ProductDTO[]> {
   const take = Math.min(16, Math.max(4, Number(d.count) || 8));
@@ -73,7 +76,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             }
           />
         </div>
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" />
         <CartDrawer ctx={lang} />
         <WhatsAppFloat ctx={ctx} />
@@ -106,7 +109,7 @@ function Hero({ ctx }: TemplatePageProps) {
             <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn t-btn-outline border-t-dark-fg/40 text-t-dark-fg hover:bg-t-dark-fg/10" />
           </div>
           {quick.length ? (
-            <nav aria-label="Categories" className="mt-10 flex flex-wrap gap-2">
+            <nav aria-label={t(CATEGORIES, lang)} className="mt-10 flex flex-wrap gap-2">
               {quick.map((c, i) => (
                 <Link
                   key={i}

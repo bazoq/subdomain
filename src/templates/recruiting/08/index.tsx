@@ -110,7 +110,7 @@ function PhotoTiles({ ctx }: TemplatePageProps) {
             const photo = photos.length ? photos[i % photos.length] : "";
             return (
               <li key={i}>
-                <SmartLink href={it.href || "/jobs"} ctx={ctx} className={cn("group relative flex aspect-[4/5] items-end overflow-hidden rounded-3xl p-5 text-white", i % 2 ? "bg-gradient-to-br from-t-accent to-t-secondary" : "bg-gradient-to-br from-t-primary to-t-secondary")}>
+                <SmartLink href={it.href || "/jobs"} ctx={ctx} className={cn("group relative flex aspect-[4/5] items-end overflow-hidden rounded-3xl p-5 text-t-dark-fg", i % 2 ? "bg-gradient-to-br from-t-accent to-t-secondary" : "bg-gradient-to-br from-t-primary to-t-secondary")}>
                   {photo ? (
                     <Img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
                   ) : null}

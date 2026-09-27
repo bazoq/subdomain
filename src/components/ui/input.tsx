@@ -43,7 +43,8 @@ export function FieldError({ children, id }: { children?: React.ReactNode; id?: 
   );
 }
 
-const CONTROL_TYPES: unknown[] = [Input, Textarea, Select, "input", "select", "textarea"];
+// PasswordInput is a hoisted function declaration (defined below), so referencing it here is safe.
+const CONTROL_TYPES: unknown[] = [Input, Textarea, Select, PasswordInput, "input", "select", "textarea"];
 
 /**
  * Label + control + help/error wrapper. When the child is a single Input/Select/Textarea it

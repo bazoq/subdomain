@@ -7,6 +7,7 @@ import { requireTenantAdminAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized } from "@/modules/shared/validation";
 
 const faqSchema = z.object({
   question: localizedString.refine((v) => v.en.trim().length > 0, "Question is required"),
@@ -20,7 +21,7 @@ export async function upsertFaq(id: string | null, input: unknown): Promise<Acti
     const ctx = await requireTenantAdminAction();
     const parsed = faqSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
-    const data = { question: json(parsed.data.question), answer: json(parsed.data.answer), isActive: parsed.data.isActive };
+    const data = { question: json(sanitizeLocalized(parsed.data.question)), answer: json(sanitizeLocalized(parsed.data.answer)), isActive: parsed.data.isActive };
     let row;
     if (id) {
       const existing = await db.faqItem.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { id: true } });
@@ -54,8 +55,10 @@ export async function deleteFaq(id: string): Promise<ActionResult> {
 export async function toggleFaq(id: string, isActive: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (typeof isActive !== "boolean") return fail("Invalid value.");
     const { count } = await db.faqItem.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { isActive } });
     if (!count) return fail("Not found.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "faq.isActive", entity: "FaqItem", entityId: id, meta: { value: isActive } });
     revalidatePath("/", "layout");
     return success(isActive ? "Shown on website." : "Hidden from website.");
   } catch (e) {

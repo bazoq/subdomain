@@ -1,9 +1,11 @@
 import { z } from "zod";
 import { localizedString } from "@/lib/i18n";
+import { zHttpUrlOrEmpty, zImageUrlList } from "@/modules/shared/validation";
 import { AREA_UNITS, PRICE_UNITS, PROPERTY_TYPES, PURPOSES } from "./constants";
 
 const requiredLocalized = localizedString.refine((v) => v.en.trim().length > 0, { message: "Title is required", path: ["en"] });
-const urlOrEmpty = z.union([z.literal(""), z.string().trim().url("Enter a full URL starting with https://").max(1000)]);
+/** http(s) only — `.url()` alone would accept javascript: and data: schemes. */
+const urlOrEmpty = zHttpUrlOrEmpty;
 
 /** Admin property editor payload (JSON server action). */
 export const propertySchema = z.object({
@@ -21,7 +23,7 @@ export const propertySchema = z.object({
   location: z.string().trim().min(2, "Location is required").max(160),
   description: localizedString.default({ en: "" }),
   features: z.array(z.string().trim().min(1).max(60)).max(40).default([]),
-  images: z.array(z.string().trim().max(1000)).max(20).default([]),
+  images: zImageUrlList(20),
   videoUrl: urlOrEmpty.default(""),
   mapUrl: urlOrEmpty.default(""),
   agentId: z.string().trim().max(40).default(""),

@@ -19,6 +19,15 @@ function localDateTimeValue(d: Date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** Random per-checkout key so a double tap / retried request never creates a second order. */
+function newIdempotencyKey(): string {
+  try {
+    return crypto.randomUUID().replace(/-/g, "");
+  } catch {
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}${Math.random().toString(36).slice(2, 12)}`.slice(0, 32).padEnd(16, "0");
+  }
+}
+
 export function CheckoutForm({
   ctx,
   zones,
@@ -59,6 +68,8 @@ export function CheckoutForm({
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const honeypot = React.useRef<HTMLInputElement>(null);
+  // one key per mounted checkout; survives re-renders and failed attempts so a retry can never double-order
+  const [idempotencyKey] = React.useState(newIdempotencyKey);
 
   const deliveryFee = type === "DELIVERY" ? (zone?.fee ?? 0) : 0;
   const minOrder = type === "DELIVERY" ? (zone && zone.minOrder > 0 ? zone.minOrder : rest.minDeliveryOrder) : 0;
@@ -88,14 +99,20 @@ export function CheckoutForm({
       zoneId: type === "DELIVERY" ? (zone?.id ?? "") : undefined,
       tableNumber: type === "DINE_IN" ? table : undefined,
       scheduledFor: schedule && when ? new Date(when).toISOString() : undefined,
+      idempotencyKey,
       website: honeypot.current?.value ?? "",
       lines: order.lines.map((l) => ({ menuItemId: l.menuItemId, sizeName: l.sizeName, modifierIds: l.modifiers.map((m) => m.id), qty: l.qty, note: l.note })),
-    });
-    setPending(false);
-    if (res.ok && res.data) {
+    }).catch(() => null);
+    if (res && res.ok && res.data) {
       order.clear();
-      router.push(`/menu/order/${res.data.number}?p=${res.data.phoneLast4}`);
-    } else if (!res.ok) {
+      // number 0 = the submission was treated as a bot; nothing to show, back to the menu
+      if (res.data.number > 0 && res.data.token) router.push(`/menu/order/${res.data.number}?t=${encodeURIComponent(res.data.token)}`);
+      else router.push("/menu");
+      return; // keep the button disabled while the redirect happens
+    }
+    setPending(false);
+    if (!res) setError(t(ui.somethingWrong, lang)); // network hiccup: the same idempotency key makes the retry safe
+    else if (!res.ok) {
       setError(res.message || t(ui.somethingWrong, lang));
       setFieldErrors(res.fieldErrors ?? {});
     }

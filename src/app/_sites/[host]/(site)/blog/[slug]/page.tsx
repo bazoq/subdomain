@@ -7,7 +7,7 @@ import { db } from "@/server/db";
 import { Container, RichText } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
-import { getPost } from "@/modules/shared/queries";
+import { getPost, publicPostsWhere } from "@/modules/shared/queries";
 import { Breadcrumbs } from "@/modules/shared/ui/breadcrumbs";
 import { PostCard } from "@/modules/shared/ui/posts-block";
 import { CtaBlock } from "@/modules/shared/ui/section-blocks";
@@ -33,7 +33,7 @@ export default async function BlogPostPage({ params }: Props) {
   if (!p) notFound();
   const title = t(p.title as LocalizedString, ctx.lang);
   const excerpt = t(p.excerpt as LocalizedString, ctx.lang);
-  const more = await db.tenantPost.findMany({ where: { tenantId: ctx.tenant.id, published: true, NOT: { id: p.id } }, orderBy: { publishedAt: "desc" }, take: 3 });
+  const more = await db.tenantPost.findMany({ where: { ...publicPostsWhere(ctx.tenant.id), NOT: { id: p.id } }, orderBy: { publishedAt: "desc" }, take: 3 });
   return (
     <>
       <article>

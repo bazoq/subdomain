@@ -5,13 +5,17 @@ import { getSiteContext } from "@/server/site";
 import { db } from "@/server/db";
 import { t, ui } from "@/lib/i18n";
 import { formatPKR, whatsappLink } from "@/lib/utils";
+import { firstParam, verifyOrderToken } from "@/modules/ecommerce/order-token";
 import { rs } from "@/modules/restaurant/strings";
 import { toFoodOrderDto } from "@/modules/restaurant/serialize";
 import { orderTypeLabel, toRestaurantCtx } from "@/modules/restaurant/types";
+import { OrderLookup } from "@/modules/restaurant/ui/order-lookup";
 import { OrderTracker } from "@/modules/restaurant/ui/order-tracker";
 
 type Params = Promise<{ number: string }>;
 type Search = Promise<Record<string, string | string[] | undefined>>;
+
+const PK_TIME: Intl.DateTimeFormatOptions = { timeZone: "Asia/Karachi", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const ctx = await getSiteContext();
@@ -19,6 +23,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return { title: `${t(ui.orderNumber, ctx.lang)} #${number} · ${ctx.tenant.name}`, robots: { index: false, follow: false } };
 }
 
+/**
+ * /menu/order/[number]?t=<HMAC token>
+ * The token comes from the checkout redirect or from `lookupFoodOrder` (order number + full phone). Without a valid
+ * token the page shows only the lookup form — order numbers are sequential, so nothing else may be revealed.
+ */
 export default async function OrderStatusPage({ params, searchParams }: { params: Params; searchParams: Search }) {
   const ctx = await getSiteContext();
   const { number } = await params;
@@ -27,27 +36,14 @@ export default async function OrderStatusPage({ params, searchParams }: { params
   if (!Number.isInteger(n) || n <= 0) notFound();
   const lang = ctx.lang;
   const rc = toRestaurantCtx(ctx);
-  const p = String(Array.isArray(sp.p) ? sp.p[0] : (sp.p ?? "")).replace(/\D/g, "").slice(-4);
+  const token = firstParam(sp.t);
+  const verified = verifyOrderToken("food", ctx.tenant.id, n, token);
+  const row = verified ? await db.foodOrder.findFirst({ where: { tenantId: ctx.tenant.id, number: n }, include: { items: true } }) : null;
 
-  const row = await db.foodOrder.findFirst({ where: { tenantId: ctx.tenant.id, number: n }, include: { items: true } });
-  const matches = !!row && p.length === 4 && row.customerPhone.replace(/\D/g, "").slice(-4) === p;
-
-  if (!matches) {
+  if (!row) {
     return (
       <div className="t-container py-12 sm:py-20">
-        <div className="t-card mx-auto max-w-md p-6">
-          <h1 className="font-heading text-2xl font-bold">
-            {t(ui.orderNumber, lang)} #{n}
-          </h1>
-          <p className="mt-2 text-sm text-t-muted-fg">{t(rs.verifyPhone, lang)}</p>
-          {p.length === 4 ? <p className="mt-2 text-sm text-red-600">{lang === "ur" ? "آرڈر نہیں ملا۔" : "Order not found for that phone number."}</p> : null}
-          <form method="get" className="mt-4 flex gap-2">
-            <input name="p" inputMode="numeric" pattern="\d{4}" maxLength={4} required className="t-input" placeholder="1234" autoComplete="off" />
-            <button type="submit" className="t-btn t-btn-primary shrink-0">
-              {t(rs.verify, lang)}
-            </button>
-          </form>
-        </div>
+        <OrderLookup ctx={rc} initialNumber={n} />
       </div>
     );
   }
@@ -72,11 +68,11 @@ export default async function OrderStatusPage({ params, searchParams }: { params
               {order.area ? ` · ${order.area}` : ""}
               {order.tableNumber ? ` · ${t(rs.tableNumber, lang)} ${order.tableNumber}` : ""}
               {" · "}
-              {new Date(order.createdAt).toLocaleString("en-PK", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+              {new Date(order.createdAt).toLocaleString("en-PK", PK_TIME)}
             </p>
             {order.scheduledFor ? (
               <p className="mt-1 text-sm font-medium">
-                {t(rs.scheduledFor, lang)}: {new Date(order.scheduledFor).toLocaleString("en-PK", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                {t(rs.scheduledFor, lang)}: {new Date(order.scheduledFor).toLocaleString("en-PK", PK_TIME)}
               </p>
             ) : null}
           </div>
@@ -88,7 +84,7 @@ export default async function OrderStatusPage({ params, searchParams }: { params
           ) : null}
         </div>
 
-        <OrderTracker ctx={rc} number={order.number} phoneKey={p} type={order.type} initialStatus={order.status} initialTimeline={order.timeline} estimatedMins={order.estimatedMins} createdAt={order.createdAt} />
+        <OrderTracker ctx={rc} number={order.number} token={token} type={order.type} initialStatus={order.status} initialTimeline={order.timeline} estimatedMins={order.estimatedMins} createdAt={order.createdAt} />
 
         <div className="t-card p-5">
           <h2 className="font-heading mb-3 text-lg font-bold">{t(rs.yourOrder, lang)}</h2>

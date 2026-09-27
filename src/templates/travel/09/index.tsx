@@ -112,7 +112,7 @@ async function Hero({ ctx }: TemplatePageProps) {
   const cell = "h-full w-full object-cover";
   return (
     <section className="relative">
-      <div className="grid h-[80vh] min-h-[560px] grid-cols-2 grid-rows-3 gap-1 md:grid-cols-4 md:grid-rows-2">
+      <div className="grid h-[80vh] min-h-[35rem] grid-cols-2 grid-rows-3 gap-1 md:grid-cols-4 md:grid-rows-2">
         <Img src={pics[0]} alt="" className={`${cell} col-span-2 row-span-2`} fallback={<Camera className="size-12 opacity-30" />} />
         <Img src={pics[1]} alt="" className={cell} fallback={<Camera className="size-8 opacity-30" />} />
         <Img src={pics[2]} alt="" className={cell} fallback={<Camera className="size-8 opacity-30" />} />
@@ -179,6 +179,9 @@ async function Packages({ ctx }: TemplatePageProps) {
           {items.map((p) => (
             <PhotoCard key={p.id} pkg={p} ctx={ctx} />
           ))}
+        </div>
+        <div className="mt-8 sm:hidden">
+          <CtaButton value={fp.cta} ctx={ctx} className="t-btn t-btn-outline w-full text-xs uppercase tracking-widest text-t-fg" icon={<ArrowUpRight className="size-4 rtl:-scale-x-100" />} />
         </div>
       </Container>
     </section>

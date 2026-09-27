@@ -12,7 +12,32 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated / vendor output:
+    "src/generated/**",
+    "coverage/**",
   ]),
+  {
+    // Project rules. Kept at `warn` where the codebase still has occurrences so CI stays green
+    // while they are cleaned up; `npm run lint` prints them.
+    rules: {
+      // Use the structured logger (`log` from `@/lib/log`) so Vercel log drains get JSON lines.
+      "no-console": "warn",
+      "prefer-const": "warn",
+      eqeqeq: ["warn", "smart"],
+      "no-var": "error",
+      "@typescript-eslint/consistent-type-imports": ["warn", { prefer: "type-imports", fixStyle: "inline-type-imports", disallowTypeAnnotations: false }],
+    },
+  },
+  {
+    // The logger is the one sanctioned console transport.
+    files: ["src/lib/log.ts"],
+    rules: { "no-console": "off" },
+  },
+  {
+    // Node scripts, the seed and tests talk to a terminal, not a log drain.
+    files: ["scripts/**", "prisma/**", "tests/**", "**/*.test.ts", "*.config.*", "*.mjs"],
+    rules: { "no-console": "off" },
+  },
 ]);
 
 export default eslintConfig;

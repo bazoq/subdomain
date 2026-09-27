@@ -14,6 +14,8 @@ import { RESERVATION_STATUSES } from "@/modules/restaurant/types";
 type Search = Promise<Record<string, string | string[] | undefined>>;
 const PAGE = 25;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
+/** Reservation dates are stored as Pakistan midnight (19:00Z the day before), so they must be rendered in Asia/Karachi. */
+const pkDate = (d: Date) => d.toLocaleDateString("en-PK", { timeZone: "Asia/Karachi", weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 
 export default async function ReservationsPage({ searchParams }: { searchParams: Search }) {
   const ctx = await requireTenantAdmin();
@@ -88,7 +90,7 @@ export default async function ReservationsPage({ searchParams }: { searchParams:
               {rows.map((r) => (
                 <TR key={r.id}>
                   <TD>
-                    <p className="font-medium text-slate-900">{formatDate(r.date)}</p>
+                    <p className="font-medium text-slate-900">{pkDate(r.date)}</p>
                     <p className="text-xs text-slate-500">{r.time}</p>
                   </TD>
                   <TD>
@@ -98,7 +100,7 @@ export default async function ReservationsPage({ searchParams }: { searchParams:
                         {r.phone}
                       </a>
                       {" · "}
-                      <a href={whatsappLink(r.phone, `Hi ${r.name}, this is ${ctx.tenant.name} regarding your table reservation on ${formatDate(r.date)} at ${r.time}.`)} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline">
+                      <a href={whatsappLink(r.phone, `Hi ${r.name}, this is ${ctx.tenant.name} regarding your table reservation on ${pkDate(r.date)} at ${r.time}.`)} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline">
                         WhatsApp
                       </a>
                     </p>

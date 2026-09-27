@@ -110,7 +110,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-md">
           <div aria-hidden="true" className="absolute inset-0 -rotate-6 bg-t-primary" style={BLOB_B} />
-          <Img src={h.image} alt="" className="relative aspect-square w-full object-cover shadow-xl" style={BLOB_A} fallback={<Pizza className="size-20 text-t-accent/50" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-square w-full object-cover shadow-xl" style={BLOB_A} fallback={<Pizza className="size-20 text-t-accent/50" />} />
           <span className="absolute -bottom-2 start-2 flex size-24 flex-col items-center justify-center bg-t-accent text-center text-xs font-extrabold uppercase tracking-wider text-t-accent-fg shadow-lg" style={BLOB_B}>
             <PartyPopper className="mb-1 size-6" /> {t(L.funTime, lang)}
           </span>
@@ -184,7 +184,7 @@ function Process({ ctx }: TemplatePageProps) {
         <ol className="grid gap-10 sm:grid-cols-3">
           {p.steps.map((s, i) => (
             <li key={i} className={cn("text-center", i % 2 === 1 && "sm:translate-y-8")}>
-              <span className="relative mx-auto flex size-28 items-center justify-center bg-t-primary text-t-fg shadow-lg [&_svg]:size-10" style={i % 2 ? BLOB_B : BLOB_A}>
+              <span className="relative mx-auto flex size-28 items-center justify-center bg-t-primary text-t-primary-fg shadow-lg [&_svg]:size-10" style={i % 2 ? BLOB_B : BLOB_A}>
                 <Icon name={s.icon} />
                 <span className="absolute -end-1 -top-1 flex size-9 items-center justify-center rounded-full bg-t-accent text-sm font-extrabold text-t-accent-fg">{i + 1}</span>
               </span>
@@ -300,13 +300,13 @@ function PartyCta({ ctx }: TemplatePageProps) {
           <span aria-hidden="true" className="absolute -start-8 -top-8 size-32 bg-t-primary/40" style={BLOB_A} />
           <span aria-hidden="true" className="absolute -bottom-10 -end-6 size-40 bg-t-primary/30" style={BLOB_B} />
           <div className="relative">
-            <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-t-primary text-t-fg">
+            <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-t-primary text-t-primary-fg">
               <PartyPopper className="size-8" />
             </span>
             <h2 className="font-heading mt-5 text-3xl sm:text-4xl">{title}</h2>
             {text ? <p className="mx-auto mt-4 max-w-xl text-lg opacity-90">{text}</p> : null}
             <div className="mt-8">
-              <CtaButton value={c.cta} ctx={ctx} className="t-btn bg-t-primary px-8 text-base text-t-fg hover:brightness-105" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
+              <CtaButton value={c.cta} ctx={ctx} className="t-btn bg-t-primary px-8 text-base text-t-primary-fg hover:brightness-105" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
             </div>
           </div>
         </div>

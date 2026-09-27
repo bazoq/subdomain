@@ -504,7 +504,7 @@ export function ProductForm({
               <Link href={`/shop/${value.slug}`} target="_blank" className="block text-center text-sm text-brand-600 hover:underline">
                 View on website ↗
               </Link>
-              <ActionButton variant="ghost" className="w-full text-red-600" confirm="Delete this product permanently? Past orders keep their line items." action={() => deleteProduct(id)} redirectTo="/admin/products">
+              <ActionButton variant="ghost" className="w-full text-red-600" confirm="Delete this product? If it appears in any past order it will be hidden from the shop (archived) instead, so order history is kept." action={() => deleteProduct(id)} redirectTo="/admin/products">
                 <Trash2 /> Delete product
               </ActionButton>
             </>

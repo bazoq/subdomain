@@ -3,6 +3,7 @@
 /**
  * Restaurant module server actions: public ordering / reservations and tenant admin management.
  * Every query is scoped by the tenant resolved from the host (public) or the admin session (admin).
+ * COD only, PKR integer rupees. Public order pages are gated by an HMAC token (see ecommerce/order-token.ts).
  */
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -15,22 +16,30 @@ import { notifyTenant } from "@/server/notify";
 import { isOpenNow } from "@/templates/ui";
 import { parseSettings, tenantSettingsSchema } from "@/lib/tenant-settings";
 import { localizedString, t } from "@/lib/i18n";
-import { normalizePkPhone, slugify } from "@/lib/utils";
+import { formatPKR, normalizePkPhone, slugify, whatsappLink } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { errorFields, log } from "@/lib/log";
+import { orderToken, verifyOrderToken } from "@/modules/ecommerce/order-token";
+import { claimIdempotency, completeIdempotency, releaseIdempotency } from "@/modules/ecommerce/idempotency";
 import { itemInclude, toMenuItemDto } from "./queries";
 import { toFoodOrderDto } from "./serialize";
+import { hoursForDate, isOpenAt, pkDateTime, pkParts } from "./hours";
+import { rm } from "./messages";
 import {
   ACTIVE_FOOD_STATUSES,
   FOOD_ORDER_STATUSES,
   FOOD_ORDER_TYPES,
   MENU_TAGS,
   RESERVATION_STATUSES,
+  RESERVATION_TRANSITIONS,
   STATUS_TRANSITIONS,
+  canTransitionReservation,
   menuSizesSchema,
   parseTimeline,
   type FoodOrderDto,
   type FoodOrderStatusKey,
   type OrderItemModifier,
+  type PlacedFoodOrder,
   type TimelineEntry,
 } from "./types";
 
@@ -54,6 +63,11 @@ const placeOrderSchema = z.object({
   notes: z.string().trim().max(500).optional(),
   /** ISO / datetime-local string when the customer schedules for later */
   scheduledFor: z.string().max(40).optional(),
+  /** random client-generated key; a retry with the same key never creates a second order */
+  idempotencyKey: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{16,64}$/)
+    .optional(),
   website: z.string().max(0).optional(), // honeypot
   lines: z.array(orderLineSchema).min(1, "Your order is empty").max(50),
 });
@@ -74,192 +88,262 @@ function isUniqueViolation(e: unknown): boolean {
   return typeof e === "object" && e !== null && "code" in e && (e as { code?: string }).code === "P2002";
 }
 
-export async function placeFoodOrder(input: unknown): Promise<ActionResult<{ number: number; phoneLast4: string }>> {
+class OrderError extends Error {
+  constructor(
+    message: string,
+    public fieldErrors?: Record<string, string>,
+  ) {
+    super(message);
+  }
+}
+
+const IDEM_SCOPE = "food";
+
+const pkTime = (d: Date) => d.toLocaleString("en-PK", { timeZone: "Asia/Karachi", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+
+export async function placeFoodOrder(input: unknown): Promise<ActionResult<PlacedFoodOrder>> {
   const tc = await requireTenant();
   const lang = await currentLang();
   const parsed = placeOrderSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
-  // bot: pretend success without creating anything
-  if (d.website) return success("Order received.", { number: 0, phoneLast4: "0000" });
+  const tid = tc.tenant.id;
+  const placed = (number: number, phone: string): PlacedFoodOrder => ({ number, token: orderToken("food", tid, number), phoneLast4: phone.slice(-4) });
+  // honeypot filled → bot. Pretend success (number 0, no token) so nothing is created and nothing is learnt.
+  if (d.website) return success(rm("orderReceived", lang), { number: 0, token: "", phoneLast4: "" });
 
   const ip = await clientIp();
-  const rl = await rateLimit({ bucket: `foodorder:${ip}`, limit: 6, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many orders from this connection. Please wait a few minutes or call us.");
+  // CGNAT: many customers share one mobile-network IP, so the per-IP limit is generous; abuse is caught per phone.
+  const rl = await rateLimit({ bucket: `foodorder:${ip}`, limit: 15, windowSec: 600, tenantId: tid });
+  if (!rl.ok) return fail(rm("tooManyAttempts", lang));
 
   const rest = tc.settings.restaurant;
-  if (!rest.acceptingOrders) return fail(lang === "ur" ? "ہم اس وقت آن لائن آرڈر قبول نہیں کر رہے۔" : "We are not accepting online orders right now. Please call us.");
+  if (!rest.acceptingOrders) return fail(rm("orderingPaused", lang));
 
   const phone = normalizePkPhone(d.phone);
-  if (!phone) return fail("Please enter a valid Pakistani mobile number.", { phone: "Invalid mobile number" });
+  if (!phone) return fail(rm("fixFields", lang), { phone: rm("invalidPhone", lang) });
+  const rlPhone = await rateLimit({ bucket: `foodorder:phone:${phone}`, limit: 10, windowSec: 3600, tenantId: tid });
+  if (!rlPhone.ok) return fail(rm("tooManyAttempts", lang));
 
-  /* scheduling & opening hours */
-  let scheduledFor: Date | null = null;
-  if (d.scheduledFor) {
-    const dt = new Date(d.scheduledFor);
-    if (Number.isNaN(dt.getTime())) return fail("Invalid schedule time.", { scheduledFor: "Invalid date/time" });
-    const now = Date.now();
-    if (dt.getTime() < now + 15 * 60_000) return fail("Scheduled time must be at least 15 minutes from now.", { scheduledFor: "Too soon" });
-    if (dt.getTime() > now + 7 * 86_400_000) return fail("Orders can be scheduled up to 7 days ahead.", { scheduledFor: "Too far ahead" });
-    scheduledFor = dt;
-  } else if (isOpenNow(tc.settings.hours) === false) {
-    return fail(lang === "ur" ? "ہم اس وقت بند ہیں۔ آپ آرڈر بعد کے لیے شیڈول کر سکتے ہیں۔" : "We are closed right now. You can schedule your order for later.");
-  }
-
-  /* order type */
-  if (d.type === "DELIVERY" && !rest.delivery) return fail("Delivery is not available.");
-  if (d.type === "PICKUP" && !rest.pickup) return fail("Pickup is not available.");
-  if (d.type === "DINE_IN" && !rest.dineIn) return fail("Dine-in ordering is not available.");
-
-  let deliveryFee = 0;
-  let minOrder = 0;
-  let area: string | null = null;
-  let etaMins = 0;
-  if (d.type === "DELIVERY") {
-    if (!d.zoneId) return fail("Please select your delivery area.", { zoneId: "Required" });
-    const zone = await db.deliveryZone.findFirst({ where: { id: d.zoneId, tenantId: tc.tenant.id, isActive: true } });
-    if (!zone) return fail("Selected delivery area is not available.", { zoneId: "Invalid area" });
-    if (!d.address || d.address.length < 8) return fail("Please enter your complete delivery address.", { address: "Address is required" });
-    deliveryFee = zone.fee;
-    minOrder = zone.minOrder > 0 ? zone.minOrder : rest.minDeliveryOrder;
-    area = zone.name;
-    etaMins = zone.etaMins ?? 0;
-  }
-  if (d.type === "DINE_IN" && !d.tableNumber) return fail("Please enter your table number.", { tableNumber: "Required" });
-
-  /* re-price every line from the database */
-  const ids = [...new Set(d.lines.map((l) => l.menuItemId))];
-  const rows = await db.menuItem.findMany({ where: { tenantId: tc.tenant.id, id: { in: ids }, isAvailable: true }, include: itemInclude });
-  const items = new Map(rows.map((r) => [r.id, toMenuItemDto(r)]));
-  const priced: PricedLine[] = [];
-  for (const line of d.lines) {
-    const item = items.get(line.menuItemId);
-    if (!item) return fail("One of the items in your order is no longer available. Please review your order.");
-    const itemName = t(item.name, "en");
-    let base = item.price;
-    let sizeName: string | null = null;
-    if (item.sizes.length) {
-      const size = line.sizeName ? item.sizes.find((s) => s.name === line.sizeName) : item.sizes[0];
-      if (!size) return fail(`Please select a size for ${itemName}.`);
-      base = size.price;
-      sizeName = size.name;
+  /* duplicate-submit protection: same key → same order */
+  const idem = d.idempotencyKey ?? null;
+  if (idem) {
+    const claim = await claimIdempotency(tid, IDEM_SCOPE, idem);
+    if (claim.state === "done") {
+      const existing = await db.foodOrder.findFirst({ where: { tenantId: tid, number: claim.number, customerPhone: phone }, select: { number: true } });
+      if (existing) return success(rm("orderReceived", lang), placed(existing.number, phone));
+    } else if (claim.state === "in_flight") {
+      return fail(rm("duplicateInFlight", lang));
     }
-    const validIds = new Set(item.modifierGroups.flatMap((g) => g.modifiers.map((m) => m.id)));
-    if (line.modifierIds.some((id) => !validIds.has(id))) return fail(`Some add-ons for ${itemName} are no longer available. Please re-add the item.`);
-    const chosen: OrderItemModifier[] = [];
-    let extras = 0;
-    for (const g of item.modifierGroups) {
-      const selected = g.modifiers.filter((m) => line.modifierIds.includes(m.id));
-      const min = g.required ? Math.max(1, g.minSelect) : g.minSelect;
-      if (selected.length < min) return fail(`Please choose at least ${min} option(s) for "${t(g.name, "en")}" on ${itemName}.`);
-      if (selected.length > g.maxSelect) return fail(`You can choose at most ${g.maxSelect} option(s) for "${t(g.name, "en")}" on ${itemName}.`);
-      for (const m of selected) {
-        chosen.push({ name: t(m.name, "en"), price: m.price });
-        extras += m.price;
+  }
+  const release = async () => {
+    if (idem) await releaseIdempotency(tid, IDEM_SCOPE, idem);
+  };
+
+  try {
+    /* scheduling & opening hours */
+    let scheduledFor: Date | null = null;
+    if (d.scheduledFor) {
+      const dt = new Date(d.scheduledFor);
+      if (Number.isNaN(dt.getTime())) throw new OrderError(rm("invalidSchedule", lang), { scheduledFor: rm("invalidSchedule", lang) });
+      const now = Date.now();
+      if (dt.getTime() < now + 15 * 60_000) throw new OrderError(rm("scheduleTooSoon", lang), { scheduledFor: rm("scheduleTooSoon", lang) });
+      if (dt.getTime() > now + 7 * 86_400_000) throw new OrderError(rm("scheduleTooFar", lang), { scheduledFor: rm("scheduleTooFar", lang) });
+      // the kitchen must actually be open when the order is due
+      if (isOpenAt(tc.settings.hours, dt) === false) throw new OrderError(rm("scheduleClosed", lang), { scheduledFor: rm("scheduleClosed", lang) });
+      scheduledFor = dt;
+    } else if (isOpenNow(tc.settings.hours) === false) {
+      throw new OrderError(rm("closedNow", lang));
+    }
+
+    /* order type */
+    if (d.type === "DELIVERY" && !rest.delivery) throw new OrderError(rm("deliveryUnavailable", lang));
+    if (d.type === "PICKUP" && !rest.pickup) throw new OrderError(rm("pickupUnavailable", lang));
+    if (d.type === "DINE_IN" && !rest.dineIn) throw new OrderError(rm("dineInUnavailable", lang));
+
+    let deliveryFee = 0;
+    let minOrder = 0;
+    let area: string | null = null;
+    let etaMins = 0;
+    if (d.type === "DELIVERY") {
+      if (!d.zoneId) throw new OrderError(rm("selectArea", lang), { zoneId: rm("required", lang) });
+      const zone = await db.deliveryZone.findFirst({ where: { id: d.zoneId, tenantId: tid, isActive: true } });
+      if (!zone) throw new OrderError(rm("areaUnavailable", lang), { zoneId: rm("areaUnavailable", lang) });
+      if (!d.address || d.address.length < 8) throw new OrderError(rm("addressRequired", lang), { address: rm("required", lang) });
+      deliveryFee = zone.fee;
+      minOrder = zone.minOrder > 0 ? zone.minOrder : rest.minDeliveryOrder;
+      area = zone.name;
+      etaMins = zone.etaMins ?? 0;
+    }
+    if (d.type === "DINE_IN" && !d.tableNumber) throw new OrderError(rm("tableRequired", lang), { tableNumber: rm("required", lang) });
+
+    /* re-price every line from the database (client prices are only a preview) */
+    const ids = [...new Set(d.lines.map((l) => l.menuItemId))];
+    const rows = await db.menuItem.findMany({ where: { tenantId: tid, id: { in: ids }, isAvailable: true }, include: itemInclude });
+    const items = new Map(rows.map((r) => [r.id, toMenuItemDto(r)]));
+    const priced: PricedLine[] = [];
+    for (const line of d.lines) {
+      const item = items.get(line.menuItemId);
+      if (!item) throw new OrderError(rm("itemUnavailable", lang));
+      const storedName = t(item.name, "en") || t(item.name, lang); // kitchen tickets are printed in English
+      const shownName = t(item.name, lang) || storedName;
+      let base = item.price;
+      let sizeName: string | null = null;
+      if (item.sizes.length) {
+        const size = line.sizeName ? item.sizes.find((s) => s.name === line.sizeName) : item.sizes[0];
+        if (!size) throw new OrderError(rm("selectSize", lang, { name: shownName }));
+        base = size.price;
+        sizeName = size.name;
+      }
+      const validIds = new Set(item.modifierGroups.flatMap((g) => g.modifiers.map((m) => m.id)));
+      if (line.modifierIds.some((id) => !validIds.has(id))) throw new OrderError(rm("addonsUnavailable", lang, { name: shownName }));
+      const chosen: OrderItemModifier[] = [];
+      let extras = 0;
+      for (const g of item.modifierGroups) {
+        const selected = g.modifiers.filter((m) => line.modifierIds.includes(m.id));
+        const min = g.required ? Math.max(1, g.minSelect) : g.minSelect;
+        if (selected.length < min) throw new OrderError(rm("chooseAtLeast", lang, { n: min, group: t(g.name, lang), name: shownName }));
+        if (selected.length > g.maxSelect) throw new OrderError(rm("chooseAtMost", lang, { n: g.maxSelect, group: t(g.name, lang), name: shownName }));
+        for (const m of selected) {
+          chosen.push({ name: t(m.name, "en") || t(m.name, lang), price: m.price });
+          extras += m.price;
+        }
+      }
+      const unitPrice = base + extras;
+      priced.push({ menuItemId: item.id, name: storedName, sizeName, modifiers: chosen, unitPrice, quantity: line.qty, total: unitPrice * line.qty, note: line.note || null });
+    }
+
+    const subtotal = priced.reduce((s, l) => s + l.total, 0);
+    if (d.type === "DELIVERY" && subtotal < minOrder) throw new OrderError(rm("minDelivery", lang, { area: area ?? "", amount: formatPKR(minOrder) }));
+    const total = subtotal + deliveryFee;
+    const estimatedMins = rest.prepTimeMins + (d.type === "DELIVERY" ? etaMins : 0);
+    const timeline: TimelineEntry[] = [{ status: "NEW", at: new Date().toISOString() }];
+
+    /* create order (retry if two orders race for the same number) */
+    let created: { id: string; number: number } | null = null;
+    for (let attempt = 0; attempt < 3 && !created; attempt++) {
+      try {
+        created = await db.$transaction(async (tx) => {
+          const agg = await tx.foodOrder.aggregate({ where: { tenantId: tid }, _max: { number: true } });
+          const number = (agg._max.number ?? 0) + 1;
+          const customer = await tx.customer.upsert({
+            where: { tenantId_phone: { tenantId: tid, phone } },
+            create: { tenantId: tid, phone, name: d.name, address: d.address || null },
+            update: { name: d.name, ...(d.address ? { address: d.address } : {}) },
+          });
+          return tx.foodOrder.create({
+            data: {
+              tenantId: tid,
+              number,
+              customerId: customer.id,
+              type: d.type,
+              customerName: d.name,
+              customerPhone: phone,
+              address: d.type === "DELIVERY" ? d.address || null : null,
+              area,
+              tableNumber: d.type === "DINE_IN" ? d.tableNumber || null : null,
+              notes: d.notes || null,
+              subtotal,
+              deliveryFee,
+              discount: 0,
+              total,
+              paymentMethod: "COD",
+              status: "NEW",
+              timeline: json(timeline),
+              scheduledFor,
+              estimatedMins,
+              ip,
+              items: {
+                create: priced.map((l) => ({
+                  tenantId: tid,
+                  menuItemId: l.menuItemId,
+                  name: l.name,
+                  sizeName: l.sizeName,
+                  modifiers: json(l.modifiers),
+                  unitPrice: l.unitPrice,
+                  quantity: l.quantity,
+                  total: l.total,
+                  note: l.note,
+                })),
+              },
+            },
+            select: { id: true, number: true },
+          });
+        });
+      } catch (e) {
+        if (!isUniqueViolation(e) || attempt === 2) throw e;
       }
     }
-    const unitPrice = base + extras;
-    priced.push({
-      menuItemId: item.id,
-      name: itemName,
-      sizeName,
-      modifiers: chosen,
-      unitPrice,
-      quantity: line.qty,
-      total: unitPrice * line.qty,
-      note: line.note || null,
-    });
+    if (!created) throw new Error("order number allocation failed");
+    if (idem) await completeIdempotency(tid, IDEM_SCOPE, idem, created.number);
+
+    const itemLines = priced.map((l) => `${l.quantity} × ${l.name}${l.sizeName ? ` (${l.sizeName})` : ""}${l.modifiers.length ? ` + ${l.modifiers.map((m) => m.name).join(", ")}` : ""} — ${formatPKR(l.total)}`);
+    notifyTenant(tc, {
+      subject: `New ${d.type.replace("_", " ").toLowerCase()} order #${created.number} — ${formatPKR(total)} (${d.name})`,
+      text: [
+        `${d.name} · ${phone}`,
+        `WhatsApp customer: ${whatsappLink(phone)}`,
+        `${d.type.replace("_", " ")}${area ? ` · ${area}` : ""}${d.tableNumber ? ` · Table ${d.tableNumber}` : ""}`,
+        d.address ? d.address : "",
+        scheduledFor ? `SCHEDULED for ${pkTime(scheduledFor)} (PKT)` : `Estimated ${estimatedMins} min`,
+        "",
+        ...itemLines,
+        "",
+        `Subtotal ${formatPKR(subtotal)} · Delivery ${formatPKR(deliveryFee)} · Total ${formatPKR(total)} (COD)`,
+        d.notes ? `Notes: ${d.notes}` : "",
+        "",
+        `Open live board: https://${tc.host}/admin/kitchen`,
+        `Order detail: https://${tc.host}/admin/food-orders/${created.id}`,
+      ]
+        .filter((line, i, arr) => line !== "" || arr[i - 1] !== "")
+        .join("\n"),
+    }).catch(() => undefined);
+
+    revalidatePath("/admin/kitchen");
+    revalidatePath("/admin/food-orders");
+    return success(rm("orderReceived", lang), placed(created.number, phone));
+  } catch (e) {
+    await release();
+    if (e instanceof OrderError) return fail(e.message, e.fieldErrors);
+    log.error("food_order.place_failed", { tenantId: tid, ...errorFields(e) });
+    return fail(rm("couldNotPlace", lang));
   }
-
-  const subtotal = priced.reduce((s, l) => s + l.total, 0);
-  if (d.type === "DELIVERY" && subtotal < minOrder) return fail(`Minimum order for delivery to ${area} is Rs ${minOrder.toLocaleString("en-PK")}.`);
-  const total = subtotal + deliveryFee;
-  const estimatedMins = rest.prepTimeMins + (d.type === "DELIVERY" ? etaMins : 0);
-  const timeline: TimelineEntry[] = [{ status: "NEW", at: new Date().toISOString() }];
-
-  /* create order (retry once if two orders race for the same number) */
-  let created: { id: string; number: number } | null = null;
-  for (let attempt = 0; attempt < 3 && !created; attempt++) {
-    try {
-      created = await db.$transaction(async (tx) => {
-        const agg = await tx.foodOrder.aggregate({ where: { tenantId: tc.tenant.id }, _max: { number: true } });
-        const number = (agg._max.number ?? 0) + 1;
-        const customer = await tx.customer.upsert({
-          where: { tenantId_phone: { tenantId: tc.tenant.id, phone } },
-          create: { tenantId: tc.tenant.id, phone, name: d.name, address: d.address || null },
-          update: { name: d.name, ...(d.address ? { address: d.address } : {}) },
-        });
-        const order = await tx.foodOrder.create({
-          data: {
-            tenantId: tc.tenant.id,
-            number,
-            customerId: customer.id,
-            type: d.type,
-            customerName: d.name,
-            customerPhone: phone,
-            address: d.type === "DELIVERY" ? d.address || null : null,
-            area,
-            tableNumber: d.type === "DINE_IN" ? d.tableNumber || null : null,
-            notes: d.notes || null,
-            subtotal,
-            deliveryFee,
-            discount: 0,
-            total,
-            paymentMethod: "COD",
-            status: "NEW",
-            timeline: json(timeline),
-            scheduledFor,
-            estimatedMins,
-            ip,
-            items: {
-              create: priced.map((l) => ({
-                tenantId: tc.tenant.id,
-                menuItemId: l.menuItemId,
-                name: l.name,
-                sizeName: l.sizeName,
-                modifiers: json(l.modifiers),
-                unitPrice: l.unitPrice,
-                quantity: l.quantity,
-                total: l.total,
-                note: l.note,
-              })),
-            },
-          },
-          select: { id: true, number: true },
-        });
-        return order;
-      });
-    } catch (e) {
-      if (!isUniqueViolation(e) || attempt === 2) return fail("Could not place your order. Please try again or call us.");
-    }
-  }
-  if (!created) return fail("Could not place your order. Please try again.");
-
-  const itemLines = priced.map((l) => `${l.quantity} × ${l.name}${l.sizeName ? ` (${l.sizeName})` : ""}${l.modifiers.length ? ` + ${l.modifiers.map((m) => m.name).join(", ")}` : ""} — Rs ${l.total}`).join("\n");
-  notifyTenant(tc, {
-    subject: `New ${d.type.replace("_", " ").toLowerCase()} order #${created.number} — Rs ${total}`,
-    text: `${d.name} (${phone})\n${d.type}${area ? ` · ${area}` : ""}${d.address ? `\n${d.address}` : ""}${d.tableNumber ? `\nTable ${d.tableNumber}` : ""}${scheduledFor ? `\nScheduled: ${scheduledFor.toISOString()}` : ""}\n\n${itemLines}\n\nSubtotal Rs ${subtotal} · Delivery Rs ${deliveryFee} · Total Rs ${total}\n${d.notes ? `\nNotes: ${d.notes}\n` : ""}\nOpen live board: /admin/kitchen`,
-  }).catch(() => undefined);
-
-  revalidatePath("/admin/kitchen");
-  return success("Order received.", { number: created.number, phoneLast4: phone.slice(-4) });
 }
 
-/** Public order status lookup, gated by the last 4 digits of the customer's phone. */
+/** Public order status polling, gated by the HMAC order token from the checkout redirect / lookup. */
 export async function getFoodOrderStatus(
   number: number,
-  phoneKey: string,
+  token: string,
 ): Promise<ActionResult<{ status: FoodOrderStatusKey; timeline: TimelineEntry[]; estimatedMins: number | null; updatedAt: string }>> {
   const tc = await requireTenant();
+  const lang = await currentLang();
   const n = Number(number);
-  const key = String(phoneKey ?? "").replace(/\D/g, "").slice(-4);
-  if (!Number.isInteger(n) || n <= 0 || key.length !== 4) return fail("Invalid order.");
+  if (!Number.isInteger(n) || n <= 0 || !verifyOrderToken("food", tc.tenant.id, n, token)) return fail(rm("invalidOrder", lang));
   const ip = await clientIp();
   const rl = await rateLimit({ bucket: `foodstatus:${ip}`, limit: 120, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many requests.");
-  const order = await db.foodOrder.findFirst({ where: { tenantId: tc.tenant.id, number: n }, select: { status: true, timeline: true, estimatedMins: true, updatedAt: true, customerPhone: true } });
-  if (!order || order.customerPhone.replace(/\D/g, "").slice(-4) !== key) return fail("Order not found.");
+  if (!rl.ok) return fail(rm("tooManyRequests", lang));
+  const order = await db.foodOrder.findFirst({ where: { tenantId: tc.tenant.id, number: n }, select: { status: true, timeline: true, estimatedMins: true, updatedAt: true } });
+  if (!order) return fail(rm("orderNotFound", lang));
   return success(undefined, { status: order.status, timeline: parseTimeline(order.timeline), estimatedMins: order.estimatedMins, updatedAt: order.updatedAt.toISOString() });
+}
+
+/**
+ * Public lookup for customers who lost the tracking link: order number + the full phone used for the order → token.
+ * Rate-limited per IP so the phone cannot be brute-forced against a known order number.
+ */
+export async function lookupFoodOrder(number: unknown, phone: unknown): Promise<ActionResult<{ number: number; token: string }>> {
+  const tc = await requireTenant();
+  const lang = await currentLang();
+  const n = parseInt(String(number ?? "").replace(/\D/g, ""), 10);
+  const p = typeof phone === "string" ? normalizePkPhone(phone) : null;
+  if (!Number.isFinite(n) || n <= 0) return fail(rm("enterOrderNumber", lang), { number: rm("enterOrderNumber", lang) });
+  if (!p) return fail(rm("enterPhoneUsed", lang), { phone: rm("invalidPhone", lang) });
+  const ip = await clientIp();
+  const rl = await rateLimit({ bucket: `foodtrack:${ip}`, limit: 20, windowSec: 600, tenantId: tc.tenant.id });
+  if (!rl.ok) return fail(rm("tooManyRequests", lang));
+  const order = await db.foodOrder.findFirst({ where: { tenantId: tc.tenant.id, number: n, customerPhone: p }, select: { number: true } });
+  if (!order) return fail(rm("orderNotFound", lang));
+  return success(undefined, { number: order.number, token: orderToken("food", tc.tenant.id, order.number) });
 }
 
 /* ═══════════════════════════════ PUBLIC: RESERVATIONS ═══════════════════════════════ */
@@ -278,33 +362,49 @@ export type ReservationInput = z.infer<typeof reservationSchema>;
 export async function createReservation(input: unknown): Promise<ActionResult<{ id: string }>> {
   const tc = await requireTenant();
   const lang = await currentLang();
-  if (!tc.settings.restaurant.reservations) return fail("Table reservations are not available online. Please call us.");
+  if (!tc.settings.restaurant.reservations) return fail(rm("reservationsOff", lang));
   const parsed = reservationSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
-  if (d.website) return success(lang === "ur" ? "شکریہ!" : "Thank you!", { id: "" });
+  if (d.website) return success(rm("thankYou", lang), { id: "" });
 
   const ip = await clientIp();
-  const rl = await rateLimit({ bucket: `reservation:${ip}`, limit: 5, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many requests. Please try again later.");
+  const rl = await rateLimit({ bucket: `reservation:${ip}`, limit: 10, windowSec: 600, tenantId: tc.tenant.id });
+  if (!rl.ok) return fail(rm("tooManyRequests", lang));
 
   const phone = normalizePkPhone(d.phone);
-  if (!phone) return fail("Please enter a valid Pakistani mobile number.", { phone: "Invalid mobile number" });
-  const date = new Date(`${d.date}T00:00:00+05:00`);
-  if (Number.isNaN(date.getTime())) return fail("Invalid date.", { date: "Invalid date" });
-  const todayPk = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" }));
-  todayPk.setHours(0, 0, 0, 0);
-  if (date.getTime() < todayPk.getTime() - 5 * 3_600_000) return fail("Please choose today or a future date.", { date: "Date is in the past" });
+  if (!phone) return fail(rm("fixFields", lang), { phone: rm("invalidPhone", lang) });
+  const rlPhone = await rateLimit({ bucket: `reservation:phone:${phone}`, limit: 5, windowSec: 3600, tenantId: tc.tenant.id });
+  if (!rlPhone.ok) return fail(rm("tooManyRequests", lang));
+
+  /* date + time are the customer's local (Pakistan) wall clock */
+  const when = pkDateTime(d.date, d.time);
+  if (!when) return fail(rm("fixFields", lang), { date: rm("invalidDate", lang) });
+  const date = pkDateTime(d.date, "00:00")!;
+  const now = new Date();
+  const todayYmd = pkParts(now).ymd;
+  if (d.date < todayYmd) return fail(rm("fixFields", lang), { date: rm("pastDate", lang) });
+  if (when.getTime() < now.getTime()) return fail(rm("fixFields", lang), { time: rm("pastTime", lang) });
+  if (when.getTime() < now.getTime() + 30 * 60_000) return fail(rm("fixFields", lang), { time: rm("tooSoon", lang) });
+  if (when.getTime() > now.getTime() + 60 * 86_400_000) return fail(rm("fixFields", lang), { date: rm("tooFarAhead", lang) });
+  const hours = tc.settings.hours;
+  if (hours.length) {
+    const day = hoursForDate(hours, when);
+    if (!day || day.closed) return fail(rm("fixFields", lang), { date: rm("closedOnDay", lang) });
+    if (isOpenAt(hours, when) === false) return fail(rm("fixFields", lang), { time: rm("outsideHours", lang, { open: day.open, close: day.close }) });
+  }
 
   const row = await db.reservation.create({
     data: { tenantId: tc.tenant.id, name: d.name, phone, guests: d.guests, date, time: d.time, notes: d.notes || null, status: "PENDING" },
   });
   notifyTenant(tc, {
-    subject: `Table reservation request — ${d.name}, ${d.guests} guests`,
-    text: `${d.name} (${phone})\n${d.date} at ${d.time} · ${d.guests} guests\n${d.notes ?? ""}\n\nOpen admin: /admin/reservations`,
+    subject: `Table reservation request — ${d.name}, ${d.guests} guest${d.guests === 1 ? "" : "s"} on ${d.date} ${d.time}`,
+    text: [`${d.name} · ${phone}`, `WhatsApp customer: ${whatsappLink(phone)}`, `${d.date} at ${d.time} · ${d.guests} guest${d.guests === 1 ? "" : "s"}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/reservations`]
+      .filter((l) => l !== "")
+      .join("\n"),
   }).catch(() => undefined);
   revalidatePath("/admin/reservations");
-  return success(lang === "ur" ? "ریزرویشن کی درخواست موصول ہو گئی۔ ہم فون پر تصدیق کریں گے۔" : "Reservation request received. We will confirm by phone.", { id: row.id });
+  return success(rm("reservationReceived", lang), { id: row.id });
 }
 
 /* ═══════════════════════════════ ADMIN: LIVE BOARD & ORDERS ═══════════════════════════════ */
@@ -327,6 +427,10 @@ export async function listActiveOrders(): Promise<ActionResult<FoodOrderDto[]>> 
   }
 }
 
+/**
+ * Advance / cancel a food order. Transitions follow STATUS_TRANSITIONS; the write is guarded with
+ * `updateMany where status = <status we read>` so two kitchen screens cannot both apply a stale transition.
+ */
 export async function updateFoodOrderStatus(id: string, status: string, note?: string): Promise<ActionResult<{ status: FoodOrderStatusKey }>> {
   try {
     const ctx = await requireTenantAdminAction();
@@ -339,7 +443,8 @@ export async function updateFoodOrderStatus(id: string, status: string, note?: s
     if (s.data === "OUT_FOR_DELIVERY" && order.type !== "DELIVERY") return fail("Only delivery orders can be marked out for delivery.");
     const cleanNote = note?.trim().slice(0, 300) || undefined;
     const timeline: TimelineEntry[] = [...parseTimeline(order.timeline), { status: s.data, at: new Date().toISOString(), ...(cleanNote ? { note: cleanNote } : {}) }];
-    await db.foodOrder.update({ where: { id: order.id }, data: { status: s.data, timeline: json(timeline) } });
+    const r = await db.foodOrder.updateMany({ where: { id: order.id, tenantId: ctx.tenant.id, status: order.status }, data: { status: s.data, timeline: json(timeline) } });
+    if (!r.count) return fail(`Order #${order.number} was just updated by someone else. Refresh to see its current status.`);
     await audit({
       tenantId: ctx.tenant.id,
       actorKind: "TENANT",
@@ -467,6 +572,7 @@ export async function upsertMenuItem(id: string | null, input: unknown): Promise
     revalidatePath("/", "layout");
     return success(id ? "Menu item updated." : "Menu item added.", { id: row.id });
   } catch (e) {
+    if (isUniqueViolation(e)) return fail("Another item already uses this URL slug. Choose a different one.", { slug: "Already in use" });
     return fail((e as Error).message);
   }
 }
@@ -478,7 +584,7 @@ export async function deleteMenuItem(id: string): Promise<ActionResult> {
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "menu_item.delete", entity: "MenuItem", entityId: id });
     revalidatePath("/", "layout");
-    return success("Menu item deleted.");
+    return success("Menu item deleted. Past orders keep their line items.");
   } catch (e) {
     return fail((e as Error).message);
   }
@@ -535,6 +641,7 @@ export async function upsertMenuCategory(id: string | null, input: unknown): Pro
     revalidatePath("/", "layout");
     return success(id ? "Category updated." : "Category added.", { id: row.id });
   } catch (e) {
+    if (isUniqueViolation(e)) return fail("Another category already uses this slug. Choose a different one.", { slug: "Already in use" });
     return fail((e as Error).message);
   }
 }
@@ -706,18 +813,25 @@ export async function deleteDeliveryZone(id: string): Promise<ActionResult> {
 
 const reservationStatusSchema = z.enum(RESERVATION_STATUSES);
 
-export async function updateReservationStatus(id: string, status: string): Promise<ActionResult> {
+/** Reservation transitions (see RESERVATION_TRANSITIONS); guarded so a stale screen cannot overwrite a newer change. */
+export async function updateReservationStatus(id: string, status: string): Promise<ActionResult<{ status: string }>> {
   try {
     const ctx = await requireTenantAdminAction();
     const s = reservationStatusSchema.safeParse(status);
     if (!s.success) return fail("Invalid status.");
-    const { count } = await db.reservation.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { status: s.data } });
-    if (!count) return fail("Not found.");
-    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "reservation.status", entity: "Reservation", entityId: id, meta: { status: s.data } });
+    const row = await db.reservation.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { id: true, status: true } });
+    if (!row) return fail("Not found.");
+    if (row.status === s.data) return success("No change.", { status: row.status });
+    if (!canTransitionReservation(row.status, s.data)) {
+      const allowed = RESERVATION_TRANSITIONS[row.status as keyof typeof RESERVATION_TRANSITIONS] ?? [];
+      return fail(allowed.length ? `A ${row.status.toLowerCase()} reservation can only become: ${allowed.map((a) => a.toLowerCase()).join(", ")}.` : `A ${row.status.toLowerCase()} reservation is final.`);
+    }
+    const { count } = await db.reservation.updateMany({ where: { id, tenantId: ctx.tenant.id, status: row.status }, data: { status: s.data } });
+    if (!count) return fail("This reservation was just updated by someone else. Refresh and try again.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "reservation.status", entity: "Reservation", entityId: id, meta: { from: row.status, to: s.data } });
     revalidatePath("/admin/reservations");
-    return success(`Reservation ${s.data.toLowerCase()}.`);
+    return success(`Reservation ${s.data.toLowerCase()}.`, { status: s.data });
   } catch (e) {
     return fail((e as Error).message);
   }
 }
-

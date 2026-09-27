@@ -45,15 +45,15 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           ctx={ctx}
           variant="dark"
           cta={{ label: ui.orderNow, href: "/menu" }}
-          className="border-b-0 bg-t-primary text-t-primary-fg [&_.t-btn-primary]:rounded-full [&_.t-btn-primary]:bg-white [&_.t-btn-primary]:text-t-primary [&_nav_a]:rounded-full"
+          className="border-b-0 bg-t-primary text-t-primary-fg [&_.t-btn-primary]:rounded-full [&_.t-btn-primary]:bg-t-primary-fg [&_.t-btn-primary]:text-t-primary [&_nav_a]:rounded-full"
           rightSlot={
             <div className="flex items-center gap-2">
               {c.city ? (
-                <span className="hidden items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold sm:inline-flex">
+                <span className="hidden items-center gap-1.5 rounded-full bg-t-primary-fg/15 px-3 py-1.5 text-xs font-semibold sm:inline-flex">
                   <MapPin className="size-3.5" /> {t(L.deliverTo, lang)}: {c.city}
                 </span>
               ) : null}
-              <CartCountLink host={ctx.host} label={t(ui.cart, lang)} className="rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold hover:bg-white/25" />
+              <CartCountLink host={ctx.host} label={t(ui.cart, lang)} className="rounded-full bg-t-primary-fg/15 px-3 py-1.5 text-sm font-semibold hover:bg-t-primary-fg/25" />
             </div>
           }
         />
@@ -72,7 +72,10 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         </div>
         <CartBar ctx={rc} className="pb-20 pe-24 sm:pe-4 md:pb-6" />
         <CartDrawer ctx={rc} />
-        <WhatsAppFloat ctx={ctx} />
+        {/* lift the float above the mobile order bar */}
+        <div className="[&>a]:bottom-20 md:[&>a]:bottom-5">
+          <WhatsAppFloat ctx={ctx} />
+        </div>
       </div>
     </OrderProvider>
   );
@@ -91,17 +94,17 @@ function Hero({ ctx }: TemplatePageProps) {
   if (r.dineIn) types.push({ label: t(ui.dineIn, lang), icon: <Utensils className="size-4" /> });
   return (
     <section className="relative overflow-hidden bg-t-primary text-t-primary-fg">
-      <div aria-hidden="true" className="pointer-events-none absolute -end-20 -top-20 size-80 rounded-full bg-white/15 blur-2xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -end-20 -top-20 size-80 rounded-full bg-t-primary-fg/15 blur-2xl" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 start-1/4 size-80 rounded-full bg-t-accent/30 blur-3xl" />
       <Container className="relative grid items-center gap-10 py-12 lg:grid-cols-[1.1fr_1fr] lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-flex rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]">{h.eyebrow}</span> : null}
+          {h.eyebrow ? <span className="inline-flex rounded-full bg-t-primary-fg/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]">{h.eyebrow}</span> : null}
           <h1 className="font-heading mt-4 text-4xl font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-4 max-w-xl text-lg leading-8 opacity-90">{t(h.subtitle, lang)}</p>
           {h.badges?.length ? (
             <ul className="mt-6 flex flex-wrap gap-2">
               {h.badges.map((b, i) => (
-                <li key={i} className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold">
+                <li key={i} className="inline-flex items-center gap-1.5 rounded-full bg-t-primary-fg/15 px-3 py-1.5 text-sm font-semibold">
                   <span className="[&_svg]:size-4">
                     <Icon name={b.icon} />
                   </span>
@@ -298,7 +301,7 @@ function Hours({ ctx }: TemplatePageProps) {
               </span>
             </p>
           ) : null}
-          <Link href="/menu" className="t-btn mt-auto rounded-full bg-white px-5 text-t-primary">
+          <Link href="/menu" className="t-btn mt-auto rounded-full bg-t-primary-fg px-5 text-t-primary">
             {t(ui.orderNow, lang)} <ArrowRight className="size-4 rtl:rotate-180" />
           </Link>
         </div>

@@ -22,6 +22,28 @@ export type OrderType = (typeof FOOD_ORDER_TYPES)[number];
 export const RESERVATION_STATUSES = ["PENDING", "CONFIRMED", "SEATED", "CANCELLED"] as const;
 export type ReservationStatusKey = (typeof RESERVATION_STATUSES)[number];
 
+/** Allowed reservation transitions. SEATED and CANCELLED are final (a no-show / change of plan is a new request). */
+export const RESERVATION_TRANSITIONS: Record<ReservationStatusKey, ReservationStatusKey[]> = {
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["SEATED", "CANCELLED"],
+  SEATED: [],
+  CANCELLED: [],
+};
+
+export function canTransitionReservation(from: string, to: ReservationStatusKey): boolean {
+  const allowed = RESERVATION_TRANSITIONS[from as ReservationStatusKey];
+  return !!allowed && allowed.includes(to);
+}
+
+/** Result of a successful `placeFoodOrder` call. */
+export interface PlacedFoodOrder {
+  number: number;
+  /** access token for /menu/order/[number]?t=… (non-guessable); empty when the submission was a bot */
+  token: string;
+  /** kept for older templates that build the tracking URL themselves */
+  phoneLast4: string;
+}
+
 export const MENU_TAGS = ["spicy", "veg", "bestseller", "new"] as const;
 export type MenuTag = (typeof MENU_TAGS)[number];
 

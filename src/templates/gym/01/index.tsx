@@ -57,7 +57,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative overflow-hidden bg-t-dark text-t-dark-fg">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" fallback={<span />} />
+      <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" fallback={<span />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-dark via-t-dark/80 to-t-dark/40" aria-hidden="true" />
       <div className="absolute inset-x-0 bottom-0 h-20 -skew-y-3 bg-t-primary/90" aria-hidden="true" />
       <Container className="relative py-24 lg:py-36">
@@ -118,7 +118,7 @@ function Hours({ ctx }: TemplatePageProps) {
           <Dumbbell className="size-9 text-t-primary" aria-hidden="true" />
           {ctx.settings.contact.phone ? (
             <a href={`tel:${ctx.settings.contact.phone}`} className="inline-flex items-center gap-2 font-heading text-2xl uppercase tracking-wide hover:text-t-primary">
-              <Phone className="size-5 text-t-primary" /> {ctx.settings.contact.phone}
+              <Phone className="size-5 text-t-primary" /> <span dir="ltr">{ctx.settings.contact.phone}</span>
             </a>
           ) : null}
           <SmartLink href="/join" ctx={ctx} className="t-btn t-btn-primary w-fit px-6 py-3 text-sm font-bold uppercase tracking-wider">

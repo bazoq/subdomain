@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { updateBookingStatus } from "@/modules/travel/actions";
-import { BOOKING_STATUSES, type BookingStatusKey } from "@/modules/travel/constants";
+import { BOOKING_STATUSES, canTransitionBooking, isBookingStatus, type BookingStatusKey } from "@/modules/travel/constants";
 import { cn } from "@/lib/utils";
 
 const tone: Record<BookingStatusKey, string> = {
@@ -15,13 +15,18 @@ const tone: Record<BookingStatusKey, string> = {
   CANCELLED: "border-red-300 bg-red-50 text-red-700",
 };
 
-/** Inline status dropdown for the bookings table; saves on change. */
+/**
+ * Inline status dropdown for the bookings table; saves on change.
+ * Options that are not a legal transition from the current status are disabled
+ * (the server enforces the same state machine).
+ */
 export function BookingStatusSelect({ id, status }: { id: string; status: string }) {
   const [value, setValue] = React.useState(status);
   const [busy, setBusy] = React.useState(false);
   const toast = useToast();
   const router = useRouter();
-  const cls = tone[value as BookingStatusKey] ?? "";
+  const current: BookingStatusKey | null = isBookingStatus(value) ? value : null;
+  const cls = current ? tone[current] : "";
   return (
     <Select
       value={value}
@@ -31,6 +36,7 @@ export function BookingStatusSelect({ id, status }: { id: string; status: string
       onChange={async (e) => {
         const next = e.target.value;
         const prev = value;
+        if (!isBookingStatus(next) || (current && !canTransitionBooking(current, next))) return;
         setValue(next);
         setBusy(true);
         const res = await updateBookingStatus(id, next);
@@ -45,7 +51,7 @@ export function BookingStatusSelect({ id, status }: { id: string; status: string
       }}
     >
       {BOOKING_STATUSES.map((s) => (
-        <option key={s} value={s}>
+        <option key={s} value={s} disabled={current ? !canTransitionBooking(current, s) : false}>
           {s}
         </option>
       ))}

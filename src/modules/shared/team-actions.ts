@@ -8,15 +8,17 @@ import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { normalizePkPhone, slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized, zHttpUrlOrEmpty, zImageUrlOrEmpty } from "@/modules/shared/validation";
 
-const url = z.string().trim().max(300).optional().or(z.literal(""));
+/** Social profile links must be absolute http(s) URLs (no javascript:, no bare handles). */
+const url = zHttpUrlOrEmpty.optional();
 
 const memberSchema = z.object({
   name: z.string().trim().min(2, "Name is required").max(80),
   slug: z.string().trim().max(80).optional().or(z.literal("")),
   role: localizedString.default({ en: "" }),
   bio: localizedString.default({ en: "" }),
-  imageUrl: z.string().max(1000).optional().or(z.literal("")),
+  imageUrl: zImageUrlOrEmpty,
   phone: z.string().trim().max(20).optional().or(z.literal("")),
   email: z.string().trim().email("Invalid email").max(120).optional().or(z.literal("")),
   socials: z.object({ facebook: url, instagram: url, linkedin: url, twitter: url, youtube: url, tiktok: url }).partial().default({}),
@@ -43,13 +45,13 @@ export async function upsertTeamMember(id: string | null, input: unknown): Promi
     const parsed = memberSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const d = parsed.data;
-    const socials = Object.fromEntries(Object.entries(d.socials).filter(([, v]) => v && v.trim()));
+    const socials = Object.fromEntries(Object.entries(d.socials).filter((e): e is [string, string] => typeof e[1] === "string" && e[1].trim().length > 0).map(([k, v]) => [k, v.trim()]));
     const data = {
       slug: await uniqueSlug(ctx.tenant.id, d.slug || d.name, id),
       name: d.name,
-      role: json(d.role),
-      bio: json(d.bio),
-      imageUrl: d.imageUrl || null,
+      role: json(sanitizeLocalized(d.role)),
+      bio: json(sanitizeLocalized(d.bio)),
+      imageUrl: d.imageUrl?.trim() || null,
       phone: d.phone ? (normalizePkPhone(d.phone) ?? d.phone) : null,
       email: d.email || null,
       socials: json(socials),
@@ -90,8 +92,10 @@ export async function deleteTeamMember(id: string): Promise<ActionResult> {
 export async function toggleTeamMember(id: string, isActive: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (typeof isActive !== "boolean") return fail("Invalid value.");
     const { count } = await db.teamMember.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { isActive } });
     if (!count) return fail("Not found.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "team.isActive", entity: "TeamMember", entityId: id, meta: { value: isActive } });
     revalidatePath("/", "layout");
     return success(isActive ? "Shown on website." : "Hidden from website.");
   } catch (e) {

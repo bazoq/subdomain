@@ -32,11 +32,9 @@ type Sink = (level: LogLevel, line: string) => void;
 
 let sink: Sink = (level, line) => {
   // The console is the only transport on Vercel; stdout/stderr are captured by the platform.
-  // eslint-disable-next-line no-console
+  // (`no-console` is switched off for this file in eslint.config.mjs — everything else must use `log`.)
   if (level === "error") console.error(line);
-  // eslint-disable-next-line no-console
   else if (level === "warn") console.warn(line);
-  // eslint-disable-next-line no-console
   else console.log(line);
 };
 

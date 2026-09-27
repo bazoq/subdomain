@@ -102,7 +102,7 @@ function Hero({ ctx }: TemplatePageProps) {
             </div>
           </div>
         </div>
-        {h.image ? <Img src={h.image} alt="" className="mx-auto mt-10 max-w-4xl rounded-[var(--t-radius)] border border-t-border object-cover" /> : null}
+        {h.image ? <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="mx-auto mt-10 max-w-4xl rounded-[var(--t-radius)] border border-t-border object-cover" /> : null}
       </Container>
     </section>
   );

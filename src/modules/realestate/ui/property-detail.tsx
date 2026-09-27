@@ -5,7 +5,7 @@ import type { SiteContext } from "@/templates/types";
 import { Img, RichText } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { cn, formatDate, whatsappLink } from "@/lib/utils";
-import { areaText, mapEmbedUrl, propertyPrice, purposeLabel, typeLabel, videoEmbedUrl } from "../helpers";
+import { areaText, mapEmbedUrl, propertyPrice, purposeLabel, safeExternalUrl, typeLabel, videoEmbedUrl } from "../helpers";
 import { getAgent } from "../queries";
 import { rs } from "../strings";
 import { PropertyGallery } from "./gallery";
@@ -23,6 +23,8 @@ export async function PropertyDetail({ property: p, ctx, agent, className }: { p
   const area = areaText(p, lang);
   const map = mapEmbedUrl(p.mapUrl);
   const video = videoEmbedUrl(p.videoUrl);
+  const mapLink = safeExternalUrl(p.mapUrl);
+  const videoLink = safeExternalUrl(p.videoUrl);
   const url = `https://${ctx.host}/properties/${p.slug}`;
   const officeWa = ctx.settings.contact.whatsapp || ctx.settings.contact.phone;
   const agentWa = resolvedAgent?.phone || officeWa;
@@ -91,11 +93,20 @@ export async function PropertyDetail({ property: p, ctx, agent, className }: { p
           <section className="mt-8">
             <h2 className="font-heading text-xl font-bold">{t(rs.video, lang)}</h2>
             <div className="mt-3 aspect-video overflow-hidden rounded-[var(--t-radius)] bg-t-muted">
-              <iframe src={video} title={`${title} — video`} className="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="lazy" />
+              <iframe
+                src={video}
+                title={`${title} — video`}
+                className="h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
+              />
             </div>
           </section>
-        ) : p.videoUrl ? (
-          <a href={p.videoUrl} target="_blank" rel="noreferrer" className="t-btn t-btn-outline mt-8 text-sm">
+        ) : videoLink ? (
+          <a href={videoLink} target="_blank" rel="noreferrer noopener" className="t-btn t-btn-outline mt-8 text-sm">
             <PlayCircle className="size-4" aria-hidden="true" />
             {t(rs.watchVideo, lang)}
           </a>
@@ -105,11 +116,11 @@ export async function PropertyDetail({ property: p, ctx, agent, className }: { p
           <section className="mt-8">
             <h2 className="font-heading text-xl font-bold">{t(rs.map, lang)}</h2>
             <div className="mt-3 aspect-[16/9] overflow-hidden rounded-[var(--t-radius)] bg-t-muted">
-              <iframe src={map} title={`${title} — map`} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+              <iframe src={map} title={`${title} — map`} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen sandbox="allow-scripts allow-same-origin allow-popups" />
             </div>
           </section>
-        ) : p.mapUrl ? (
-          <a href={p.mapUrl} target="_blank" rel="noreferrer" className="t-btn t-btn-outline mt-4 text-sm">
+        ) : mapLink ? (
+          <a href={mapLink} target="_blank" rel="noreferrer noopener" className="t-btn t-btn-outline mt-4 text-sm">
             <MapPin className="size-4" aria-hidden="true" />
             {t(rs.openMap, lang)}
             <ExternalLink className="size-3.5" aria-hidden="true" />

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { log } from "@/lib/log";
 
 /**
  * POST /api/csp-report — sink for the report-only CSP emitted by proxy.ts.
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
   }
   const host = req.headers.get("x-request-host") ?? req.headers.get("host") ?? "";
   for (const r of extract(json).slice(0, 5)) {
-    console.warn("[csp-report]", JSON.stringify({ host: host.slice(0, 120), ...compact(r) }));
+    log.warn("csp.violation", { host: host.slice(0, 120), ...compact(r) });
   }
   return new NextResponse(null, { status: 204 });
 }

@@ -67,7 +67,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
                   href={whatsappLink(wa, `${t(ui.orderNow, lang)} — ${ctx.tenant.name}`)}
                   target="_blank"
                   rel="noreferrer"
-                  className="hidden items-center gap-1.5 rounded-[var(--t-radius)] bg-white/15 px-3 py-1.5 text-sm font-bold sm:inline-flex"
+                  className="hidden items-center gap-1.5 rounded-[var(--t-radius)] bg-t-primary-fg/15 px-3 py-1.5 text-sm font-bold sm:inline-flex"
                 >
                   <MessageCircle className="size-4" /> {t(ui.whatsapp, lang)}
                 </a>
@@ -140,7 +140,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-lg">
           <TruckArt thick className="rounded-t-[var(--t-radius)]" />
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full border-x-4 border-t-accent object-cover" fallback={<Pizza className="size-16 opacity-25" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full border-x-4 border-t-accent object-cover" fallback={<Pizza className="size-16 opacity-25" />} />
           <TruckArt thick className="rounded-b-[var(--t-radius)]" />
           <span className="absolute -bottom-5 start-4 inline-flex items-center gap-2 rounded-full bg-t-primary px-4 py-2 text-sm font-bold text-t-primary-fg shadow-lg">
             <Flame className="size-4 text-t-accent" /> {t(L.desiTaste, lang)}

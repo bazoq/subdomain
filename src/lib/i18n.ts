@@ -26,6 +26,35 @@ export function dirFor(lang: Lang): "ltr" | "rtl" {
   return lang === "ur" ? "rtl" : "ltr";
 }
 
+export function isLang(v: unknown): v is Lang {
+  return v === "en" || v === "ur";
+}
+
+/**
+ * Effective site language for a request: the visitor cookie wins, then the tenant default;
+ * Urdu is only honoured when the tenant has enabled it.
+ */
+export function resolveLang(cookieValue: string | undefined | null, languages: { urduEnabled: boolean; defaultLang?: Lang }): Lang {
+  if (!languages.urduEnabled) return "en";
+  if (isLang(cookieValue)) return cookieValue;
+  return languages.defaultLang ?? "en";
+}
+
+/** BCP-47 tag for <html lang> and hreflang. */
+export function htmlLang(lang: Lang): "en-PK" | "ur-PK" {
+  return lang === "ur" ? "ur-PK" : "en-PK";
+}
+
+/** Open Graph locale. */
+export function ogLocale(lang: Lang): "en_PK" | "ur_PK" {
+  return lang === "ur" ? "ur_PK" : "en_PK";
+}
+
+/** Pick the other language (for switchers). */
+export function otherLang(lang: Lang): Lang {
+  return lang === "ur" ? "en" : "ur";
+}
+
 /** Common UI strings for storefront chrome (cart, checkout, forms). */
 export const ui = {
   addToCart: ls("Add to Cart", "کارٹ میں شامل کریں"),
@@ -107,6 +136,24 @@ export const ui = {
   loading: ls("Loading...", "لوڈ ہو رہا ہے..."),
   somethingWrong: ls("Something went wrong. Please try again.", "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔"),
   thankYou: ls("Thank you! We will contact you shortly.", "شکریہ! ہم جلد آپ سے رابطہ کریں گے۔"),
+  // shell / chrome
+  skipToContent: ls("Skip to content", "مرکزی مواد پر جائیں"),
+  openMenu: ls("Open menu", "مینیو کھولیں"),
+  closeMenu: ls("Close menu", "مینیو بند کریں"),
+  mainNavigation: ls("Main navigation", "مرکزی نیویگیشن"),
+  switchLanguage: ls("Switch language", "زبان بدلیں"),
+  backHome: ls("Back to home", "ہوم پیج پر واپس جائیں"),
+  tryAgain: ls("Try again", "دوبارہ کوشش کریں"),
+  pageNotFound: ls("Page not found", "صفحہ نہیں ملا"),
+  pageNotFoundText: ls("The page you are looking for does not exist or has moved.", "آپ جو صفحہ تلاش کر رہے ہیں وہ موجود نہیں یا منتقل ہو گیا ہے۔"),
+  errorTitle: ls("Something went wrong", "کچھ غلط ہو گیا"),
+  errorText: ls("We could not load this page. Please try again in a moment.", "یہ صفحہ لوڈ نہیں ہو سکا۔ براہ کرم تھوڑی دیر بعد دوبارہ کوشش کریں۔"),
+  siteSuspendedTitle: ls("This website is temporarily unavailable", "یہ ویب سائٹ عارضی طور پر دستیاب نہیں"),
+  siteSuspendedText: ls("Please check back soon or contact the business directly.", "براہ کرم بعد میں دوبارہ آئیں یا کاروبار سے براہ راست رابطہ کریں۔"),
+  comingSoonTitle: ls("Coming soon", "جلد آ رہا ہے"),
+  comingSoonText: ls("This website is being set up. Please check back soon.", "یہ ویب سائٹ تیار کی جا رہی ہے۔ براہ کرم جلد دوبارہ آئیں۔"),
+  popularPages: ls("Popular pages", "مقبول صفحات"),
+  errorCode: ls("Error reference", "ایرر ریفرنس"),
 } as const;
 
 export type UiKey = keyof typeof ui;

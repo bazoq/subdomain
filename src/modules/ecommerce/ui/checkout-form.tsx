@@ -16,6 +16,15 @@ import { fmt, sui } from "./strings";
 type AppliedCoupon = { code: string; type: string; value: number };
 const OTHER = "__other";
 
+/** Random per-checkout key so a double tap / retried request never creates a second order. */
+function newIdempotencyKey(): string {
+  try {
+    return crypto.randomUUID().replace(/-/g, "");
+  } catch {
+    return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}${Math.random().toString(36).slice(2, 12)}`.slice(0, 32).padEnd(16, "0");
+  }
+}
+
 /**
  * COD checkout: delivery details, city (from shipping zones), coupon, optional gift message,
  * age confirmation and prescription upload. Submits JSON to `placeOrder` and redirects to the order page.
@@ -50,6 +59,8 @@ export function CheckoutForm({ ctx, zones, showGiftMessage = false, className }:
   const [submitting, setSubmitting] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [message, setMessage] = React.useState<string | null>(null);
+  // one key per mounted checkout; survives re-renders and failed attempts so a retry can never double-order
+  const [idempotencyKey] = React.useState(newIdempotencyKey);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -95,12 +106,21 @@ export function CheckoutForm({ ctx, zones, showGiftMessage = false, className }:
       giftMessage: showGiftMessage ? form.giftMessage : "",
       ageConfirmed,
       prescriptionMediaId: rx.id,
+      idempotencyKey,
       website: honeypot,
-    });
-    setSubmitting(false);
-    if (res.ok && res.data) {
+    }).catch(() => null);
+    if (res && res.ok && res.data) {
       cart.clear();
-      router.push(`/order/${res.data.number}?p=${res.data.phoneLast4}&new=1`);
+      // number 0 = the submission was treated as a bot; nothing to show, go back to the shop
+      if (res.data.number > 0 && res.data.token) router.push(`/order/${res.data.number}?t=${encodeURIComponent(res.data.token)}&new=1`);
+      else router.push("/shop");
+      return; // keep the button disabled while the redirect happens
+    }
+    setSubmitting(false);
+    if (!res) {
+      // network / server hiccup: same idempotency key on retry returns the original order if it did go through
+      setMessage(t(ui.somethingWrong, lang));
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     if (!res.ok) {
@@ -143,7 +163,7 @@ export function CheckoutForm({ ctx, zones, showGiftMessage = false, className }:
         ) : null}
         {!commerce.codEnabled ? (
           <div role="alert" className="rounded-[var(--t-radius)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Online ordering is currently paused. Please contact us on WhatsApp to place an order.
+            {t(sui.orderingPaused, lang)}
           </div>
         ) : null}
 

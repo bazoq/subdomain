@@ -17,6 +17,7 @@ import { notifyTenant } from "@/server/notify";
 import { formatPKR, normalizePkPhone, whatsappLink } from "@/lib/utils";
 import { t, ui, type Lang } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { errorFields, log } from "@/lib/log";
 import { buildAttributes, asTimeline, toOrderDTO, toShippingZoneDTO } from "./mappers";
 import { computeShipping, couponDiscount, orderLabel, phoneLast4 } from "./pricing";
 import { orderToken } from "./order-token";
@@ -32,7 +33,7 @@ import {
   productInputSchema,
   shippingZoneInputSchema,
 } from "./schemas";
-import { canTransitionOrder, STOCK_RELEASING_STATUSES, type OrderDTO, type OrderStatusValue, type TimelineEntry } from "./types";
+import { canTransitionOrder, ORDER_TRANSITIONS, STOCK_RELEASING_STATUSES, type OrderDTO, type OrderStatusValue, type PlacedOrder, type TimelineEntry } from "./types";
 import type { TenantContext } from "@/server/tenant";
 import type { TenantAdminContext } from "@/server/auth/guards";
 
@@ -60,6 +61,17 @@ function adminAudit(ctx: TenantAdminContext, action: string, entity: string, ent
 
 function isUniqueViolation(e: unknown): boolean {
   return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
+}
+
+/**
+ * End of a calendar day in Pakistan (Asia/Karachi, UTC+5, no DST) for a `YYYY-MM-DD` input.
+ * Coupons entered as "expires 30 Sep" must stay valid until midnight in Karachi, not midnight UTC on the Vercel server.
+ */
+function pkEndOfDay(input: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(input.trim());
+  if (!m) return null;
+  const dt = new Date(`${m[1]}-${m[2]}-${m[3]}T23:59:59.999+05:00`);
+  return Number.isNaN(dt.getTime()) ? null : dt;
 }
 
 /* ═══════════════════════════════ public: checkout ═══════════════════════════════ */
@@ -126,15 +138,6 @@ async function priceLines(tc: TenantContext, lines: { productId: string; variant
   return out;
 }
 
-export interface PlacedOrder {
-  number: number;
-  label: string;
-  /** access token for /order/[number]?t=… (non-guessable) */
-  token: string;
-  /** kept for older templates that build the tracking URL themselves */
-  phoneLast4: string;
-}
-
 const IDEM_SCOPE = "checkout";
 
 export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrder>> {
@@ -143,21 +146,24 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
   const parsed = checkoutInputSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
-  if (d.website) return fail(m("unableToPlace", lang));
-
   const tid = tc.tenant.id;
   const commerce = tc.settings.commerce;
   const placed = (number: number, phone: string): PlacedOrder => ({ number, label: orderLabel(commerce.orderPrefix, number), token: orderToken("shop", tid, number), phoneLast4: phoneLast4(phone) });
+  // honeypot filled → bot. Pretend success (number 0, no token) so the bot learns nothing; the client goes back to /shop.
+  if (d.website) return success(t(ui.orderPlaced, lang), { number: 0, label: "", token: "", phoneLast4: "" });
 
   const ip = await clientIp();
-  // Pakistani mobile networks put many customers behind one CGNAT address, so the per-IP limit is generous.
-  const rl = await rateLimit({ bucket: `checkout:${ip}`, limit: 10, windowSec: 600, tenantId: tid });
+  // Pakistani mobile networks put whole neighbourhoods behind one CGNAT address, so the per-IP limit is generous
+  // and abuse is caught by the per-phone limit instead.
+  const rl = await rateLimit({ bucket: `checkout:${ip}`, limit: 15, windowSec: 600, tenantId: tid });
   if (!rl.ok) return fail(m("tooManyAttempts", lang));
 
   if (!commerce.codEnabled) return fail(m("orderingPaused", lang));
 
   const phone = normalizePkPhone(d.phone);
   if (!phone) return fail(m("fixFields", lang), { phone: m("invalidPhone", lang) });
+  const rlPhone = await rateLimit({ bucket: `checkout:phone:${phone}`, limit: 10, windowSec: 3600, tenantId: tid });
+  if (!rlPhone.ok) return fail(m("tooManyAttempts", lang));
   if (commerce.ageConfirmation && !d.ageConfirmed) return fail(m("fixFields", lang), { ageConfirmed: m("ageRequired", lang) });
 
   // duplicate-submit protection: same key → same order
@@ -320,7 +326,7 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
   } catch (e) {
     await release();
     if (e instanceof CheckoutError) return fail(e.message, e.fieldErrors);
-    console.error("placeOrder failed", e);
+    log.error("order.place_failed", { tenantId: tid, ...errorFields(e) });
     return fail(t(ui.somethingWrong, lang));
   }
 }
@@ -362,18 +368,20 @@ export async function getOrderStatus(number: unknown, phone: unknown): Promise<A
 export async function submitPrescription(input: unknown): Promise<ActionResult> {
   const tc = await requireTenant();
   const lang = await currentLang();
-  if (!tc.category.modules.includes("medical")) return fail("Not available.");
+  if (!tc.category.modules.includes("medical")) return fail(m("notAvailable", lang));
   const parsed = prescriptionInputSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
   if (d.website) return success(t(ui.thankYou, lang));
   const ip = await clientIp();
-  const rl = await rateLimit({ bucket: `form:prescription:${ip}`, limit: 5, windowSec: 600, tenantId: tc.tenant.id });
-  if (!rl.ok) return fail("Too many submissions. Please try again later.");
+  const rl = await rateLimit({ bucket: `form:prescription:${ip}`, limit: 10, windowSec: 600, tenantId: tc.tenant.id });
+  if (!rl.ok) return fail(m("tooManyRequests", lang));
   const phone = normalizePkPhone(d.phone);
-  if (!phone) return fail("Please fix the highlighted fields.", { phone: "Enter a valid Pakistani mobile number" });
+  if (!phone) return fail(m("fixFields", lang), { phone: m("invalidPhone", lang) });
+  const rlPhone = await rateLimit({ bucket: `form:prescription:phone:${phone}`, limit: 5, windowSec: 3600, tenantId: tc.tenant.id });
+  if (!rlPhone.ok) return fail(m("tooManyRequests", lang));
   const media = await db.media.findFirst({ where: { id: d.mediaId, tenantId: tc.tenant.id, visibility: "PRIVATE", confirmed: true }, select: { id: true } });
-  if (!media) return fail("Please fix the highlighted fields.", { mediaId: "The uploaded file could not be verified. Please upload again." });
+  if (!media) return fail(m("fixFields", lang), { mediaId: m("rxInvalid", lang) });
   const rx = await db.prescription.create({ data: { tenantId: tc.tenant.id, mediaId: media.id, customerName: d.name, customerPhone: phone, notes: d.notes || null } });
   await db.customer.upsert({
     where: { tenantId_phone: { tenantId: tc.tenant.id, phone } },
@@ -382,8 +390,9 @@ export async function submitPrescription(input: unknown): Promise<ActionResult> 
   });
   notifyTenant(tc, {
     subject: `New prescription from ${d.name}`,
-    text: `${d.name} (${phone})\n${d.notes ?? ""}\n\nOpen admin: /admin/prescriptions (id ${rx.id})`,
+    text: [`${d.name} · ${phone}`, `WhatsApp customer: ${whatsappLink(phone)}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/prescriptions (id ${rx.id})`].filter((l) => l !== "").join("\n"),
   }).catch(() => undefined);
+  revalidatePath("/admin/prescriptions");
   return success(t(ui.thankYou, lang));
 }
 
@@ -460,19 +469,36 @@ export async function upsertProduct(id: string | null, input: unknown): Promise<
     revalidatePath("/admin/products");
     return success(id ? "Product updated." : "Product created.", { id: productId });
   } catch (e) {
+    // two admins saving the same slug at the same time: the pre-check passed for both, the unique index caught the loser
+    if (isUniqueViolation(e)) return fail("Please fix the highlighted fields.", { slug: "Another product already uses this slug. Choose a different one." });
     return fail((e as Error).message);
   }
 }
 
-export async function deleteProduct(id: string): Promise<ActionResult> {
+/**
+ * Delete a product. When the product appears in any order it is archived (hidden, un-featured) instead, so order history,
+ * reports and the admin order → product links keep working. Products with no order history are removed for real.
+ */
+export async function deleteProduct(id: string): Promise<ActionResult<{ archived: boolean }>> {
   try {
     const ctx = await requireTenantAdminAction();
-    const { count } = await db.product.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
+    const tid = ctx.tenant.id;
+    const product = await db.product.findFirst({ where: { id, tenantId: tid }, select: { id: true, _count: { select: { orderItems: true } } } });
+    if (!product) return fail("Not found.");
+    const orders = product._count.orderItems;
+    if (orders > 0) {
+      await db.product.updateMany({ where: { id, tenantId: tid }, data: { isActive: false, isFeatured: false } });
+      await adminAudit(ctx, "product.archive", "Product", id, { orderItems: orders });
+      revalidatePath("/", "layout");
+      revalidatePath("/admin/products");
+      return success(`This product is part of ${orders} past order line${orders === 1 ? "" : "s"}, so it was hidden from the shop instead of deleted. Its order history stays intact.`, { archived: true });
+    }
+    const { count } = await db.product.deleteMany({ where: { id, tenantId: tid } });
     if (!count) return fail("Not found.");
     await adminAudit(ctx, "product.delete", "Product", id);
     revalidatePath("/", "layout");
     revalidatePath("/admin/products");
-    return success("Product deleted.");
+    return success("Product deleted.", { archived: false });
   } catch (e) {
     return fail((e as Error).message);
   }
@@ -524,6 +550,7 @@ export async function upsertCategory(id: string | null, input: unknown): Promise
     revalidatePath("/admin/products/categories");
     return success(id ? "Category updated." : "Category added.", { id: row.id });
   } catch (e) {
+    if (isUniqueViolation(e)) return fail("Please fix the highlighted fields.", { slug: "Another category already uses this slug. Choose a different one." });
     return fail((e as Error).message);
   }
 }
@@ -544,44 +571,74 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
 
 /* ═══════════════════════════════ admin: orders ═══════════════════════════════ */
 
-const STOCK_RELEASING = new Set(["CANCELLED", "RETURNED"]);
+const pretty = (s: string) => s.toLowerCase().replace(/_/g, " ");
 
-export async function updateOrderStatus(id: string, status: string, note?: string): Promise<ActionResult> {
+/**
+ * Move a shop order along the fulfilment state machine (see ORDER_TRANSITIONS).
+ *  - Illegal jumps (DELIVERED → PENDING, re-opening a CANCELLED order …) are refused with a clear message.
+ *  - Concurrency: the update is `updateMany where status = <status we read>`, so two staff members acting on a stale
+ *    screen cannot both apply a transition; the loser is told to refresh.
+ *  - Stock is handed back exactly once, on the first entry into a releasing status, and only ever incremented here.
+ *    Terminal statuses cannot be re-activated, so stock can never be driven negative by status changes.
+ *  - Same status + note = "add a note to the timeline" (no transition).
+ */
+export async function updateOrderStatus(id: string, status: string, note?: string): Promise<ActionResult<{ status: OrderStatusValue }>> {
   try {
     const ctx = await requireTenantAdminAction();
     const s = orderStatusSchema.safeParse(status);
     if (!s.success) return fail("Invalid status.");
     const tid = ctx.tenant.id;
     const cleanNote = (note ?? "").trim().slice(0, 500);
-    await db.$transaction(async (tx) => {
+    const next = s.data;
+
+    const outcome = await db.$transaction(async (tx) => {
       const order = await tx.order.findFirst({ where: { id, tenantId: tid }, include: { items: true } });
-      if (!order) throw new Error("Order not found.");
-      const wasReleased = STOCK_RELEASING.has(order.status);
-      const willRelease = STOCK_RELEASING.has(s.data);
-      // restore stock when cancelling / returning; take it again if an order is re-activated
-      if (!wasReleased && willRelease) await adjustStock(tx, tid, order.items, +1);
-      else if (wasReleased && !willRelease) await adjustStock(tx, tid, order.items, -1);
+      if (!order) return { kind: "missing" as const };
+      const current = order.status as OrderStatusValue;
+      if (!canTransitionOrder(current, next)) {
+        const allowed = ORDER_TRANSITIONS[current];
+        return { kind: "illegal" as const, current, allowed };
+      }
+      if (current === next && !cleanNote) return { kind: "noop" as const, current };
+
       const timeline = asTimeline(order.timeline);
-      if (order.status !== s.data || cleanNote) timeline.push({ status: s.data, at: new Date().toISOString(), ...(cleanNote ? { note: cleanNote } : {}) });
-      await tx.order.update({ where: { id: order.id }, data: { status: s.data, timeline: json(timeline) } });
+      timeline.push({ status: next, at: new Date().toISOString(), ...(cleanNote ? { note: cleanNote } : {}) });
+      // optimistic concurrency guard: only apply if nobody changed the status since we read it
+      const r = await tx.order.updateMany({ where: { id: order.id, tenantId: tid, status: current }, data: { status: next, timeline: json(timeline) } });
+      if (!r.count) return { kind: "conflict" as const };
+
+      const releasesNow = STOCK_RELEASING_STATUSES.includes(next) && !STOCK_RELEASING_STATUSES.includes(current);
+      if (releasesNow) await restoreStock(tx, tid, order.items);
+      return { kind: "ok" as const, from: current, restored: releasesNow };
     });
-    await adminAudit(ctx, "order.status", "Order", id, { status: s.data, note: cleanNote });
+
+    if (outcome.kind === "missing") return fail("Order not found.");
+    if (outcome.kind === "illegal") {
+      const hint = outcome.allowed.length ? `From ${pretty(outcome.current)} it can only go to: ${outcome.allowed.map(pretty).join(", ")}.` : `A ${pretty(outcome.current)} order is final; place a new order instead.`;
+      return fail(`Cannot change this order from ${pretty(outcome.current)} to ${pretty(next)}. ${hint}`);
+    }
+    if (outcome.kind === "conflict") return fail("This order was just updated by someone else. Refresh the page and try again.");
+    if (outcome.kind === "noop") return success("No change.", { status: outcome.current });
+
+    await adminAudit(ctx, "order.status", "Order", id, { from: outcome.from, to: next, note: cleanNote || undefined, stockRestored: outcome.restored });
     revalidatePath("/admin/orders");
     revalidatePath(`/admin/orders/${id}`);
-    return success(`Order marked as ${s.data.toLowerCase()}.`);
+    if (outcome.restored) revalidatePath("/", "layout"); // storefront stock badges
+    const msg = outcome.from === next ? "Note added to the timeline." : `Order marked as ${pretty(next)}.${outcome.restored ? " Stock for its items has been restored." : ""}`;
+    return success(msg, { status: next });
   } catch (e) {
     return fail((e as Error).message);
   }
 }
 
-async function adjustStock(tx: Prisma.TransactionClient, tenantId: string, items: { productId: string | null; variantId: string | null; quantity: number }[], direction: 1 | -1) {
+/** Hand the items of a cancelled / returned order back to the shelf (increment only; skips untracked products). */
+async function restoreStock(tx: Prisma.TransactionClient, tenantId: string, items: { productId: string | null; variantId: string | null; quantity: number }[]) {
   for (const it of items) {
-    if (!it.productId) continue;
+    if (!it.productId || it.quantity <= 0) continue;
     const product = await tx.product.findFirst({ where: { id: it.productId, tenantId }, select: { trackStock: true } });
     if (!product?.trackStock) continue;
-    const change = direction > 0 ? { increment: it.quantity } : { decrement: it.quantity };
-    if (it.variantId) await tx.productVariant.updateMany({ where: { id: it.variantId, tenantId }, data: { stock: change } });
-    else await tx.product.updateMany({ where: { id: it.productId, tenantId }, data: { stock: change } });
+    if (it.variantId) await tx.productVariant.updateMany({ where: { id: it.variantId, tenantId }, data: { stock: { increment: it.quantity } } });
+    else await tx.product.updateMany({ where: { id: it.productId, tenantId }, data: { stock: { increment: it.quantity } } });
   }
 }
 
@@ -596,10 +653,8 @@ export async function upsertCoupon(id: string | null, input: unknown): Promise<A
     if (d.type === "PERCENT" && d.value > 100) return fail("Please fix the highlighted fields.", { value: "Percentage cannot exceed 100." });
     let expiresAt: Date | null = null;
     if (d.expiresAt) {
-      const dt = new Date(d.expiresAt);
-      if (Number.isNaN(dt.getTime())) return fail("Please fix the highlighted fields.", { expiresAt: "Invalid date." });
-      dt.setHours(23, 59, 59, 999);
-      expiresAt = dt;
+      expiresAt = pkEndOfDay(d.expiresAt);
+      if (!expiresAt) return fail("Please fix the highlighted fields.", { expiresAt: "Enter the expiry date as YYYY-MM-DD." });
     }
     const tid = ctx.tenant.id;
     const clash = await db.coupon.findFirst({ where: { tenantId: tid, code: { equals: d.code, mode: "insensitive" }, ...(id ? { NOT: { id } } : {}) }, select: { id: true } });
@@ -615,6 +670,7 @@ export async function upsertCoupon(id: string | null, input: unknown): Promise<A
     revalidatePath("/admin/coupons");
     return success(id ? "Coupon updated." : "Coupon created.", { id: row.id });
   } catch (e) {
+    if (isUniqueViolation(e)) return fail("Please fix the highlighted fields.", { code: "This code already exists. Choose a different code." });
     return fail((e as Error).message);
   }
 }

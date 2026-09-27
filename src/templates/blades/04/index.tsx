@@ -46,7 +46,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           className="[&_nav]:gap-0 [&_nav_a]:rounded-none [&_nav_a]:border-b-2 [&_nav_a]:border-transparent [&_nav_a]:px-4 [&_nav_a]:text-[13px] [&_nav_a]:font-semibold [&_nav_a]:tracking-wide [&_nav_a:hover]:border-t-primary [&_nav_a:hover]:bg-transparent [&_nav_a:hover]:text-t-primary [&_nav_a[aria-current=page]]:border-t-primary"
           rightSlot={<CartButton ctx={lc} mode="drawer" className="hover:bg-t-muted" />}
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="light" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

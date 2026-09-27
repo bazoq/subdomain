@@ -32,6 +32,7 @@ export default async function TenantAdminLayout({ children }: { children: React.
       userName={ctx.user.name}
       userRole={ctx.user.role}
       logout={tenantLogout}
+      urduEnabled={ctx.settings.languages.urduEnabled}
     >
       {children}
     </AdminShell>

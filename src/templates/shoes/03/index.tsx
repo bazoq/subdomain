@@ -66,7 +66,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           className={cn(GRADIENT, "[&_nav_a]:font-semibold [&_nav_a:hover]:bg-t-primary-fg/15")}
           rightSlot={<CartButton ctx={lc} mode="drawer" className="bg-t-accent px-3 text-t-accent-fg shadow-[0_0_18px_var(--t-accent)] hover:bg-t-accent/90 [&>span]:bg-t-primary-fg [&>span]:text-t-primary" />}
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-accent" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

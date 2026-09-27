@@ -33,6 +33,7 @@ export const checkoutMessages = {
   enterPhoneUsed: ls("Enter the mobile number used at checkout.", "چیک آؤٹ پر استعمال شدہ موبائل نمبر درج کریں۔"),
   orderNotFound: ls("No order found with these details.", "ان تفصیلات سے کوئی آرڈر نہیں ملا۔"),
   tooManyRequests: ls("Too many attempts. Please try again later.", "بہت زیادہ کوششیں۔ بعد میں دوبارہ کوشش کریں۔"),
+  notAvailable: ls("This feature is not available on this store.", "یہ سہولت اس اسٹور پر دستیاب نہیں۔"),
 } as const;
 
 export type CheckoutMessageKey = keyof typeof checkoutMessages;

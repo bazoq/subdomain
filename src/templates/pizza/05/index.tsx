@@ -142,6 +142,8 @@ function Hero({ ctx }: TemplatePageProps) {
           <div aria-hidden="true" className="absolute inset-0 rounded-full bg-t-primary/30 blur-3xl" />
           <Img
             src={h.image}
+            loading="eager"
+            fetchPriority="high"
             alt=""
             className={cn("relative aspect-square w-full rounded-full border-2 border-t-primary object-cover", GLOW)}
             fallback={<Pizza className="size-20 text-t-primary/60" />}

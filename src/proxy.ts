@@ -21,7 +21,9 @@ import { NextResponse, type NextRequest } from "next/server";
  *    request header and stamps it on every framework script, so once the report endpoint is
  *    quiet the report-only policy can be promoted to enforced.
  *
- * Nothing here touches the database: proxy must stay cheap. Runs in the Node.js runtime.
+ * The routing decision itself is a pure function (`resolveRewrite`) so it can be unit-tested
+ * without a NextRequest. Nothing here touches the database: proxy must stay cheap.
+ * Runs in the Node.js runtime.
  */
 
 const ROOT = (process.env.ROOT_DOMAIN ?? process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost").toLowerCase();
@@ -33,12 +35,14 @@ const R2_ACCOUNT = (process.env.R2_ACCOUNT_ID ?? "").replace(/[^a-z0-9]/gi, "");
 const HOSTNAME_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/;
 const IPV6_RE = /^[0-9a-f:.]{2,45}$/;
 
+/* ───────────────────────── pure helpers (unit-testable) ───────────────────────── */
+
 /**
  * Parse a `Host`-style header into a canonical hostname (lowercase, no port, no trailing dot).
  * Returns null for anything malformed: multiple values, whitespace, control chars, bad port,
- * non-ASCII, over-long names.
+ * non-ASCII, over-long names, URL fragments.
  */
-function parseHost(raw: string | null | undefined): string | null {
+export function normaliseHost(raw: string | null | undefined): string | null {
   if (!raw) return null;
   let h = raw.trim().toLowerCase();
   if (h.length === 0 || h.length > 260) return null;
@@ -61,21 +65,16 @@ function parseHost(raw: string | null | undefined): string | null {
   return HOSTNAME_RE.test(h) ? h : null;
 }
 
-function requestHost(req: NextRequest): string | null {
-  // Vercel's edge sets x-forwarded-host from the client's Host; anywhere else it is client-controlled.
-  const forwarded = ON_VERCEL ? parseHost(req.headers.get("x-forwarded-host")) : null;
-  return forwarded ?? parseHost(req.headers.get("host"));
-}
-
-function isRootHost(host: string) {
-  if (host === ROOT || host === `www.${ROOT}`) return true;
+/** True for the platform's own hosts: ROOT_DOMAIN, www.ROOT_DOMAIN and Vercel preview deployments. */
+export function isRootHost(host: string, root: string = ROOT): boolean {
+  if (host === root || host === `www.${root}`) return true;
   // Vercel preview deployments render the super site.
   if (host.endsWith(".vercel.app")) return true;
   return false;
 }
 
-/** Percent-decode and normalise a path so prefix checks cannot be bypassed with encoding tricks. */
-function normalisePath(pathname: string): string | null {
+/** Percent-decode and normalise a path so prefix checks cannot be bypassed with encoding tricks. Null = malformed. */
+export function normalisePath(pathname: string): string | null {
   let p = pathname;
   try {
     p = decodeURIComponent(p);
@@ -83,13 +82,64 @@ function normalisePath(pathname: string): string | null {
     return null;
   }
   p = p.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
-  // eslint-disable-next-line no-control-regex
-  if (/[\u0000-\u001f\u007f]/.test(p)) return null;
+  for (let i = 0; i < p.length; i++) {
+    const c = p.charCodeAt(i);
+    if (c < 0x20 || c === 0x7f) return null; // control characters
+  }
   return p.toLowerCase();
 }
 
 function isInternalPath(p: string) {
   return /^\/_sites(?:\/|$)/.test(p);
+}
+
+export type RewriteDecision =
+  /** malformed host or path */
+  | { kind: "bad"; status: 400; reason: "host" | "path" }
+  /** internal / forbidden path for this host */
+  | { kind: "block"; status: 404 }
+  /** platform host: continue as-is */
+  | { kind: "root"; host: string; isApi: boolean; isAdmin: boolean }
+  /** tenant host, shared API route: continue but tag tenant */
+  | { kind: "tenant-api"; host: string; isApi: true; isAdmin: boolean }
+  /** tenant host, page: rewrite to the internal tenant tree */
+  | { kind: "tenant"; host: string; isApi: false; isAdmin: boolean; pathname: string };
+
+/**
+ * Pure routing decision for a (host, pathname) pair. `rawHost` is the raw Host header value,
+ * `pathname` the raw request path (as `req.nextUrl.pathname`). No side effects, no request object.
+ */
+export function resolveRewrite(rawHost: string | null | undefined, pathname: string, root: string = ROOT): RewriteDecision {
+  const host = normaliseHost(rawHost);
+  if (!host) return { kind: "bad", status: 400, reason: "host" };
+
+  const path = normalisePath(pathname);
+  if (path === null) return { kind: "bad", status: 400, reason: "path" };
+
+  const isApi = pathname.startsWith("/api/");
+  const isAdmin = path.startsWith("/admin") || path.startsWith("/super");
+
+  if (isRootHost(host, root)) {
+    // Never allow direct access to the internal tenant route group from the root host.
+    if (isInternalPath(path)) return { kind: "block", status: 404 };
+    return { kind: "root", host, isApi, isAdmin };
+  }
+
+  // Tenant host: block direct internal access and the super admin.
+  if (isInternalPath(path) || /^\/super(?:\/|$)/.test(path)) return { kind: "block", status: 404 };
+
+  // API routes are shared by all hosts; they read the tenant from x-tenant-host.
+  if (isApi) return { kind: "tenant-api", host, isApi: true, isAdmin };
+
+  return { kind: "tenant", host, isApi: false, isAdmin, pathname: `/_sites/${host}${pathname === "/" ? "" : pathname}` };
+}
+
+/* ───────────────────────── request plumbing ───────────────────────── */
+
+function requestHost(req: NextRequest): string | null {
+  // Vercel's edge sets x-forwarded-host from the client's Host; anywhere else it is client-controlled.
+  const forwarded = ON_VERCEL ? req.headers.get("x-forwarded-host") : null;
+  return forwarded && normaliseHost(forwarded) ? forwarded : req.headers.get("host");
 }
 
 function nonce(): string {
@@ -129,15 +179,12 @@ function bad(status: number, text: string) {
 }
 
 export function proxy(req: NextRequest) {
-  const host = requestHost(req);
-  if (!host) return bad(400, "Invalid host");
+  const decision = resolveRewrite(requestHost(req), req.nextUrl.pathname);
 
-  const path = normalisePath(req.nextUrl.pathname);
-  if (path === null) return bad(400, "Invalid path");
+  if (decision.kind === "bad") return bad(400, decision.reason === "host" ? "Invalid host" : "Invalid path");
+  if (decision.kind === "block") return bad(404, "Not found");
 
-  const { pathname, search } = req.nextUrl;
-  const isApi = pathname.startsWith("/api/");
-  const isAdmin = path.startsWith("/admin") || path.startsWith("/super");
+  const { host, isApi, isAdmin } = decision;
 
   // Never trust routing/security headers from the client.
   const headers = new Headers(req.headers);
@@ -148,36 +195,26 @@ export function proxy(req: NextRequest) {
   headers.delete("content-security-policy-report-only");
   headers.set("x-request-host", host);
 
-  const n = nonce();
-  const csp = strictCsp(n, { admin: isAdmin });
-  if (!isApi) {
+  const n = isApi ? null : nonce();
+  const csp = n ? strictCsp(n, { admin: isAdmin }) : null;
+  if (n && csp) {
+    // Next.js extracts the nonce from the (report-only) CSP request header and applies it to its own scripts.
     headers.set("x-nonce", n);
-    // Next.js extracts the nonce from this request header and applies it to its own scripts.
     headers.set("content-security-policy-report-only", csp);
   }
-
   const decorate = (res: NextResponse) => {
-    if (!isApi) res.headers.set("content-security-policy-report-only", csp);
+    if (csp) res.headers.set("content-security-policy-report-only", csp);
     return res;
   };
 
-  if (isRootHost(host)) {
-    // Never allow direct access to the internal tenant route group from the root host.
-    if (isInternalPath(path)) return bad(404, "Not found");
-    return decorate(NextResponse.next({ request: { headers } }));
-  }
-
-  // Tenant host: block direct internal access and rewrite everything else.
-  if (isInternalPath(path) || /^\/super(?:\/|$)/.test(path)) return bad(404, "Not found");
+  if (decision.kind === "root") return decorate(NextResponse.next({ request: { headers } }));
 
   headers.set("x-tenant-host", host);
-
-  // API routes are shared by all hosts; they read the tenant from x-tenant-host.
-  if (isApi) return NextResponse.next({ request: { headers } });
+  if (decision.kind === "tenant-api") return NextResponse.next({ request: { headers } });
 
   const url = req.nextUrl.clone();
-  url.pathname = `/_sites/${host}${pathname === "/" ? "" : pathname}`;
-  url.search = search;
+  url.pathname = decision.pathname;
+  url.search = req.nextUrl.search;
   return decorate(NextResponse.rewrite(url, { request: { headers } }));
 }
 
@@ -185,7 +222,9 @@ export const config = {
   matcher: [
     // Skip Next internals, static assets and image optimisation. NB: inside a string the dot must be
     // written `\\.` — a single backslash collapses and `.*.(css|js|txt)$` would match `/roadmap`.
+    // The `(?!_sites)` guard keeps `/_sites/**` inside the proxy even when the path looks like an
+    // asset, so the internal tree can never be reached directly.
     // robots.txt / sitemap.xml / manifest are NOT excluded: tenant hosts must be able to serve their own.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|woff2?|ttf|otf|css|js|map)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|(?!_sites).*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|woff2?|ttf|otf|css|js|map)$).*)",
   ],
 };

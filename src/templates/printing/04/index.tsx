@@ -55,7 +55,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={quoteLink(ctx)}
         className="border-b border-t-border [&>div>a>span]:uppercase [&>div>a>span]:tracking-wide [&>div>a>span]:text-t-primary [&_nav_a]:text-sm [&_nav_a]:uppercase [&_nav_a]:tracking-wide"
       />
-      <div className="flex-1">{children}</div>
+      <main id="main" className="flex-1">{children}</main>
       <SiteFooter ctx={ctx} variant="dark" />
       <WhatsAppFloat ctx={ctx} />
     </div>

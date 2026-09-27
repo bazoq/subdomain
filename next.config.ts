@@ -73,6 +73,13 @@ const adminHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  /**
+   * `typedRoutes` is stable in Next 16 but OFF here on purpose: trialled 2026-09-27, it produced 343 type errors
+   * (template nav/`href` props are plain strings). Turn it on once `Link`/`href` usages are migrated to `Route`.
+   * `serverExternalPackages` is not needed: `pg`, `@prisma/client` and `@aws-sdk/client-s3` are already in
+   * Next's built-in external list; `bcryptjs` and `jose` are pure JS.
+   */
+  typedRoutes: false,
   images: {
     remotePatterns: [
       ...(r2Host ? [{ protocol: "https" as const, hostname: r2Host }] : []),

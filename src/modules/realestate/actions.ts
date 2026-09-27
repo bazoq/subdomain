@@ -6,6 +6,7 @@ import { requireTenantAdminAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
 import { slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized } from "@/modules/shared/validation";
 import { propertySchema } from "./schema";
 
 /* Public inquiries go through submitLead (formKey "property_inquiry") — see ui/inquiry-form.tsx. */
@@ -36,7 +37,7 @@ export async function upsertProperty(id: string | null, input: unknown): Promise
     const slug = await uniqueSlug(ctx.tenant.id, v.slug || v.title.en, id);
     const data = {
       slug,
-      title: json(v.title),
+      title: json(sanitizeLocalized(v.title)),
       purpose: v.purpose,
       type: v.type,
       price: v.price,
@@ -47,11 +48,11 @@ export async function upsertProperty(id: string | null, input: unknown): Promise
       bathrooms: v.type === "PLOT" ? null : v.bathrooms,
       city: v.city,
       location: v.location,
-      description: json(v.description),
+      description: json(sanitizeLocalized(v.description)),
       features: Array.from(new Set(v.features.map((x) => x.trim()).filter(Boolean))),
-      images: v.images.filter(Boolean),
-      videoUrl: v.videoUrl || null,
-      mapUrl: v.mapUrl || null,
+      images: v.images.map((x) => x.trim()).filter(Boolean),
+      videoUrl: v.videoUrl.trim() || null,
+      mapUrl: v.mapUrl.trim() || null,
       agentId,
       isFeatured: v.isFeatured,
       isActive: v.isActive,
@@ -90,6 +91,7 @@ export async function toggleProperty(id: string, field: "isActive" | "isFeatured
   try {
     const ctx = await requireTenantAdminAction();
     if (field !== "isActive" && field !== "isFeatured") return fail("Invalid field.");
+    if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.property.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: `property.${field}`, entity: "Property", entityId: id, meta: { value } });

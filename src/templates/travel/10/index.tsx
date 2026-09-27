@@ -77,12 +77,18 @@ function Hero({ ctx }: TemplatePageProps) {
           <StatsBlock ctx={ctx} variant="row" bare className="mt-12 border-t border-t-border pt-8 [&_dd]:text-2xl sm:[&_dd]:text-3xl [&_dl]:gap-4 [&_dl>div]:text-start" />
         </div>
         <div className="relative">
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full object-cover" fallback={<Building2 className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full object-cover" fallback={<Building2 className="size-16 opacity-30" />} />
           <div className="absolute -bottom-6 -start-6 hidden border border-t-border bg-t-card p-5 shadow-lg md:block">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-t-muted-fg">{lang === "ur" ? "کارپوریٹ ڈیسک" : "Corporate desk"}</p>
-            <a href={`tel:${ctx.settings.contact.phone}`} className="font-heading mt-1 block text-lg font-semibold text-t-primary">
-              {ctx.settings.contact.phone || ctx.settings.contact.email}
-            </a>
+            {ctx.settings.contact.phone ? (
+              <a href={`tel:${ctx.settings.contact.phone}`} dir="ltr" className="font-heading mt-1 block text-lg font-semibold text-t-primary">
+                {ctx.settings.contact.phone}
+              </a>
+            ) : ctx.settings.contact.email ? (
+              <a href={`mailto:${ctx.settings.contact.email}`} className="font-heading mt-1 block text-lg font-semibold text-t-primary">
+                {ctx.settings.contact.email}
+              </a>
+            ) : null}
           </div>
         </div>
       </Container>
@@ -139,8 +145,8 @@ function ServiceRow({ s, ctx, index }: { s: Service; ctx: TemplatePageProps["ctx
 }
 
 async function Services({ ctx }: TemplatePageProps) {
-  const h = ctx.sections.services?.data as HeadingData | undefined;
-  const rows = await getServices(ctx.tenant.id, { take: 9 });
+  const h = ctx.sections.services?.data as (HeadingData & { count?: number }) | undefined;
+  const rows = await getServices(ctx.tenant.id, { take: h?.count || 9 });
   if (!rows.length) return null;
   return (
     <section id="services" className="py-16 sm:py-20">

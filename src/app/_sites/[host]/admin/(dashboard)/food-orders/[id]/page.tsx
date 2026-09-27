@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrderStatusControls } from "@/components/admin/restaurant/order-status-controls";
 import { formatDate, formatPKR, whatsappLink } from "@/lib/utils";
+import { orderToken } from "@/modules/ecommerce/order-token";
 import { toFoodOrderDto } from "@/modules/restaurant/serialize";
 
 export default async function FoodOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -16,6 +17,7 @@ export default async function FoodOrderDetailPage({ params }: { params: Promise<
   const row = await db.foodOrder.findFirst({ where: { id, tenantId: ctx.tenant.id }, include: { items: true, customer: { select: { id: true, _count: { select: { foodOrders: true } } } } } });
   if (!row) notFound();
   const o = toFoodOrderDto(row);
+  const trackingUrl = `https://${ctx.host}/menu/order/${o.number}?t=${orderToken("food", ctx.tenant.id, o.number)}`;
 
   return (
     <>
@@ -102,8 +104,14 @@ export default async function FoodOrderDetailPage({ params }: { params: Promise<
                   {o.customerPhone}
                 </a>
                 {" · "}
-                <a href={whatsappLink(o.customerPhone, `Hi ${o.customerName}, regarding your order #${o.number} at ${ctx.tenant.name}`)} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline">
+                <a href={whatsappLink(o.customerPhone, `Hi ${o.customerName}, regarding your order #${o.number} at ${ctx.tenant.name}. Track it here: ${trackingUrl}`)} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline">
                   WhatsApp
+                </a>
+              </p>
+              <p className="break-all text-xs text-slate-400">
+                Customer tracking link:{" "}
+                <a href={trackingUrl} target="_blank" rel="noreferrer" className="underline hover:text-slate-600">
+                  {trackingUrl}
                 </a>
               </p>
               {o.address ? <p className="text-slate-600">{o.address}</p> : null}

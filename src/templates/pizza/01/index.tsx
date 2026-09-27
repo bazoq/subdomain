@@ -8,7 +8,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, BadgePercent, MapPin, Phone, Pizza, Plus } from "lucide-react";
-import type { SiteContext, TemplateComponents, TemplateLayoutProps, TemplatePageProps } from "@/templates/types";
+import type { TemplateComponents, TemplateLayoutProps, TemplatePageProps } from "@/templates/types";
 import { section } from "@/templates/types";
 import { heroSection, hoursSection } from "@/templates/shared/sections";
 import { dealsSection, deliveryAreasSection, featuredMenuSection } from "@/templates/shared/packs";
@@ -17,7 +17,7 @@ import { Container, CtaButton, Icon, Img, SectionHeading, WhatsAppFloat } from "
 import { ls, t, ui } from "@/lib/i18n";
 import { cn, formatPKR } from "@/lib/utils";
 import { AboutBlock, AnnouncementBar, CtaBlock, FaqBlock, GalleryBlock, HoursTable, ProcessBlock, SiteFooter, SiteHeader, TestimonialsBlock } from "@/modules/shared/ui";
-import { FeaturedItems, OpenBadge } from "@/modules/restaurant/ui";
+import { OpenBadge } from "@/modules/restaurant/ui";
 import { OrderProvider } from "@/modules/restaurant/ui/order-provider";
 import { CartBar } from "@/modules/restaurant/ui/cart-bar";
 import { CartDrawer } from "@/modules/restaurant/ui/cart-drawer";
@@ -113,7 +113,7 @@ function Hero({ ctx }: TemplatePageProps) {
           </div>
           <div className="relative mx-auto w-full max-w-lg">
             <div className="absolute inset-0 -rotate-3 rounded-[2rem] bg-t-accent/30" aria-hidden="true" />
-            <Img src={h.image} alt="" className="relative aspect-square w-full rounded-[2rem] object-cover shadow-2xl" fallback={<Pizza className="size-20 opacity-30" />} />
+            <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-square w-full rounded-[2rem] object-cover shadow-2xl" fallback={<Pizza className="size-20 opacity-30" />} />
             {topDeal ? (
               <Link href="#deals" className="absolute -bottom-5 -start-3 flex items-center gap-3 rounded-full bg-t-primary py-2 pe-6 ps-2 text-t-primary-fg shadow-xl transition hover:scale-105 sm:-start-8">
                 <span className="flex size-11 items-center justify-center rounded-full bg-t-accent text-t-accent-fg">
@@ -174,7 +174,7 @@ async function FeaturedMenu({ ctx }: TemplatePageProps) {
   const fm = section(ctx, featuredMenuSection);
   if (!fm) return null;
   const items = await getFeaturedItems(ctx.tenant.id, fm.count || 6);
-  if (!items.length) return <FeaturedItems ctx={ctx} take={fm.count || 6} title={t(fm.title, ctx.lang) || undefined} />;
+  if (!items.length) return null;
   const lang = ctx.lang;
   return (
     <section id="menu" className="py-16 sm:py-20">
@@ -298,7 +298,7 @@ function Hours({ ctx }: TemplatePageProps) {
             ) : null}
           </dl>
         </div>
-        <div className="rounded-[var(--t-radius)] border border-white/10 bg-white/5 p-6">
+        <div className="rounded-[var(--t-radius)] border border-t-dark-fg/10 bg-t-dark-fg/5 p-6">
           <HoursTable ctx={ctx} light showStatus={false} />
         </div>
       </Container>
@@ -328,6 +328,3 @@ function Home({ ctx }: TemplatePageProps) {
 }
 
 export const components: TemplateComponents = { Layout, Home };
-
-// keep the SiteContext type referenced for helper signatures below
-export type { SiteContext };

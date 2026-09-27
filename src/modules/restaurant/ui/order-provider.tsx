@@ -41,16 +41,57 @@ const EMPTY: Record<OrderType, PersistedState> = {
   DINE_IN: { lines: [], orderType: "DINE_IN", zoneId: null },
 };
 
+const MAX_QTY = 99;
+const MAX_LINES = 50;
+
+const optStr = (v: unknown): string | undefined => (typeof v === "string" && v ? v : undefined);
+
+/**
+ * Validate + clamp one persisted line. localStorage is user-editable, so quantities are forced into 1..99 (the server
+ * accepts at most 50 per line and re-prices everything anyway) and malformed lines are dropped.
+ */
+function sanitizeLine(x: unknown): CartLine | null {
+  if (!x || typeof x !== "object") return null;
+  const o = x as Record<string, unknown>;
+  if (typeof o.menuItemId !== "string" || !o.menuItemId || typeof o.name !== "string" || !o.name) return null;
+  if (typeof o.unitPrice !== "number" || !Number.isFinite(o.unitPrice) || o.unitPrice < 0) return null;
+  const qtyRaw = typeof o.qty === "number" && Number.isFinite(o.qty) ? Math.floor(o.qty) : 0;
+  if (qtyRaw < 1) return null;
+  const modifiers = Array.isArray(o.modifiers)
+    ? o.modifiers
+        .filter((m): m is Record<string, unknown> => !!m && typeof m === "object")
+        .map((m) => ({ id: String(m.id ?? ""), name: String(m.name ?? ""), price: typeof m.price === "number" && Number.isFinite(m.price) ? Math.max(0, Math.floor(m.price)) : 0 }))
+        .filter((m) => m.id)
+    : [];
+  const base = {
+    menuItemId: o.menuItemId,
+    slug: typeof o.slug === "string" ? o.slug : "",
+    name: o.name,
+    sizeName: optStr(o.sizeName),
+    unitPrice: Math.floor(o.unitPrice),
+    modifiers,
+    qty: Math.min(MAX_QTY, qtyRaw),
+    note: optStr(o.note),
+    imageUrl: optStr(o.imageUrl),
+  };
+  return { ...base, key: cartLineKey(base) };
+}
+
 function parseState(raw: string, fallback: PersistedState): PersistedState {
   try {
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    const lines = Array.isArray(parsed.lines)
-      ? parsed.lines
-          .filter((l): l is CartLine => !!l && typeof l === "object" && typeof l.menuItemId === "string" && typeof l.qty === "number" && l.qty > 0)
-          .map((l) => ({ ...l, modifiers: Array.isArray(l.modifiers) ? l.modifiers : [], key: l.key || cartLineKey(l) }))
-      : [];
+    const byKey = new Map<string, CartLine>();
+    if (Array.isArray(parsed.lines)) {
+      for (const entry of parsed.lines) {
+        const line = sanitizeLine(entry);
+        if (!line) continue;
+        const existing = byKey.get(line.key);
+        byKey.set(line.key, existing ? { ...existing, qty: Math.min(MAX_QTY, existing.qty + line.qty) } : line);
+        if (byKey.size >= MAX_LINES) break;
+      }
+    }
     const orderType: OrderType = parsed.orderType === "PICKUP" || parsed.orderType === "DINE_IN" || parsed.orderType === "DELIVERY" ? parsed.orderType : fallback.orderType;
-    return { lines, orderType, zoneId: typeof parsed.zoneId === "string" ? parsed.zoneId : null };
+    return { lines: Array.from(byKey.values()), orderType, zoneId: typeof parsed.zoneId === "string" ? parsed.zoneId : null };
   } catch {
     return fallback;
   }
@@ -134,12 +175,14 @@ function OrderProviderInner({ host, defaultOrderType, children }: { host: string
       const key = cartLineKey(input);
       commit((s) => {
         const idx = s.lines.findIndex((l) => l.key === key);
+        const add = Math.max(1, Math.floor(Number.isFinite(input.qty) ? input.qty : 1));
         if (idx >= 0) {
           const lines = [...s.lines];
-          lines[idx] = { ...lines[idx], qty: Math.min(99, lines[idx].qty + input.qty) };
+          lines[idx] = { ...lines[idx], qty: Math.min(MAX_QTY, lines[idx].qty + add) };
           return { ...s, lines };
         }
-        return { ...s, lines: [...s.lines, { ...input, key, qty: Math.max(1, input.qty) }] };
+        if (s.lines.length >= MAX_LINES) return s;
+        return { ...s, lines: [...s.lines, { ...input, key, qty: Math.min(MAX_QTY, add) }] };
       });
     },
     [commit],
@@ -147,9 +190,10 @@ function OrderProviderInner({ host, defaultOrderType, children }: { host: string
 
   const updateQty = React.useCallback(
     (key: string, qty: number) => {
+      const q = Math.floor(Number.isFinite(qty) ? qty : 0);
       commit((s) => ({
         ...s,
-        lines: qty <= 0 ? s.lines.filter((l) => l.key !== key) : s.lines.map((l) => (l.key === key ? { ...l, qty: Math.min(99, qty) } : l)),
+        lines: q <= 0 ? s.lines.filter((l) => l.key !== key) : s.lines.map((l) => (l.key === key ? { ...l, qty: Math.min(MAX_QTY, q) } : l)),
       }));
     },
     [commit],

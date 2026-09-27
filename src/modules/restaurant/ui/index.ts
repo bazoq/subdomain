@@ -12,6 +12,7 @@ export { CartBar } from "./cart-bar";
 export { CartDrawer } from "./cart-drawer";
 export { CheckoutForm } from "./checkout-form";
 export { OrderTracker } from "./order-tracker";
+export { OrderLookup } from "./order-lookup";
 export { OpenBadge } from "./open-badge";
 export { DealsStrip } from "./deals-strip";
 export { FeaturedItems } from "./featured-items";

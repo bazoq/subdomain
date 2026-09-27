@@ -18,6 +18,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       layout: "Generous whitespace, serif headings, cream background, terracotta buttons, footer on dark brown.",
     },
     overrides: { hero: { eyebrow: "Since 2012 · Lahore" } },
+    features: ["Editorial split hero with trust badges", "Overlapping polaroid-style collection cards", "Cream product cards in a 4-column grid"],
     demo: { name: "Copper & Clay Kitchen", city: "Lahore" },
   },
   {
@@ -34,6 +35,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Yellow 'promo' ribbon with coupon code; product cards with red price tag and 'Add' button visible always.",
       layout: "Compact, retail energy, thick section dividers, dark footer with payment/COD badges.",
     },
+    features: ["Retail header with category bar and mobile drawer", "Yellow promo ribbon with coupon code", "Always-visible Add buttons with red price tags"],
     demo: { name: "ChefLine Appliances", city: "Karachi" },
   },
   {
@@ -50,6 +52,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Products in a 3-column masonry with hover image swap; collections as text-only list with arrows.",
       layout: "Square corners, hairline borders, sage buttons, lots of breathing room, monochrome footer.",
     },
+    features: ["Transparent-to-solid header on scroll", "3-column masonry with hover image swap", "Text-only collections list with arrows"],
     demo: { name: "Nordic Table", city: "Islamabad" },
   },
   {
@@ -66,6 +69,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Collections as colourful rounded tiles (teal/mango/cream); testimonials as speech bubbles.",
       layout: "Extra-rounded cards, pastel section backgrounds alternating, friendly footer with WhatsApp CTA.",
     },
+    features: ["Colourful rounded collection tiles", "Speech-bubble testimonials", "Playful stat cards on a dark band"],
     demo: { name: "Desi Rasoi Store", city: "Faisalabad" },
   },
 
@@ -85,6 +89,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       layout: "Black/white with gold accent, square corners, uppercase letter-spaced labels, editorial spacing.",
     },
     overrides: { hero: { eyebrow: "Unstitched · Pret · Bridal" } },
+    features: ["Full-screen scroll-snap hero slider", "Lookbook masonry from the gallery", "Tall side-by-side collection panels with hover zoom"],
     demo: { name: "Zarnish Couture", city: "Lahore" },
   },
   {
@@ -102,6 +107,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       layout: "Dark mode throughout, hard edges, lime/pink accents, grid lines.",
       motion: "Marquee ticker (.t-marquee), hover scale on cards.",
     },
+    features: ["Diagonal promo ticker", "Lime price tags with keyboard-accessible QUICK ADD", "Grid-paper collection cards"],
     demo: { name: "StreetForm", city: "Karachi" },
   },
   {
@@ -118,6 +124,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Collections as circular category bubbles; testimonial carousel with big quotation marks.",
       layout: "Rounded-xl cards, soft shadows, pastel section bands, floral divider line.",
     },
+    features: ["Circular category bubbles", "Testimonial carousel with big quotation marks", "Soft rounded product cards"],
     demo: { name: "Gulaab Boutique", city: "Multan" },
   },
   {
@@ -134,6 +141,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Section eyebrows sit inside small mustard chips; collections as a 4-tile bento grid.",
       layout: "Bento grids, subtle geometric pattern backgrounds (CSS), indigo footer.",
     },
+    features: ["Mustard eyebrow chips (block-print inspired)", "4-tile bento collections grid", "Indigo header with inline search"],
     demo: { name: "Khaadi Lane", city: "Lahore" },
   },
 
@@ -152,6 +160,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Size chips shown on product cards on hover; 'New drops' horizontal scroll row.",
       layout: "High contrast, black section headers, orange CTAs, sneaker grid.",
     },
+    features: ["Size chips revealed on product cards", "'New drops' horizontal scroll row", "Black-on-white sneaker hero"],
     demo: { name: "Sole Studio", city: "Karachi" },
   },
   {
@@ -168,7 +177,8 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "'Made by hand' about block with 3 process images; testimonials in leather-brown cards.",
       layout: "Warm paper background, serif headings, stitched dashed dividers.",
     },
-    overrides: { hero: { eyebrow: "Handmade in Charsadda & Multan", title: { en: "Handmade leather, honest prices" } } },
+    overrides: { hero: { eyebrow: "Handmade in Charsadda & Multan", title: { en: "Handmade leather, honest prices", ur: "ہاتھ سے بنا چمڑا، مناسب قیمتیں" } } },
+    features: ["'Made by hand' process block with 3 images", "Leather-brown testimonial cards", "Artisan highlights list"],
     demo: { name: "Kolhapuri Co.", city: "Peshawar" },
   },
   {
@@ -186,6 +196,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       layout: "Angled section edges via clip-path, rounded cards, blue/cyan gradients.",
       motion: "Fade-up on sections, hover lift.",
     },
+    features: ["Gradient speed-line hero", "Big-number stat tiles with gradient borders", "'Fast delivery' chips on product cards"],
     demo: { name: "Stride Footwear", city: "Sialkot" },
   },
   {
@@ -202,6 +213,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Collections as gold-framed portraits; lookbook in 2-column oversized grid.",
       layout: "Square corners, gold hairlines, black footer with champagne text.",
     },
+    features: ["Gold-framed collection portraits", "Oversized 2-column lookbook", "Serif micro-label typography"],
     demo: { name: "Maison Heel", city: "Lahore" },
   },
 
@@ -220,7 +232,8 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Occasions grid (collections) as pastel tiles with emoji-style icons; 'Add a gift message' callout.",
       layout: "Playful pastels, extra-rounded cards, ribbon-like section dividers.",
     },
-    overrides: { collections: { title: { en: "Shop by occasion" }, items: [{ title: { en: "Birthday" }, subtitle: { en: "Cakes, balloons, boxes" }, image: "", href: "/shop?tags=birthday" }, { title: { en: "Eid" }, subtitle: { en: "Eidi boxes & sweets" }, image: "", href: "/shop?tags=eid" }, { title: { en: "Wedding" }, subtitle: { en: "Nikkah & valima gifts" }, image: "", href: "/shop?tags=wedding" }, { title: { en: "Anniversary" }, subtitle: { en: "Flowers & personalised" }, image: "", href: "/shop?tags=anniversary" }] } },
+    overrides: { collections: { title: { en: "Shop by occasion", ur: "موقع کے مطابق خریداری" }, items: [{ title: { en: "Birthday", ur: "سالگرہ" }, subtitle: { en: "Cakes, balloons, boxes", ur: "کیک، غبارے، گفٹ باکس" }, image: "", href: "/shop?tags=birthday" }, { title: { en: "Eid", ur: "عید" }, subtitle: { en: "Eidi boxes & sweets", ur: "عیدی باکس اور مٹھائیاں" }, image: "", href: "/shop?tags=eid" }, { title: { en: "Wedding", ur: "شادی" }, subtitle: { en: "Nikkah & valima gifts", ur: "نکاح اور ولیمہ کے تحائف" }, image: "", href: "/shop?tags=wedding" }, { title: { en: "Anniversary", ur: "سالگرۂ شادی" }, subtitle: { en: "Flowers & personalised", ur: "پھول اور پرسنلائزڈ تحائف" }, image: "", href: "/shop?tags=anniversary" }] } },
+    features: ["Pastel occasions grid with icons", "'Add a gift message' callout", "Cheerful rounded product cards"],
     demo: { name: "Wrapped Gifts", city: "Islamabad" },
   },
   {
@@ -237,7 +250,8 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Banner section pitched as 'Corporate & bulk gifting' with a lead CTA; gold divider ornaments.",
       layout: "Formal, symmetric, gold hairlines, emerald footer.",
     },
-    overrides: { banner: { eyebrow: "Corporate", title: { en: "Bulk & corporate gifting" }, text: { en: "Branded hampers for clients and teams. Minimum 25 units, custom packaging available." }, cta: { label: { en: "Request a quote" }, href: "/contact" } } },
+    overrides: { banner: { eyebrow: "Corporate", title: { en: "Bulk & corporate gifting", ur: "بلک اور کارپوریٹ گفٹنگ" }, text: { en: "Branded hampers for clients and teams. Minimum 25 units, custom packaging available.", ur: "کلائنٹس اور ٹیموں کے لیے برانڈڈ ہیمپرز۔ کم از کم 25 یونٹس، کسٹم پیکیجنگ دستیاب۔" }, cta: { label: { en: "Request a quote", ur: "کوٹ حاصل کریں" }, href: "/contact" } } },
+    features: ["Corporate & bulk gifting lead banner", "Gold divider ornaments", "Dark header with gold accents"],
     demo: { name: "Noor Hampers", city: "Karachi" },
   },
   {
@@ -254,6 +268,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "'Personalise it' step strip; product cards with dashed hover border.",
       layout: "Tidy 4-col grids, pastel lilac bands, hand-drawn underline on headings (CSS).",
     },
+    features: ["'Personalise it' step strip", "Dashed hover border on product cards", "Compact occasions icon grid"],
     demo: { name: "Little Things", city: "Rawalpindi" },
   },
   {
@@ -270,6 +285,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Featured products as large image-first cards with hover overlay price; promo as gold ribbon.",
       layout: "Dark botanical theme, gold accents, serif headings, generous imagery.",
     },
+    features: ["Dark botanical mood with fixed header", "Image-first product cards with reveal price row", "Gold promo ribbon"],
     demo: { name: "Bloom & Box", city: "Lahore" },
   },
 
@@ -288,6 +304,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Craft section as horizontal timeline with numbered steps; product cards show steel type chip (Damascus / 1095).",
       layout: "Dark, metallic borders, amber accents, specs tables prominent.",
     },
+    features: ["Forge-lit dark theme", "Craft timeline with numbered steps", "Steel-type chip on product cards"],
     demo: { name: "Damascus Forge Wazirabad", city: "Wazirabad" },
   },
   {
@@ -304,6 +321,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Products presented as 'exhibits' with catalogue numbers; craft section as two-column essay with images.",
       layout: "Square corners, thin rules, catalogue feel, maroon accents.",
     },
+    features: ["Centred masthead logo", "Products presented as catalogued exhibits", "Two-column craft essay with images"],
     demo: { name: "Steelcraft Heritage", city: "Wazirabad" },
   },
   {
@@ -320,6 +338,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Product cards with blade length / steel / weight micro-specs row; features as icon list in olive.",
       layout: "Gear-store grid, sharp corners, orange CTAs, dark olive footer.",
     },
+    features: ["Blade length / steel / weight micro-specs on cards", "Olive icon feature list", "Rugged full-bleed hero"],
     demo: { name: "Edge Outdoors", city: "Sialkot" },
   },
   {
@@ -336,6 +355,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Comparison-style features grid; craft section shown as 3 vertical cards.",
       layout: "Clean grid, steel-grey accents, teal buttons.",
     },
+    features: ["Comparison-style features grid", "3 vertical craft cards", "Clean knife-on-white hero with chips"],
     demo: { name: "Kitchen Steel", city: "Wazirabad" },
   },
 
@@ -354,6 +374,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Brands strip with logos; 'Top picks' horizontal scroller.",
       layout: "Energetic, green bands, yellow CTAs, angled dividers.",
     },
+    features: ["Cricket-first hero with category nav", "Brands logo strip", "'Top picks' horizontal scroller"],
     demo: { name: "Pitch Pro Sports", city: "Sialkot" },
   },
   {
@@ -370,6 +391,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Product cards with weight/size chips; features as red-numbered list.",
       layout: "Dark, aggressive, red accents, big type.",
     },
+    features: ["Dark heavy-metal hero", "Weight/size chips on product cards", "Red-numbered features list"],
     demo: { name: "IronWorks Fitness Store", city: "Lahore" },
   },
   {
@@ -386,6 +408,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Collections as circular icons; testimonials as speech bubbles.",
       layout: "Rounded, bright, alternating pastel bands.",
     },
+    features: ["Circular icon collections", "Speech-bubble testimonials", "Bright blob-shaped banner"],
     demo: { name: "Active Kids", city: "Islamabad" },
   },
   {
@@ -402,6 +425,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Collections as wide landscape tiles; features with trail icons.",
       layout: "Earthy, wide imagery, green CTAs.",
     },
+    features: ["Wide landscape collection tiles", "Trail-icon features", "Outdoor hero with altitude badge"],
     demo: { name: "Summit Gear", city: "Islamabad" },
   },
   {
@@ -418,7 +442,8 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Banner pitched as 'Custom team kits' with lead CTA; brands strip.",
       layout: "Clean, navy/neon, rounded-lg cards.",
     },
-    overrides: { banner: { eyebrow: "Teams & academies", title: { en: "Custom team kits & printing" }, text: { en: "Jerseys, numbers and logos for your club or school team. Bulk discounts from 15 pieces." }, cta: { label: { en: "Request a quote" }, href: "/contact" } } },
+    overrides: { banner: { eyebrow: "Teams & academies", title: { en: "Custom team kits & printing", ur: "کسٹم ٹیم کٹس اور پرنٹنگ" }, text: { en: "Jerseys, numbers and logos for your club or school team. Bulk discounts from 15 pieces.", ur: "آپ کے کلب یا اسکول ٹیم کے لیے جرسیاں، نمبر اور لوگو۔ 15 پیس سے بلک ڈسکاؤنٹ۔" }, cta: { label: { en: "Request a quote", ur: "کوٹ حاصل کریں" }, href: "/contact" } } },
+    features: ["Custom team-kits lead banner", "Brands strip", "Clean court-line grid layout"],
     demo: { name: "Court Club", city: "Karachi" },
   },
 
@@ -437,6 +462,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Product cards show 2-3 key specs; brands strip; warranty features block.",
       layout: "Retail grid, blue CTAs, light grey bands.",
     },
+    features: ["Key specs on product cards", "Header search bar", "Warranty features block"],
     demo: { name: "Voltify Electronics", city: "Lahore" },
   },
   {
@@ -454,6 +480,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       layout: "Dark neon, gradient borders, grid.",
       motion: "Subtle glow pulse on CTA.",
     },
+    features: ["Neon glow-border product cards", "Monospace spec chips", "Dark gaming palette"],
     demo: { name: "Nightshift Gaming", city: "Karachi" },
   },
   {
@@ -470,7 +497,8 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Banner as 'Solar & inverter solutions' lead capture; features with service icons.",
       layout: "Warm neutral, teal CTAs, orange highlights.",
     },
-    overrides: { banner: { eyebrow: "Solar", title: { en: "Solar & inverter packages" }, text: { en: "Beat load-shedding with net-metering-ready solar systems. Free site survey in city." }, cta: { label: { en: "Get a free survey" }, href: "/contact" } } },
+    overrides: { banner: { eyebrow: "Solar", title: { en: "Solar & inverter packages", ur: "سولر اور انورٹر پیکجز" }, text: { en: "Beat load-shedding with net-metering-ready solar systems. Free site survey in city.", ur: "نیٹ میٹرنگ کے لیے تیار سولر سسٹمز کے ساتھ لوڈ شیڈنگ کو شکست دیں۔ شہر میں مفت سائٹ سروے۔" }, cta: { label: { en: "Get a free survey", ur: "مفت سروے حاصل کریں" }, href: "/contact" } } },
+    features: ["Solar & inverter lead-capture banner", "Service-icon features", "Click-to-call CTA"],
     demo: { name: "HomeVolt Appliances", city: "Gujranwala" },
   },
 
@@ -489,6 +517,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Prescription CTA block with 3 steps; categories as icon chips (Medicines, Baby care, Vitamins, Devices).",
       layout: "Clean, high legibility, blue/green.",
     },
+    features: ["3-step prescription CTA block", "Category icon chips", "Clinical blue trust header"],
     demo: { name: "CarePlus Pharmacy", city: "Lahore" },
   },
   {
@@ -505,6 +534,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Wellness categories as pastel rounded tiles; prescription CTA as a card with icon steps.",
       layout: "Rounded, pastel green, warm and accessible.",
     },
+    features: ["Pastel wellness category tiles", "Prescription card with icon steps", "Rounded green header pills"],
     demo: { name: "Sehat Medical Store", city: "Rawalpindi" },
   },
   {
@@ -521,6 +551,7 @@ export const ecommerceBlueprints: Blueprint[] = [
       signature: "Category chips scroll row; 'Upload prescription' floating card; features as delivery-time steps.",
       layout: "Mobile-first, card-based, red CTAs.",
     },
+    features: ["App-style category chip scroll row", "Floating 'Upload prescription' card", "Delivery-time step features"],
     demo: { name: "MediDash", city: "Karachi" },
   },
 ];

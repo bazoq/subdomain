@@ -113,7 +113,7 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <GoldFrame className="mx-auto mt-12 max-w-4xl">
-          <Img src={h.image} alt="" className="aspect-[16/9] w-full object-cover" fallback={<Cookie className="size-14 text-t-primary/40" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[16/9] w-full object-cover" fallback={<Cookie className="size-14 text-t-primary/40" />} />
         </GoldFrame>
       </Container>
     </section>

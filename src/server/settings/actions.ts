@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db, json } from "@/server/db";
+import { dbErrorMessage } from "@/server/db";
+import { readTenantSettings, updateTenantSettings } from "@/server/settings/store";
 import { requireTenantAdminAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
-import { parseSettings, tenantSettingsSchema, type TenantSettings } from "@/lib/tenant-settings";
+import { tenantSettingsSchema, type TenantSettings } from "@/lib/tenant-settings";
 import { normalizePkPhone } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 
@@ -23,8 +24,7 @@ export async function saveSettings(section: SettingsSection, partial: unknown): 
     if (section === "commerce" && !ctx.category.modules.includes("ecommerce")) return fail("Not available for this business type.");
     if (section === "restaurant" && !ctx.category.modules.includes("restaurant")) return fail("Not available for this business type.");
 
-    const fresh = await db.tenant.findUnique({ where: { id: ctx.tenant.id }, select: { settings: true } });
-    const current = parseSettings(fresh?.settings);
+    const current = await readTenantSettings(ctx.tenant.id);
     const incoming = normaliseIncoming(section, partial);
     const merged: Record<string, unknown> = { ...current };
     merged[section] = Array.isArray(incoming) || section === "hours" ? incoming : { ...(current[section] as object), ...(incoming as object) };
@@ -36,12 +36,14 @@ export async function saveSettings(section: SettingsSection, partial: unknown): 
       const fieldErrors = Object.fromEntries(Object.entries(r.ok ? {} : (r.fieldErrors ?? {})).map(([k, v]) => [k.replace(`${section}.`, ""), v]));
       return fail("Please fix the highlighted fields.", fieldErrors);
     }
-    await db.tenant.update({ where: { id: ctx.tenant.id }, data: { settings: json(parsed.data) } });
+    // Re-read inside the transaction and replace only this section, so a concurrent save of another
+    // section (or the restaurant "accepting orders" switch) is never overwritten with our stale copy.
+    const saved = await updateTenantSettings(ctx.tenant.id, (latest) => ({ ...latest, [section]: parsed.data[section] }));
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "settings.update", entity: "Tenant", entityId: ctx.tenant.id, meta: { section } });
     revalidatePath("/", "layout");
-    return success("Settings saved.", { settings: parsed.data });
+    return success("Settings saved.", { settings: saved });
   } catch (e) {
-    return fail((e as Error).message);
+    return fail(dbErrorMessage(e));
   }
 }
 

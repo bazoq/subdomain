@@ -49,7 +49,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
       <div className="flex min-h-screen flex-col bg-t-bg text-t-fg">
         <AnnouncementBar ctx={ctx} variant="dark" />
         <EditorialHeader ctx={ctx} />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:tracking-[0.25em] [&_h3]:text-t-accent" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />
@@ -82,13 +82,13 @@ function Hero({ ctx }: TemplatePageProps) {
                 {i === 0 ? (
                   <>
                     <h1 className="font-heading text-4xl font-light leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
-                    <p className="mt-5 max-w-lg text-sm leading-7 text-white/80 sm:text-base">{t(h.subtitle, lang)}</p>
+                    <p className="mt-5 max-w-lg text-sm leading-7 text-t-dark-fg/80 sm:text-base">{t(h.subtitle, lang)}</p>
                   </>
                 ) : (
                   <p className="font-heading text-3xl font-light leading-tight tracking-tight sm:text-5xl">{t(h.subtitle, lang)}</p>
                 )}
                 <div className="mt-8 flex flex-wrap gap-4">
-                  <CtaButton value={h.primaryCta} ctx={ctx} className={cn("t-btn t-btn-outline border-white/60 px-8 text-white hover:bg-white hover:text-t-fg", LABEL)} />
+                  <CtaButton value={h.primaryCta} ctx={ctx} className={cn("t-btn t-btn-outline border-t-dark-fg/60 px-8 text-t-dark-fg hover:bg-t-dark-fg hover:text-t-dark", LABEL)} />
                   <CtaButton value={h.secondaryCta} ctx={ctx} className={cn("inline-flex items-center gap-2 border-b border-t-accent pb-1 text-t-accent", LABEL)} />
                 </div>
               </div>
@@ -171,9 +171,9 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container className="relative py-20 text-center">
         {d.eyebrow ? <span className={cn("block text-t-accent", LABEL)}>{d.eyebrow}</span> : null}
         <h2 className="font-heading mx-auto mt-5 max-w-2xl text-3xl font-light leading-tight tracking-tight sm:text-5xl">{title}</h2>
-        <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-white/80">{t(d.text, ctx.lang)}</p>
+        <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-t-dark-fg/80">{t(d.text, ctx.lang)}</p>
         <div className="mt-9">
-          <CtaButton value={d.cta} ctx={ctx} className={cn("t-btn t-btn-outline border-white/60 px-8 text-white hover:bg-white hover:text-t-fg", LABEL)} />
+          <CtaButton value={d.cta} ctx={ctx} className={cn("t-btn t-btn-outline border-t-dark-fg/60 px-8 text-t-dark-fg hover:bg-t-dark-fg hover:text-t-dark", LABEL)} />
         </div>
       </Container>
     </section>

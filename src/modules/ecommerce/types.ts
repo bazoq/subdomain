@@ -125,6 +125,16 @@ export function canTransitionOrder(from: OrderStatusValue, to: OrderStatusValue)
 /** Statuses that hand stock back to the shelf. */
 export const STOCK_RELEASING_STATUSES: readonly OrderStatusValue[] = ["CANCELLED", "RETURNED"];
 
+/** Result of a successful `placeOrder` call. */
+export interface PlacedOrder {
+  number: number;
+  label: string;
+  /** access token for /order/[number]?t=… (non-guessable); empty when the submission was a bot */
+  token: string;
+  /** kept for older templates that build the tracking URL themselves */
+  phoneLast4: string;
+}
+
 export interface TimelineEntry {
   status: string;
   at: string;

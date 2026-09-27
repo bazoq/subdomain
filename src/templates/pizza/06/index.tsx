@@ -48,11 +48,11 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           rightSlot={
             <div className="flex items-center gap-2">
               {phone ? (
-                <a href={`tel:${phone}`} dir="ltr" className="hidden items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold md:inline-flex">
+                <a href={`tel:${phone}`} dir="ltr" className="hidden items-center gap-1.5 rounded-full bg-t-dark-fg/10 px-3 py-1.5 text-sm font-bold md:inline-flex">
                   <Phone className="size-4 text-t-accent" /> {phone}
                 </a>
               ) : null}
-              <CartCountLink host={ctx.host} label={t(ui.cart, lang)} className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold hover:bg-white/20" />
+              <CartCountLink host={ctx.host} label={t(ui.cart, lang)} className="rounded-full bg-t-dark-fg/10 px-3 py-1.5 text-sm font-bold hover:bg-t-dark-fg/20" />
             </div>
           }
         />
@@ -72,7 +72,8 @@ function Hero({ ctx }: TemplatePageProps) {
   if (!h) return null;
   const lang = ctx.lang;
   const deals = section(ctx, dealsSection);
-  const lowest = deals?.items?.length ? Math.min(...deals.items.map((it) => it.price).filter((p) => p > 0)) : 0;
+  const prices = (deals?.items ?? []).map((it) => it.price).filter((p) => p > 0);
+  const lowest = prices.length ? Math.min(...prices) : 0;
   const extra = (h.slides ?? []).slice(0, 2);
   return (
     <section className="relative overflow-hidden bg-t-muted">
@@ -100,7 +101,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative">
           <div className="grid grid-cols-3 gap-3">
-            <Img src={h.image} alt="" className="col-span-3 aspect-[16/10] w-full rounded-[var(--t-radius)] object-cover shadow-lg" fallback={<Pizza className="size-16 opacity-25" />} />
+            <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="col-span-3 aspect-[16/10] w-full rounded-[var(--t-radius)] object-cover shadow-lg" fallback={<Pizza className="size-16 opacity-25" />} />
             {extra.map((src, i) => (
               <Img key={i} src={src} alt="" className="aspect-square w-full rounded-[var(--t-radius)] object-cover shadow" />
             ))}

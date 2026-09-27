@@ -79,7 +79,7 @@ function Hero({ ctx }: TemplatePageProps) {
           </div>
         </div>
       </Container>
-      {h.image ? <Img src={h.image} alt="" className="h-72 w-full object-cover opacity-60 grayscale lg:h-96" /> : null}
+      {h.image ? <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="h-72 w-full object-cover opacity-60 grayscale lg:h-96" /> : null}
     </section>
   );
 }

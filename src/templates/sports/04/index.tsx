@@ -57,7 +57,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           className="bg-t-muted/95 [&>div>a>span]:text-t-primary [&_nav_a]:font-semibold [&_nav_a:hover]:bg-t-primary/10 [&_nav_a:hover]:text-t-primary"
           rightSlot={<CartButton ctx={lc} mode="drawer" className="hover:bg-t-primary/10" />}
         />
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrderStatusForm } from "@/components/admin/ecommerce/order-status-form";
 import { asTimeline } from "@/modules/ecommerce/mappers";
+import { orderToken } from "@/modules/ecommerce/order-token";
 import { orderLabel } from "@/modules/ecommerce/pricing";
 import { formatDate, formatPKR, whatsappLink } from "@/lib/utils";
 
@@ -20,7 +21,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   if (!order) notFound();
   const label = orderLabel(ctx.settings.commerce.orderPrefix, order.number);
   const timeline = asTimeline(order.timeline).reverse();
-  const waMsg = `Assalam o Alaikum ${order.customerName}, this is ${ctx.tenant.name} regarding your order ${label} (${formatPKR(order.total)}).`;
+  const trackingUrl = `https://${ctx.host}/order/${order.number}?t=${orderToken("shop", ctx.tenant.id, order.number)}`;
+  const waMsg = `Assalam o Alaikum ${order.customerName}, this is ${ctx.tenant.name} regarding your order ${label} (${formatPKR(order.total)}). Track it here: ${trackingUrl}`;
 
   return (
     <>
@@ -203,8 +205,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </Card>
           ) : null}
 
-          <p className="text-xs text-slate-400">
-            IP {order.ip ?? "—"} · Customer tracking link: /order/{order.number}?p={order.customerPhone.slice(-4)}
+          <p className="break-all text-xs text-slate-400">
+            IP {order.ip ?? "—"} · Customer tracking link:{" "}
+            <a href={trackingUrl} target="_blank" rel="noreferrer" className="underline hover:text-slate-600">
+              {trackingUrl}
+            </a>
           </p>
         </div>
       </div>

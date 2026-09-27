@@ -47,7 +47,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             rightSlot={<CartButton ctx={lc} mode="drawer" showLabel className="bg-t-accent px-4 text-t-accent-fg hover:bg-t-accent/90" />}
           />
         </div>
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

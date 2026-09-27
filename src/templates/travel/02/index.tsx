@@ -82,7 +82,7 @@ async function Hero({ ctx }: TemplatePageProps) {
   const departures = Array.from(new Set(umrah.flatMap((p) => parseDepartures(p.departures, true).slice(0, 2)))).sort().slice(0, 6);
   return (
     <section className="relative overflow-hidden bg-t-dark text-t-dark-fg">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Moon className="size-24 opacity-20" />} />
+      <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Moon className="size-24 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-b from-t-dark/70 via-t-dark/60 to-t-dark" aria-hidden="true" />
       <Container className="relative py-24 text-center lg:py-32">
         {h.eyebrow ? <span className="inline-block border-y border-t-accent/60 px-4 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{h.eyebrow}</span> : null}
@@ -92,7 +92,7 @@ async function Hero({ ctx }: TemplatePageProps) {
         <ul className="mt-8 flex flex-wrap justify-center gap-3">
           {TIERS.map((tier) => (
             <li key={tier.key}>
-              <Link href={`/packages?kind=UMRAH&q=${tier.key}`} className="inline-flex items-center gap-2 border border-t-accent/60 bg-white/5 px-5 py-2 text-sm font-semibold uppercase tracking-widest text-t-accent transition hover:bg-t-accent hover:text-t-accent-fg">
+              <Link href={`/packages?kind=UMRAH&q=${tier.key}`} className="inline-flex items-center gap-2 border border-t-accent/60 bg-t-dark-fg/5 px-5 py-2 text-sm font-semibold uppercase tracking-widest text-t-accent transition hover:bg-t-accent hover:text-t-accent-fg">
                 {lang === "ur" ? tier.ur : tier.en}
               </Link>
             </li>

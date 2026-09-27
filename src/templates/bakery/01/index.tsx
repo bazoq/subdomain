@@ -108,7 +108,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <div className="relative aspect-square w-72 sm:w-96 lg:w-[28rem]">
             <div className="absolute inset-0 rounded-full border-2 border-dashed border-t-primary/40" aria-hidden="true" />
             <div className="absolute inset-4 overflow-hidden rounded-full bg-t-accent shadow-xl ring-8 ring-t-card">
-              <Img src={h.image} alt="" className="h-full w-full object-cover" fallback={<Cake className="size-16 text-t-primary/50" />} />
+              <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="h-full w-full object-cover" fallback={<Cake className="size-16 text-t-primary/50" />} />
             </div>
             <span className="absolute -bottom-1 end-4 flex size-20 items-center justify-center rounded-full bg-t-primary text-t-primary-fg shadow-lg [&_svg]:size-8">
               <Cake />

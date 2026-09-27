@@ -121,7 +121,7 @@ export function PackageDetail({ pkg, ctx, className }: { pkg: TravelPackage; ctx
           <p className="font-heading text-3xl font-bold text-t-primary">{formatPKR(pkg.price)}</p>
           <p className="text-xs text-t-muted-fg">{pkg.priceNote || t(ts.perPerson, lang)}</p>
           <h2 className="font-heading mt-5 text-lg font-bold">{t(ts.bookThis, lang)}</h2>
-          <BookingForm packageId={pkg.id} ctx={ctx} departures={departures} className="mt-3" />
+          <BookingForm packageId={pkg.id} ctx={ctx} departures={departures} pricePerPerson={pkg.price} className="mt-3" />
           {wa ? (
             <a href={whatsappLink(wa, `Assalam o Alaikum, I am interested in "${title}" (${url})`)} target="_blank" rel="noreferrer" className="t-btn t-btn-outline mt-3 w-full text-sm">
               {t(ts.askWhatsApp, lang)}

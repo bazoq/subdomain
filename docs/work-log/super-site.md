@@ -21,3 +21,10 @@ Everything else -> `## Handoffs` at the bottom.
   6. No `loading.tsx` / `error.tsx` / `not-found.tsx` under `(super)`; no `global-error.tsx`; multiple root layouts mean unmatched root-host URLs need a `(site)/[...rest]` catch-all to reach a branded 404.
   7. Header mobile toggle lacks `aria-expanded`/`aria-controls`; no skip link; "Sign in" in the public header points at the platform owner's login (confusing for business owners).
 - NEXT: implement fix 1 (SEO foundation: site.ts helpers, seo.tsx, root layout metadata, sitemap/robots/manifest, OG image).
+
+## [2026-09-27 14:10] Resumed after cutoff — verified no super-site code changed since 9a2d796
+- FOUND: `git diff 9a2d796 --stat` on ownership paths shows only `src/config/env.ts` (other stream). Audit list stands.
+- FOUND (new, affects fix 1): current `proxy.ts` matcher no longer excludes `robots.txt|sitemap.xml|manifest.webmanifest` — on tenant hosts these are now rewritten to `/_sites/{host}/…`, so root `sitemap.ts`/`robots.ts` only answer on root/preview hosts. Still making them host-aware (cheap, defensive) and leaving a handoff for tenant-site.
+- FOUND: Next 16.3 `error.tsx` receives `retry()` (preferred) + `reset()`; `global-error` must own `<html>/<body>`; `next/og` present (bundled Geist-Regular.ttf, no project TTFs).
+- IN PROGRESS: fix 1 — SEO foundation (site.ts helpers, super-site/seo.tsx JSON-LD, root layout metadata + Urdu next/font, sitemap/robots/manifest host-aware, opengraph-image + twitter-image, per-template OG image).
+- NEXT: finish fix 1, then fix 2 (gallery honours TemplateSetting, TemplateMini fonts/alpha/a11y).

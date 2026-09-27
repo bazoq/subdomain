@@ -53,48 +53,49 @@ model Tenant {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  domains       Domain[]
-  users         TenantUser[]
-  sessions      Session[]
-  sections      SiteSection[]
-  pages         SitePage[]
-  media         Media[]
-  leads         Lead[]
-  auditLogs     AuditLog[]
-  rateLimits    RateLimit[]
-  productCats   ProductCategory[]
-  products      Product[]
-  variants      ProductVariant[]
-  orders        Order[]
-  orderItems    OrderItem[]
-  customers     Customer[]
-  coupons       Coupon[]
-  shippingZones ShippingZone[]
-  prescriptions Prescription[]
-  menuCats      MenuCategory[]
-  menuItems     MenuItem[]
+  domains        Domain[]
+  users          TenantUser[]
+  sessions       Session[]
+  sections       SiteSection[]
+  pages          SitePage[]
+  media          Media[]
+  leads          Lead[]
+  auditLogs      AuditLog[]
+  rateLimits     RateLimit[]
+  productCats    ProductCategory[]
+  products       Product[]
+  variants       ProductVariant[]
+  orders         Order[]
+  orderItems     OrderItem[]
+  customers      Customer[]
+  coupons        Coupon[]
+  shippingZones  ShippingZone[]
+  prescriptions  Prescription[]
+  menuCats       MenuCategory[]
+  menuItems      MenuItem[]
   modifierGroups ModifierGroup[]
-  modifiers     Modifier[]
-  foodOrders    FoodOrder[]
+  modifiers      Modifier[]
+  foodOrders     FoodOrder[]
   foodOrderItems FoodOrderItem[]
-  deliveryZones DeliveryZone[]
-  reservations  Reservation[]
-  jobs          Job[]
-  applications  Application[]
-  packages      TravelPackage[]
-  bookings      Booking[]
-  properties    Property[]
-  plans         MembershipPlan[]
-  classes       ClassSchedule[]
-  team          TeamMember[]
-  services      Service[]
-  testimonials  Testimonial[]
-  faqs          FaqItem[]
-  gallery       GalleryItem[]
-  posts         TenantPost[]
+  deliveryZones  DeliveryZone[]
+  reservations   Reservation[]
+  jobs           Job[]
+  applications   Application[]
+  packages       TravelPackage[]
+  bookings       Booking[]
+  properties     Property[]
+  plans          MembershipPlan[]
+  classes        ClassSchedule[]
+  team           TeamMember[]
+  services       Service[]
+  testimonials   Testimonial[]
+  faqs           FaqItem[]
+  gallery        GalleryItem[]
+  posts          TenantPost[]
 
   @@index([category])
   @@index([templateId])
+  @@index([isDemo, status])
 }
 
 model Domain {
@@ -110,24 +111,25 @@ model Domain {
 }
 
 model TenantUser {
-  id             String    @id @default(cuid())
-  tenantId       String
-  username       String
-  passwordHash   String
-  name           String
-  email          String?
-  role           UserRole  @default(ADMIN)
-  isActive       Boolean   @default(true)
-  failedLogins   Int       @default(0)
-  lockedUntil    DateTime?
-  lastLoginAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  tenantId     String
+  username     String
+  passwordHash String
+  name         String
+  email        String?
+  role         UserRole  @default(ADMIN)
+  isActive     Boolean   @default(true)
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   sessions Session[]
 
   @@unique([tenantId, username])
+  @@index([tenantId, role, isActive])
 }
 
 model SuperUser {
@@ -164,6 +166,9 @@ model Session {
   tenant     Tenant?     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([expiresAt])
+  @@index([superUserId])
+  @@index([tenantUserId])
+  @@index([tenantId])
 }
 
 /// One row per template section, per tenant. `data` is validated by the section's zod schema.
@@ -198,6 +203,7 @@ model SitePage {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, slug])
+  @@index([tenantId, enabled, sortOrder])
 }
 
 model Media {
@@ -219,6 +225,8 @@ model Media {
   tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, folder])
+  @@index([tenantId, createdAt])
+  @@index([confirmed, createdAt])
 }
 
 enum LeadStatus {
@@ -254,7 +262,7 @@ model Lead {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   tenantId  String?
   actorKind SessionKind
   actorId   String
@@ -262,13 +270,14 @@ model AuditLog {
   action    String // e.g. "product.create"
   entity    String?
   entityId  String?
-  meta      Json     @default("{}")
+  meta      Json        @default("{}")
   ip        String?
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
 
   tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, createdAt])
+  @@index([tenantId, entity, entityId])
 }
 
 /// In-database sliding-window rate limiter (login, public forms, checkout).
@@ -312,6 +321,7 @@ model BlogPost {
 
   @@unique([category, slug])
   @@index([category, published])
+  @@index([published, publishedAt])
 }
 
 /// Leads submitted on the super website (business owners asking for a site).
@@ -325,6 +335,8 @@ model SuperLead {
   message   String?
   status    LeadStatus @default(NEW)
   createdAt DateTime   @default(now())
+
+  @@index([status, createdAt])
 }
 
 // ───────────────────────────── Ecommerce ─────────────────────────────
@@ -355,46 +367,49 @@ model ProductCategory {
   products Product[]
 
   @@unique([tenantId, slug])
+  @@index([tenantId, parentId])
+  @@index([parentId])
 }
 
 model Product {
-  id           String   @id @default(cuid())
-  tenantId     String
-  categoryId   String?
-  slug         String
-  name         Json // LocalizedString
-  description  Json     @default("{}") // LocalizedString (rich text/markdown)
-  shortDesc    Json     @default("{}")
-  price        Int // PKR
-  comparePrice Int?
-  costPrice    Int?
-  sku          String?
-  stock        Int      @default(0)
-  trackStock   Boolean  @default(true)
-  images       String[] @default([]) // public URLs (Media.url)
-  attributes   Json     @default("{}") // { brand, material, warranty, specs: {...} }
-  tags         String[] @default([])
-  isFeatured   Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  sortOrder    Int      @default(0)
+  id                   String   @id @default(cuid())
+  tenantId             String
+  categoryId           String?
+  slug                 String
+  name                 Json // LocalizedString
+  description          Json     @default("{}") // LocalizedString (rich text/markdown)
+  shortDesc            Json     @default("{}")
+  price                Int // PKR
+  comparePrice         Int?
+  costPrice            Int?
+  sku                  String?
+  stock                Int      @default(0)
+  trackStock           Boolean  @default(true)
+  images               String[] @default([]) // public URLs (Media.url)
+  attributes           Json     @default("{}") // { brand, material, warranty, specs: {...} }
+  tags                 String[] @default([])
+  isFeatured           Boolean  @default(false)
+  isActive             Boolean  @default(true)
+  sortOrder            Int      @default(0)
   // medical-store extras
-  requiresPrescription Boolean @default(false)
-  genericName  String?
-  manufacturer String?
-  dosageForm   String?
-  strength     String?
-  seo          Json     @default("{}")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  requiresPrescription Boolean  @default(false)
+  genericName          String?
+  manufacturer         String?
+  dosageForm           String?
+  strength             String?
+  seo                  Json     @default("{}")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  category ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  variants ProductVariant[]
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category   ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants   ProductVariant[]
   orderItems OrderItem[]
 
   @@unique([tenantId, slug])
   @@index([tenantId, isActive, isFeatured])
   @@index([tenantId, categoryId])
+  @@index([tenantId, createdAt])
 }
 
 model ProductVariant {
@@ -413,6 +428,7 @@ model ProductVariant {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
+  @@index([tenantId])
 }
 
 model Customer {
@@ -432,6 +448,7 @@ model Customer {
   foodOrders FoodOrder[]
 
   @@unique([tenantId, phone])
+  @@index([tenantId, createdAt])
 }
 
 model Order {
@@ -469,6 +486,10 @@ model Order {
 
   @@unique([tenantId, number])
   @@index([tenantId, status, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, customerPhone])
+  @@index([customerId])
+  @@index([prescriptionId])
 }
 
 model OrderItem {
@@ -489,38 +510,43 @@ model OrderItem {
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
+  @@index([productId])
+  @@index([tenantId])
 }
 
 model Coupon {
-  id         String    @id @default(cuid())
-  tenantId   String
-  code       String
-  type       String // "PERCENT" | "FIXED"
-  value      Int
-  minOrder   Int       @default(0)
-  maxUses    Int?
-  usedCount  Int       @default(0)
-  expiresAt  DateTime?
-  isActive   Boolean   @default(true)
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(cuid())
+  tenantId  String
+  code      String
+  type      String // "PERCENT" | "FIXED"
+  value     Int
+  minOrder  Int       @default(0)
+  maxUses   Int?
+  usedCount Int       @default(0)
+  expiresAt DateTime?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, code])
+  @@index([tenantId, isActive])
 }
 
 model ShippingZone {
-  id            String  @id @default(cuid())
-  tenantId      String
-  name          String // "Lahore", "Punjab", "Rest of Pakistan"
-  cities        String[] @default([])
-  fee           Int
-  freeAbove     Int?
-  etaDays       String? // "2-3"
-  isActive      Boolean @default(true)
-  sortOrder     Int     @default(0)
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String // "Lahore", "Punjab", "Rest of Pakistan"
+  cities    String[] @default([])
+  fee       Int
+  freeAbove Int?
+  etaDays   String? // "2-3"
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, isActive, sortOrder])
 }
 
 /// Uploaded prescriptions (private R2 objects) for medical stores.
@@ -538,6 +564,8 @@ model Prescription {
   orders Order[]
 
   @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([mediaId])
 }
 
 // ───────────────────────────── Restaurant / food ─────────────────────────────
@@ -571,6 +599,7 @@ model MenuCategory {
   items  MenuItem[]
 
   @@unique([tenantId, slug])
+  @@index([tenantId, isActive, sortOrder])
 }
 
 model MenuItem {
@@ -590,13 +619,15 @@ model MenuItem {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  category MenuCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tenant         Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category       MenuCategory?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   modifierGroups MenuItemModifierGroup[]
-  orderItems FoodOrderItem[]
+  orderItems     FoodOrderItem[]
 
   @@unique([tenantId, slug])
   @@index([tenantId, categoryId, isAvailable])
+  @@index([tenantId, isAvailable, isFeatured])
+  @@index([tenantId, createdAt])
 }
 
 model ModifierGroup {
@@ -608,9 +639,11 @@ model ModifierGroup {
   required  Boolean @default(false)
   sortOrder Int     @default(0)
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant    Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   modifiers Modifier[]
   items     MenuItemModifierGroup[]
+
+  @@index([tenantId, sortOrder])
 }
 
 model Modifier {
@@ -624,6 +657,9 @@ model Modifier {
 
   tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   group  ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, sortOrder])
+  @@index([tenantId])
 }
 
 model MenuItemModifierGroup {
@@ -634,6 +670,7 @@ model MenuItemModifierGroup {
   group ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@id([menuItemId, groupId])
+  @@index([groupId])
 }
 
 model FoodOrder {
@@ -667,6 +704,10 @@ model FoodOrder {
 
   @@unique([tenantId, number])
   @@index([tenantId, status, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, customerPhone])
+  @@index([tenantId, scheduledFor])
+  @@index([customerId])
 }
 
 model FoodOrderItem {
@@ -687,6 +728,8 @@ model FoodOrderItem {
   menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
+  @@index([menuItemId])
+  @@index([tenantId])
 }
 
 model DeliveryZone {
@@ -700,6 +743,8 @@ model DeliveryZone {
   sortOrder Int     @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, isActive, sortOrder])
 }
 
 model Reservation {
@@ -717,6 +762,8 @@ model Reservation {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, date])
+  @@index([tenantId, status, date])
+  @@index([tenantId, createdAt])
 }
 
 // ───────────────────────────── Recruiting ─────────────────────────────
@@ -758,6 +805,9 @@ model Job {
 
   @@unique([tenantId, slug])
   @@index([tenantId, isActive])
+  @@index([tenantId, isActive, isFeatured, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, deadline])
 }
 
 model Application {
@@ -781,6 +831,8 @@ model Application {
   job    Job?   @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, status, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([jobId])
 }
 
 // ───────────────────────────── Travel ─────────────────────────────
@@ -813,25 +865,29 @@ model TravelPackage {
 
   @@unique([tenantId, slug])
   @@index([tenantId, isActive, kind])
+  @@index([tenantId, isActive, isFeatured, sortOrder])
+  @@index([tenantId, createdAt])
 }
 
 model Booking {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   tenantId   String
   packageId  String?
   name       String
   phone      String
   email      String?
-  travellers Int      @default(1)
+  travellers Int       @default(1)
   date       DateTime?
   message    String?
-  status     String   @default("NEW") // NEW | CONTACTED | CONFIRMED | CANCELLED
-  createdAt  DateTime @default(now())
+  status     String    @default("NEW") // NEW | CONTACTED | CONFIRMED | CANCELLED
+  createdAt  DateTime  @default(now())
 
   tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   package TravelPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([packageId])
 }
 
 // ───────────────────────────── Real estate ─────────────────────────────
@@ -856,33 +912,39 @@ model Property {
   images      String[] @default([])
   videoUrl    String?
   mapUrl      String?
-  agentId     String? // TeamMember
+  agentId     String? // TeamMember (agent)
   isFeatured  Boolean  @default(false)
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  agent  TeamMember? @relation("PropertyAgent", fields: [agentId], references: [id], onDelete: SetNull)
 
   @@unique([tenantId, slug])
   @@index([tenantId, isActive, purpose, type, city])
+  @@index([tenantId, isActive, isFeatured, sortOrder])
+  @@index([tenantId, createdAt])
+  @@index([agentId])
 }
 
 // ───────────────────────────── Gym ─────────────────────────────
 
 model MembershipPlan {
-  id         String   @id @default(cuid())
-  tenantId   String
-  name       Json
-  price      Int
-  period     String   @default("MONTH") // MONTH | QUARTER | YEAR | DAY
-  features   Json     @default("[]")
-  isPopular  Boolean  @default(false)
-  isActive   Boolean  @default(true)
-  sortOrder  Int      @default(0)
+  id        String  @id @default(cuid())
+  tenantId  String
+  name      Json
+  price     Int
+  period    String  @default("MONTH") // MONTH | QUARTER | YEAR | DAY
+  features  Json    @default("[]")
+  isPopular Boolean @default(false)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, isActive, sortOrder])
 }
 
 model ClassSchedule {
@@ -897,66 +959,76 @@ model ClassSchedule {
   level     String? // Beginner | Intermediate | Advanced
   isActive  Boolean @default(true)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant  Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  trainer TeamMember? @relation("ClassTrainer", fields: [trainerId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, isActive, dayOfWeek])
+  @@index([trainerId])
 }
 
 // ───────────────────────────── Shared content ─────────────────────────────
 
 /// Attorneys, trainers, agents, chefs, staff.
 model TeamMember {
-  id        String   @id @default(cuid())
-  tenantId  String
-  slug      String
-  name      String
-  role      Json
-  bio       Json     @default("{}")
-  imageUrl  String?
-  phone     String?
-  email     String?
-  socials   Json     @default("{}")
+  id          String   @id @default(cuid())
+  tenantId    String
+  slug        String
+  name        String
+  role        Json
+  bio         Json     @default("{}")
+  imageUrl    String?
+  phone       String?
+  email       String?
+  socials     Json     @default("{}")
   specialties String[] @default([])
-  isActive  Boolean  @default(true)
-  sortOrder Int      @default(0)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  properties Property[]      @relation("PropertyAgent")
+  classes    ClassSchedule[] @relation("ClassTrainer")
 
   @@unique([tenantId, slug])
+  @@index([tenantId, isActive, sortOrder])
 }
 
 /// Services / practice areas / printing services / visa services.
 model Service {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   tenantId    String
   slug        String
   name        Json
-  summary     Json     @default("{}")
-  description Json     @default("{}")
+  summary     Json    @default("{}")
+  description Json    @default("{}")
   priceFrom   Int?
   priceNote   String?
   imageUrl    String?
   icon        String?
-  features    Json     @default("[]")
-  isFeatured  Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  features    Json    @default("[]")
+  isFeatured  Boolean @default(false)
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, slug])
+  @@index([tenantId, isActive, isFeatured, sortOrder])
 }
 
 model Testimonial {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   tenantId  String
   name      String
   role      String?
   text      Json
-  rating    Int      @default(5)
+  rating    Int     @default(5)
   imageUrl  String?
-  isActive  Boolean  @default(true)
-  sortOrder Int      @default(0)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, isActive, sortOrder])
 }
 
 model FaqItem {
@@ -968,19 +1040,21 @@ model FaqItem {
   sortOrder Int     @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, isActive, sortOrder])
 }
 
 model GalleryItem {
-  id        String  @id @default(cuid())
+  id        String @id @default(cuid())
   tenantId  String
   imageUrl  String
-  caption   Json    @default("{}")
-  album     String  @default("general")
-  sortOrder Int     @default(0)
+  caption   Json   @default("{}")
+  album     String @default("general")
+  sortOrder Int    @default(0)
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId, album])
+  @@index([tenantId, album, sortOrder])
 }
 
 /// Tenant's own blog / news / offers.
@@ -1000,4 +1074,6 @@ model TenantPost {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, slug])
+  @@index([tenantId, published, publishedAt])
+  @@index([tenantId, updatedAt])
 }

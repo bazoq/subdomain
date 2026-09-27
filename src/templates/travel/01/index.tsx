@@ -53,7 +53,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           <div className="flex items-center gap-4">
             {c.phone ? (
               <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 font-semibold hover:underline">
-                <Phone className="size-3.5" /> {c.phone}
+                <Phone className="size-3.5" /> <span dir="ltr">{c.phone}</span>
               </a>
             ) : null}
             {c.email ? (
@@ -96,7 +96,7 @@ async function Hero({ ctx }: TemplatePageProps) {
   const dests = (await getDestinations(ctx.tenant.id)).map((d) => d.destination);
   return (
     <section className="relative overflow-hidden bg-t-dark text-t-dark-fg">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Plane className="size-20 opacity-20" />} />
+      <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Plane className="size-20 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark/90 via-t-dark/60 to-t-dark/20 rtl:bg-gradient-to-l" aria-hidden="true" />
       <Container className="relative py-20 lg:py-28">
         <div className="max-w-2xl t-fade-up">
@@ -115,7 +115,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
             {h.badges.map((b, i) => (
               <li key={i} className="flex items-center gap-2 text-sm font-medium text-t-dark-fg/90">
-                <span className="flex size-7 items-center justify-center rounded-full bg-white/15 [&_svg]:size-3.5">
+                <span className="flex size-7 items-center justify-center rounded-full bg-t-dark-fg/15 [&_svg]:size-3.5">
                   <Icon name={b.icon} />
                 </span>
                 {b.text}

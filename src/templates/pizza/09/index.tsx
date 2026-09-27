@@ -108,7 +108,7 @@ async function Hero({ ctx }: TemplatePageProps) {
             const deal = i > 0 ? deals?.items?.[i - 1] : undefined;
             return (
               <div key={i} id={`slide-${i + 1}`} className="relative min-w-full snap-center">
-                <Img src={src} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" fallback={<Pizza className="size-20 opacity-20" />} />
+                <Img src={src} alt="" loading={i === 0 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : undefined} className="absolute inset-0 h-full w-full object-cover opacity-55" fallback={<Pizza className="size-20 opacity-20" />} />
                 <Container className="relative py-20 lg:py-28">
                   <div className="t-fade-up max-w-2xl">
                     {i === 0 ? (
@@ -127,7 +127,7 @@ async function Hero({ ctx }: TemplatePageProps) {
                     )}
                     <div className="mt-8 flex flex-wrap gap-3">
                       <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary px-7" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-                      <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn border border-white/50 px-7 text-white hover:bg-white/10" />
+                      <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn border border-t-dark-fg/50 px-7 text-t-dark-fg hover:bg-t-dark-fg/10" />
                     </div>
                   </div>
                 </Container>
@@ -141,7 +141,7 @@ async function Hero({ ctx }: TemplatePageProps) {
               key={i}
               href={`#slide-${i + 1}`}
               aria-label={`${t(L.slide, lang)} ${i + 1}`}
-              className="size-2.5 rounded-full bg-white/50 transition hover:bg-t-primary focus-visible:bg-t-primary"
+              className="size-2.5 rounded-full bg-t-dark-fg/50 transition hover:bg-t-primary focus-visible:bg-t-primary"
             />
           ))}
         </div>

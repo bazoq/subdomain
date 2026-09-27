@@ -11,13 +11,14 @@ import { requireTenantAdminAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { sanitizeLocalized, zImageUrlOrEmpty } from "@/modules/shared/validation";
 
 const testimonialSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(80),
   role: z.string().trim().max(80).optional().or(z.literal("")),
-  text: localizedString,
+  text: localizedString.refine((v) => v.en.trim().length > 0, { message: "Review text is required", path: ["en"] }).refine((v) => v.en.length <= 2000 && (v.ur ?? "").length <= 2000, { message: "Keep the review under 2000 characters", path: ["en"] }),
   rating: z.coerce.number().int().min(1).max(5).default(5),
-  imageUrl: z.string().max(1000).optional().or(z.literal("")),
+  imageUrl: zImageUrlOrEmpty,
   isActive: z.boolean().default(true),
 });
 export type TestimonialInput = z.infer<typeof testimonialSchema>;
@@ -30,9 +31,9 @@ export async function upsertTestimonial(id: string | null, input: unknown): Prom
     const data = {
       name: parsed.data.name,
       role: parsed.data.role || null,
-      text: json(parsed.data.text),
+      text: json(sanitizeLocalized(parsed.data.text)),
       rating: parsed.data.rating,
-      imageUrl: parsed.data.imageUrl || null,
+      imageUrl: parsed.data.imageUrl?.trim() || null,
       isActive: parsed.data.isActive,
     };
     let row;
@@ -76,8 +77,10 @@ export async function deleteTestimonial(id: string): Promise<ActionResult> {
 export async function toggleTestimonial(id: string, isActive: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (typeof isActive !== "boolean") return fail("Invalid value.");
     const { count } = await db.testimonial.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { isActive } });
     if (!count) return fail("Not found.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "testimonial.isActive", entity: "Testimonial", entityId: id, meta: { value: isActive } });
     revalidatePath("/", "layout");
     return success(isActive ? "Shown on website." : "Hidden from website.");
   } catch (e) {

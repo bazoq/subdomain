@@ -152,7 +152,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-md">
           <div className="absolute -end-4 -top-4 h-full w-full rounded-[var(--t-radius)] border-2 border-dashed border-t-primary/40" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<Stamp className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="relative aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<Stamp className="size-16 opacity-30" />} />
           <span className="absolute -bottom-5 start-6 flex -rotate-6 items-center gap-2 rounded-[var(--t-radius)] border-2 border-t-accent bg-t-bg px-4 py-2 text-xs font-extrabold uppercase tracking-widest text-t-primary shadow-md">
             <Check className="size-4 text-t-accent" /> {lang === "ur" ? "منظور شدہ" : "Approved"}
           </span>
@@ -203,8 +203,8 @@ function ChecklistCard({ s, ctx }: { s: Service; ctx: TemplatePageProps["ctx"] }
 }
 
 async function Services({ ctx }: TemplatePageProps) {
-  const h = ctx.sections.services?.data as HeadingData | undefined;
-  const rows = await getServices(ctx.tenant.id, { take: 9 });
+  const h = ctx.sections.services?.data as (HeadingData & { count?: number }) | undefined;
+  const rows = await getServices(ctx.tenant.id, { take: h?.count || 9 });
   if (!rows.length) return null;
   return (
     <section id="services" className="py-16 sm:py-20">

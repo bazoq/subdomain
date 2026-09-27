@@ -77,7 +77,7 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="relative">
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<Stethoscope className="size-16 opacity-30" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<Stethoscope className="size-16 opacity-30" />} />
           <div className="absolute -bottom-5 -start-5 hidden size-24 items-center justify-center rounded-[var(--t-radius)] bg-t-primary text-t-primary-fg shadow-lg sm:flex" aria-hidden="true">
             <span className="relative block size-12">
               <span className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 rounded-sm bg-t-primary-fg" />
@@ -146,7 +146,7 @@ function EmployersCta({ ctx }: TemplatePageProps) {
       <Container>
         <div className="grid items-center gap-8 rounded-[var(--t-radius)] bg-t-primary p-8 text-t-primary-fg sm:p-12 lg:grid-cols-[1fr_auto]">
           <div className="flex items-start gap-5">
-            <span className="hidden size-14 shrink-0 items-center justify-center rounded-[var(--t-radius)] bg-white/15 sm:flex">
+            <span className="hidden size-14 shrink-0 items-center justify-center rounded-[var(--t-radius)] bg-t-primary-fg/15 sm:flex">
               <ShieldCheck className="size-7" />
             </span>
             <div>

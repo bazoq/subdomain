@@ -7,6 +7,7 @@ import { requireTenantAdminAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { isSafeImageUrl, sanitizeLocalized } from "@/modules/shared/validation";
 
 const album = z
   .string()
@@ -15,7 +16,10 @@ const album = z
   .regex(/^[a-z0-9_-]{1,40}$/, "Album name: letters, numbers, dashes only")
   .default("general");
 
-const addSchema = z.object({ album, urls: z.array(z.string().max(1000)).min(1, "Upload at least one image").max(40) });
+const addSchema = z.object({
+  album,
+  urls: z.array(z.string().trim().min(1).max(1000).refine(isSafeImageUrl, "Image must be an https:// URL")).min(1, "Upload at least one image").max(40),
+});
 
 /** Create one GalleryItem per uploaded public URL. */
 export async function addGalleryImages(input: unknown): Promise<ActionResult<{ count: number }>> {
@@ -42,8 +46,9 @@ export async function updateGalleryItem(id: string, input: unknown): Promise<Act
     const ctx = await requireTenantAdminAction();
     const parsed = updateSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
-    const { count } = await db.galleryItem.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { caption: json(parsed.data.caption), album: parsed.data.album } });
+    const { count } = await db.galleryItem.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { caption: json(sanitizeLocalized(parsed.data.caption)), album: parsed.data.album } });
     if (!count) return fail("Not found.");
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "gallery.update", entity: "GalleryItem", entityId: id, meta: { album: parsed.data.album } });
     revalidatePath("/", "layout");
     return success("Saved.");
   } catch (e) {
@@ -77,6 +82,7 @@ export async function moveGalleryItems(input: unknown): Promise<ActionResult> {
       where: { tenantId: ctx.tenant.id, ...(ids?.length ? { id: { in: ids } } : { album: fromAlbum }) },
       data: { album: toAlbum },
     });
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "gallery.move", entity: "GalleryItem", meta: { count, fromAlbum: fromAlbum ?? null, toAlbum } });
     revalidatePath("/", "layout");
     return success(`${count} image(s) moved to "${toAlbum}".`);
   } catch (e) {

@@ -59,7 +59,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
           />
           <div className="h-px w-full bg-gradient-to-r from-t-primary via-t-accent to-t-primary" aria-hidden="true" />
         </div>
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <SiteFooter ctx={ctx} variant="dark" className="border-t border-t-border" />
         <CartDrawer ctx={lc} />
         <WhatsAppFloat ctx={ctx} />

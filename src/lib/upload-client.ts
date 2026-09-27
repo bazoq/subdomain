@@ -1,13 +1,21 @@
-/** Browser-side upload helper: presign -> PUT to R2 -> confirm. */
+/**
+ * Browser-side upload helper: presign -> PUT to R2 -> confirm.
+ *
+ * The confirm step sends back the one-time `token` issued by presign; anonymous visitors
+ * (job applicants, prescription uploads) cannot confirm without it. The PUT must use exactly the
+ * content-type the server signed, so the same normalised value is used for both calls.
+ */
 export async function uploadFile(
   file: File,
   opts: { visibility?: "PUBLIC" | "PRIVATE"; folder?: string; alt?: string; tenantId?: string; onProgress?: (pct: number) => void } = {},
 ): Promise<{ id: string; url: string | null }> {
+  const mime = (file.type || "application/octet-stream").split(";")[0].trim().toLowerCase();
   const presign = await fetch("/api/media/presign", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
     body: JSON.stringify({
-      mime: file.type || "application/octet-stream",
+      mime,
       size: file.size,
       visibility: opts.visibility ?? "PUBLIC",
       folder: opts.folder ?? "general",
@@ -19,12 +27,12 @@ export async function uploadFile(
     const j = await presign.json().catch(() => ({}));
     throw new Error(j.error ?? "Could not start upload");
   }
-  const { mediaId, uploadUrl } = (await presign.json()) as { mediaId: string; uploadUrl: string };
+  const { mediaId, uploadUrl, token } = (await presign.json()) as { mediaId: string; uploadUrl: string; token: string };
 
   await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", uploadUrl);
-    xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+    xhr.setRequestHeader("Content-Type", mime);
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && opts.onProgress) opts.onProgress(Math.round((e.loaded / e.total) * 100));
     };
@@ -36,7 +44,8 @@ export async function uploadFile(
   const confirm = await fetch("/api/media/confirm", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mediaId }),
+    credentials: "same-origin",
+    body: JSON.stringify({ mediaId, token }),
   });
   if (!confirm.ok) {
     const j = await confirm.json().catch(() => ({}));

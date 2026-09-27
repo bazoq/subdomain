@@ -70,7 +70,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
                     <Phone className="size-4" /> {phone}
                   </a>
                 ) : null}
-                <CartCountLink host={ctx.host} label={t(rs.yourOrder, ctx.lang)} className="bg-white/10 px-3 py-1.5 text-sm font-semibold hover:bg-white/20" />
+                <CartCountLink host={ctx.host} label={t(rs.yourOrder, ctx.lang)} className="bg-t-dark-fg/10 px-3 py-1.5 text-sm font-semibold hover:bg-t-dark-fg/20" />
               </div>
             }
           />
@@ -94,7 +94,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative -mt-16 flex min-h-[90svh] items-end overflow-hidden lg:-mt-20">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Flame className="size-24 opacity-20" />} />
+      <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Flame className="size-24 opacity-20" />} />
       <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/80 to-t-bg/30" />
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-t-bg to-transparent" />
       <Container className="relative py-20 lg:py-28">
@@ -109,7 +109,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <p className="mt-6 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary rounded-none px-7" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
-            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn rounded-none border border-t-fg/40 px-7 text-t-fg hover:bg-white/10" />
+            <CtaButton value={h.secondaryCta} ctx={ctx} className="t-btn rounded-none border border-t-fg/40 px-7 text-t-fg hover:bg-t-fg/10" />
           </div>
           {h.badges?.length ? (
             <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3">

@@ -87,7 +87,7 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Img src={shots[0]} alt="" className="col-span-2 aspect-[16/10] w-full rounded-[2rem] object-cover shadow-sm" fallback={<Users className="size-12 text-t-primary/40" />} />
+          <Img src={shots[0]} loading="eager" fetchPriority="high" alt="" className="col-span-2 aspect-[16/10] w-full rounded-[2rem] object-cover shadow-sm" fallback={<Users className="size-12 text-t-primary/40" />} />
           <Img src={shots[1]} alt="" className="aspect-square w-full rounded-full object-cover shadow-sm" fallback={<HeartPulse className="size-9 text-t-primary/40" />} />
           <Img src={shots[2]} alt="" className="mt-6 aspect-square w-full rounded-[2rem] object-cover shadow-sm" fallback={<Users className="size-9 text-t-primary/40" />} />
         </div>

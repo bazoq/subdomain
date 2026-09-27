@@ -97,6 +97,8 @@ function Hero({ ctx }: TemplatePageProps) {
           <span className="absolute -top-5 end-6 hidden size-24 rounded-full bg-t-accent/50 lg:block" aria-hidden="true" />
           <Img
             src={h.image}
+            loading="eager"
+            fetchPriority="high"
             alt=""
             className="relative aspect-[4/5] w-full rounded-[2rem] object-cover shadow-sm"
             fallback={<Coffee className="size-14 text-t-primary/40" />}

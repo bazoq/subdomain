@@ -109,7 +109,7 @@ function Hero({ ctx }: TemplatePageProps) {
               </ul>
             ) : null}
           </div>
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full object-cover" fallback={<Pizza className="size-12 opacity-20" />} />
+          <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="aspect-[4/3] w-full object-cover" fallback={<Pizza className="size-12 opacity-20" />} />
         </div>
       </Container>
     </section>

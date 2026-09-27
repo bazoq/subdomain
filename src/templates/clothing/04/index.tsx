@@ -74,7 +74,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
             }
           />
         </div>
-        <div className="flex-1">{children}</div>
+        <main id="main" className="flex-1">{children}</main>
         <div className="contents" style={INDIGO}>
           <SiteFooter ctx={ctx} variant="dark" className="[&_h3]:text-t-accent" />
         </div>

@@ -11,7 +11,10 @@ validation, restaurant modifiers/zones/hours/state machine, admin CRUD consisten
 UX states, cache invalidation. DB not reachable: reasoned from code only.
 
 ## Handoffs
-(cross-boundary findings go here)
+- [platform-dx / tenant-site] `formatDate` in `src/lib/utils.ts` formats in the server TZ (UTC on Vercel); admin pages and invoices show times 5h early for PK. Add `timeZone: "Asia/Karachi"` (owned pages cannot change the helper). Reservation admin page already works around it locally.
+- [platform-dx] `revalidatePath("/admin/orders")` etc. (pre-existing pattern everywhere) targets the public path while the route lives under `/_sites/[host]/…` via rewrite — please verify it invalidates the intended segment in Next 16 or switch the codebase to `revalidateTag`. Commerce relies on it for storefront stock badges after cancellations.
+- [data-layer] No schema change needed for this wave (tokens are HMAC-derived, idempotency uses the RateLimit table). Nice-to-have later: `Order.idempotencyKey String?` + `@@unique([tenantId, idempotencyKey])` and same on FoodOrder, which would let idempotency survive RateLimit cleanup and remove the lock rows.
+- [security] The `RateLimit` table doubles as the idempotency lock store (`idem:*` buckets, 24h windowEnd). `purgeExpiredRateLimits` must keep honouring `windowEnd` (it does) — do not add a shorter global TTL.
 
 ## Entries
 
@@ -46,3 +49,89 @@ UX states, cache invalidation. DB not reachable: reasoned from code only.
   order type toggles honoured; PK phone normalised; honeypot + rate limit on all public actions; admin
   actions all go through `requireTenantAdminAction`; audit on mutations; revalidatePath after writes.
 - NEXT: implement fixes 1-11 (shared helpers first: order-token.ts, idempotency.ts, messages).
+
+## [2026-09-27 13:05] [resume] state reconciled
+- Previous agent was cut off mid-implementation (after the audit entry). Reconciled from `git diff 9a2d796` + new files.
+- DONE by previous agent (verified present, tsc clean): `src/modules/ecommerce/order-token.ts` (HMAC over kind:tenantId:number with
+  SESSION_SECRET — no schema column needed), `idempotency.ts` (lock rows in existing `RateLimit` table, bucket `idem:<scope>:<key>` — no
+  schema change), `messages.ts` (EN+UR checkout messages + `m()`), `schemas.ts` (`idempotencyKey`), `types.ts` (ORDER_TRANSITIONS,
+  canTransitionOrder, STOCK_RELEASING_STATUSES), `actions.ts` placeOrder rewrite (idempotency claim/complete/release, localised messages,
+  atomic coupon usedCount guard, returns `token`), validateCoupon + getOrderStatus localised, getOrderStatus returns token.
+- Findings status: (4) coupon usedCount guard DONE. (1) token helper + server side DONE, pages/clients/restaurant PENDING.
+  (2) ecommerce server DONE, client key + restaurant PENDING. (3) types DONE, updateOrderStatus wiring PENDING (unused imports
+  canTransitionOrder/STOCK_RELEASING_STATUSES/OrderStatusValue are the eslint warnings). (8) ecommerce placeOrder/coupon/track DONE,
+  submitPrescription + restaurant + per-phone limit PENDING. (5)(6)(7)(9)(10)(11) PENDING.
+- Also noted: `export interface PlacedOrder` inside a "use server" file — type-only so it compiles, but moving to types.ts to be safe.
+- NEXT: fix 3 (state machine + guarded stock) → 1 (order pages + clients) → 2 (client keys) → 5 → 6 → 11 → 9 → restaurant 7/8/10.
+
+## [2026-09-27 13:10] Fix 3 — order status state machine + guarded stock — IN PROGRESS
+- Plan: `updateOrderStatus` validates transition via `canTransitionOrder`, uses `order.updateMany where status = <read status>` as an
+  optimistic concurrency guard, restores stock only on the first entry into CANCELLED/RETURNED (increment only — never decrements, so stock
+  can never go negative from status changes; terminal statuses cannot be re-opened). Admin select limited to allowed transitions.
+
+## [2026-09-27 13:20] Fix 3 — DONE
+- DONE: `src/modules/ecommerce/actions.ts` updateOrderStatus: transition check (ORDER_TRANSITIONS), optimistic guard
+  (`updateMany where status = read status` → "updated by someone else" on conflict), stock restored once on first entry into
+  CANCELLED/RETURNED (increment only, `restoreStock`), noop/note-only path, audit meta {from,to,stockRestored}, storefront revalidate
+  when stock restored. Removed the unguarded re-activation decrement (terminal statuses can't be re-opened).
+  `src/components/admin/ecommerce/order-status-form.tsx`: select shows current + allowed next statuses only; terminal notice.
+  `PlacedOrder` moved to `types.ts`. tsc + eslint clean.
+- NEXT: Fix 1 — order pages + clients on HMAC token (ecommerce first, then restaurant).
+
+## [2026-09-27 13:21] Fix 1 — HMAC order tokens on public order pages — IN PROGRESS
+- Plan: `/order/[n]?t=` verified with verifyOrderToken("shop"); tracker navigates to token URL after phone verification; checkout
+  redirects with token; admin detail shows the token link. Restaurant: `/menu/order/[n]?t=`, `getFoodOrderStatus(number, token)`,
+  new `lookupFoodOrder(number, phone)` action + `OrderLookup` client for the unverified state; restaurant checkout redirects with token.
+
+## [2026-09-27 14:05] Fix 1 — DONE (HMAC order tokens, both modules)
+- DONE: `(site)/order/[number]/page.tsx` verifies `?t=` with `verifyOrderToken("shop")`; no data without a valid token (the old `?p=<last4>`
+  is gone). `ui/order-tracker.tsx` navigates to the tokenised URL after full-phone verification (`getOrderStatus` returns the token).
+  Restaurant: `(site)/menu/order/[number]/page.tsx` verifies `?t=` ("food"); unverified → new `ui/order-lookup.tsx` (order number + full
+  phone → new action `lookupFoodOrder`, 20/10min per IP). `getFoodOrderStatus(number, token)` now token-gated (poll skips hidden tabs).
+  Admin order + food-order detail pages show the tokenised tracking link and include it in the WhatsApp reply. Token = 144-bit HMAC
+  (SESSION_SECRET) → no page-render rate limit needed; enumeration is infeasible.
+
+## [2026-09-27 14:06] Fix 2 — DONE (idempotent placeOrder / placeFoodOrder)
+- DONE: both checkout forms generate one `idempotencyKey` per mounted checkout (`useState(newIdempotencyKey)`), send it, and treat a
+  rejected promise as "retry with the same key" (the server returns the original order if it went through). `placeFoodOrder` wired to
+  `claimIdempotency/completeIdempotency/releaseIdempotency` (scope "food"); lock released on any failure. No schema change (RateLimit rows).
+
+## [2026-09-27 14:07] Fix 5 — DONE (coupon expiry in Asia/Karachi)
+- DONE: `upsertCoupon` uses `pkEndOfDay(YYYY-MM-DD)` → `T23:59:59.999+05:00`; malformed dates get a field error.
+
+## [2026-09-27 14:08] Fix 6 — DONE (archive instead of hard-delete)
+- DONE: `deleteProduct` archives (isActive=false, isFeatured=false, audit `product.archive`) when `_count.orderItems > 0`, deletes otherwise;
+  message explains which happened. Product form confirm text updated.
+
+## [2026-09-27 14:09] Fix 7 — DONE (restaurant: hours, reservations, transitions, concurrency)
+- DONE: new `src/modules/restaurant/hours.ts` (`pkParts`, `isOpenAt` incl. overnight windows, `hoursForDate`, `pkDateTime`).
+  `placeFoodOrder` rejects scheduled times when the kitchen is closed at that time (plus existing 15min/7day bounds).
+  `createReservation`: date/time interpreted in PKT; rejects past dates, past/too-soon (<30 min) times, >60 days ahead, closed days and
+  times outside that day's hours (message includes the day's hours). `RESERVATION_TRANSITIONS` + `canTransitionReservation` in types.ts;
+  `updateReservationStatus` enforces them with an `updateMany where status=current` guard; admin select only offers allowed moves
+  ("Final" for SEATED/CANCELLED). `updateFoodOrderStatus` guarded the same way (stale kitchen screen → "updated by someone else").
+  Admin reservations page renders dates in Asia/Karachi (was off by one day on UTC servers).
+
+## [2026-09-27 14:10] Fix 8 — DONE (EN+UR messages, CGNAT-aware limits)
+- DONE: new `src/modules/restaurant/messages.ts` (`rm()`); every public restaurant action message is EN+UR (field errors too).
+  `submitPrescription` localised. Limits: checkout 15/10min per IP + 10/hour per phone (shop and food), coupon 30/10min, tracker 20/10min,
+  prescription 10/10min per IP + 5/hour per phone, reservation 10/10min per IP + 5/hour per phone. Rate limiter (security stream) now
+  fails open with `degraded`; idempotency lock still fails closed (DB error → generic failure, no order).
+
+## [2026-09-27 14:11] Fix 9 — DONE (cart clamp on read)
+- DONE: `ecommerce/ui/cart-provider.tsx` `sanitizeCart`: qty→int 1..min(maxQty,99), price→non-negative int, invalid lines dropped, duplicate
+  keys merged, 50-line cap. `restaurant/ui/order-provider.tsx` `sanitizeLine`: same treatment incl. modifier shape, 99 cap, 50 lines.
+
+## [2026-09-27 14:12] Fix 10 — DONE (honeypot)
+- DONE: both `placeOrder`/`placeFoodOrder` return a fake success `{number:0, token:""}`; both clients detect `number === 0` and go to
+  /shop or /menu instead of `/…/order/0`. Reservation honeypot already returned fake success.
+
+## [2026-09-27 14:13] Fix 11 — DONE (P2002 → friendly)
+- DONE: upsertProduct / upsertCategory / upsertCoupon / upsertMenuItem / upsertMenuCategory catch P2002 and return a field error on
+  slug/code instead of the raw Prisma message.
+
+## [2026-09-27 14:14] Extras
+- DONE: `console.error` → structured `log.error` (project rule) in both action files. Notifications: both order emails now carry the customer
+  WhatsApp link, absolute admin URLs (`https://<host>/admin/…`) and, for food, the scheduled time in PKT; prescription email likewise.
+  Print pages reviewed: A4 invoice and 80mm ticket render the right fields (COD amount, variants/modifiers/notes) — no change needed.
+  Pending/empty states reviewed across owned forms and admin lists — present.
