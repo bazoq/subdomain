@@ -103,7 +103,10 @@ export function themeVars(
   const heading = safeFontName(base.fonts.heading);
   const body = safeFontName(base.fonts.body);
   const urdu = safeFontName(base.fonts.urdu);
-  const urduStack = urdu && urdu !== DEFAULT_URDU_FONT ? `"${urdu}", ${URDU_FALLBACK}` : URDU_FALLBACK;
+  const customUrdu = urdu && urdu !== DEFAULT_URDU_FONT ? `"${urdu}", ` : "";
+  // A template-specific Urdu family (loaded from Google Fonts by the layout) stays first; the self-hosted
+  // Nastaliq variable follows so the default case never needs a network font.
+  const urduStack = `${customUrdu}${opts.urduFontVar ? `var(${opts.urduFontVar}), ` : ""}${URDU_FALLBACK}`;
   return {
     "--t-primary": c.primary,
     "--t-primary-fg": c.primaryFg,
@@ -122,7 +125,7 @@ export function themeVars(
     "--t-radius": RADIUS[base.radius] ?? RADIUS.md,
     "--t-font-heading": fontStack(heading, SANS),
     "--t-font-body": fontStack(body, SANS),
-    "--t-font-urdu": opts.urduFontVar ? `var(${opts.urduFontVar}), ${urduStack}` : urduStack,
+    "--t-font-urdu": urduStack,
   };
 }
 

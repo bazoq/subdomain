@@ -5,9 +5,9 @@ Baseline (2026-09-27): `tsc` clean, `eslint src` clean, 84 templates, no tests, 
 | Stream | File | State | Last update | NEXT |
 |---|---|---|---|---|
 | security | security.md | done | 2026-09-27 04:35 | done - see security.md Handoffs (revokeSessions adoption, commerce SUSPENDED, CSP promotion) |
-| data-layer | data-layer.md | in-progress | 2026-09-27 18:20 | state reconciled; idempotencyKey migration → DEPLOY.md DB sections → final entry |
+| data-layer | data-layer.md | done | 2026-09-27 18:50 | done - readiness 82/100; see data-layer.md Handoffs (db:seed script, .env.example, super revalidateTenantContent, commerce idempotencyKey adoption) |
 | commerce | commerce.md | done | 2026-09-27 18:25 | done - 12 fixes, score 78/100; see commerce.md Handoffs (notify.ts U+2028 build break → services-modules; formatDate TZ; revalidatePath; idempotencyKey column) |
-| services-modules | services-modules.md | in-progress | 2026-09-27 18:45 | #1-#9 + security handoffs done; final verification + summary |
+| services-modules | services-modules.md | done | 2026-09-27 18:55 | done - 9 fix groups + 3 security handoffs, score 84/100; see services-modules.md Handoffs (admin-ux min-length 10, tenant-site i18n keys, revokeSessions except-current, commerce module gates) |
 | super-site | super-site.md | in-progress | 2026-09-27 14:10 | fix 1 SEO foundation IN PROGRESS (of 7 fix groups) |
 | tenant-site | tenant-site.md | in-progress | 2026-09-27 18:20 | Fix 2: src/server/site-seo.ts + tenant sitemap/robots/manifest route handlers |
 | templates-a | templates-a.md | in-progress | 2026-09-27 03:56 | Batch C: catalog Urdu overrides + features, then final sweep/score |

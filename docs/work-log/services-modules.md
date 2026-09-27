@@ -108,3 +108,34 @@
 - DONE #9: new `src/modules/shared/module-gate.ts` (`hasModule`, `requireModulePage`, `moduleUnavailable`). Public pages `/jobs`, `/jobs/[slug]`, `/employers` (recruiting), `/packages`, `/packages/[slug]` (travel), `/properties`, `/properties/[slug]` (realestate) now 404 in both `generateMetadata` and the page for tenants whose category lacks the module. Admin pages `applications` (+`[id]`), `jobs` (+`new`, `[id]`), `packages` (+`new`, `[id]`), `bookings`, `properties` (+`new`, `[id]`) 404 likewise. Server actions: every admin action in recruiting/travel/realestate/gym returns `moduleUnavailable()` for foreign categories; public `applyToJob`/`createBooking` return the bilingual `unavailable` message.
 - tsc: only error in repo is `src/app/(super)/(site)/page.tsx:265` (`source` prop on a super-site component) — super-site stream's in-flight work, not mine (see Handoffs). eslint on all owned changed paths clean.
 - NEXT: final verification + summary.
+
+## Handoffs (added 2026-09-27 18:50)
+- **admin-ux** (`src/components/admin/shared/user-forms.tsx` lines ~215-218): `minLength={8}` on password/confirm must become 10 to match `passwordPolicy` (server now enforces 10+ with letters+digits and rejects the username); add matching help text.
+- **tenant-site** (`src/components/site/preview-banner.tsx`, `suspended.tsx`, `unknown-host.tsx`): reference `ui.previewTitle/previewText/openAdmin/unavailableEyebrow/siteNotSetUpTitle/siteNotSetUpText/visit` which do not exist in `src/lib/i18n` → 8 tsc errors at 18:50 (their in-flight work; not services-modules).
+- **security / platform-dx** (`src/server/auth/session.ts`): `revokeSessions` has no "except current session" option; services-modules works around it by revoke-all + `createSession` re-issue in `changeOwnPassword`. A `revokeSessions({ tenantUserId, exceptTokenHash })` variant would avoid the extra row churn.
+- **commerce** (`src/modules/ecommerce/actions.ts#submitPrescription`, restaurant custom-cake): consider `hasModule(tc, "medical")` / category check via `src/modules/shared/module-gate.ts` in the public actions, mirroring what recruiting/travel/gym actions now do.
+- **data-layer**: `deleteTenantPrivateMedia` decrements `tenant.storageUsed`; confirm `Media.confirmed`/`size` are indexed for the `(tenantId, folder, confirmed)` lookups used by `findPrivateUpload`.
+
+## [2026-09-27 18:55] Services-modules stream — final summary
+- FIXED (all 9 audit findings + 3 security handoffs):
+  1. notify.ts: never throws, 8 s timeout, per-lead-type templates (application/booking/lead), WhatsApp reply links, absolute admin links, `safeSubject` header-injection guard, structured logging. API stable for commerce.
+  2. leads: bounded/validated `extra`, tenant-verified property/plan/service ids, PRIVATE+confirmed files only, duplicate guard, bilingual messages, audit on delete.
+  3. recruiting: state machine, CV mime/folder/ownership checks, 24 h idempotent duplicate guard, orphan CV cleanup, admin UI disables illegal transitions.
+  4. travel: booking state machine, departure/past-date validation, nights<=days, duplicate guard, per-person total in form and email.
+  5. realestate: Google-Maps-only embed allowlist, https-only video/map URLs, sandboxed iframes, min/max swap, sanitised text.
+  6. gym: toggle field validation + audits, trainer overlap check, labelled trial form.
+  7. shared: rich text sanitised on every write, safe image/social URLs, scheduled posts hidden until publishedAt, audits on every toggle/move, reserved slugs.
+  8. forms a11y: every public form (contact, quote, inquiry, employer, apply, consultation, booking, trial) has real labels, `role=alert` errors linked by aria-describedby/aria-invalid, status/alert banners, stable `useId` ids.
+  9. module 404s: `module-gate.ts`; 7 public routes + 13 admin routes 404 for foreign categories; all module admin actions and public apply/booking actions refuse foreign categories.
+  10. security handoffs: `revokeSessions` on role change / deactivation / reset / self change (with session re-issue), `passwordPolicy(pw, { username })`, CR/LF-safe subjects.
+- VERIFICATION: `npx eslint` on every owned changed path: 0 errors, 0 warnings (no `console`). `npx tsc --noEmit`: 0 errors in owned files; the 8 remaining repo errors are tenant-site's uncommitted `src/components/site/*` (missing i18n keys), see Handoffs. Uncommitted from this stream: `src/components/admin/uploader.tsx` (role=alert) + docs; everything else landed in checkpoint 3 (bfde950).
+- REMAINING RISKS:
+  1. No automated tests for module actions (state machines, duplicate guards, module gates, `safeSubject`) — pure helpers (`canTransitionApplication`, `canTransitionBooking`, `googleMapsEmbedUrl`, `sanitizeRichText`, `parseExtraFields`, `safeSubject`, `hasModule`) are test-ready; platform-dx should add vitest cases.
+  2. Stored XSS via RichText links depends on tenant-site's renderer fix (sanitise-on-write is in place for new rows; old rows unaffected until re-saved).
+  3. Duplicate guards are time-window based (24 h / 2 min) using phone; a determined visitor with many numbers can still flood — rate limiting is per IP and fails open when Postgres is down.
+  4. Email delivery is best-effort (Resend, fire-and-forget); there is no retry/outbox, so a lead is stored but the owner may not be notified if Resend is down. Admin list + WhatsApp are the fallback.
+  5. `changeOwnPassword` re-issues a session via `createSession` inside a server action; if cookie writing fails mid-way the user is signed out (safe failure, but abrupt).
+  6. DB was not reachable: all reasoning is from code; Prisma queries (e.g. `data: { path: [...] }` JSON filters, `publicPostsWhere`) were type-checked, not executed.
+  7. `user-forms.tsx` still says min 8 client-side until admin-ux updates it (server rejects correctly).
+- READINESS SCORE: **84/100**. Server-side validation, tenant isolation, state machines, sanitisation, module gating and accessibility of public forms are production-grade and consistent across the six service modules. Deductions: no automated tests for the new logic (-6), notification path without retry (-3), duplicate/rate limits are heuristic (-3), pending cross-stream items (renderer allow-list, client min-length) (-4).
+- NEXT: none for this stream (done). Orchestrator: commit `src/components/admin/uploader.tsx` + docs; route the Handoffs above.

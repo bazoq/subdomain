@@ -10,15 +10,16 @@ Stack: Next.js 16 on Vercel · Supabase Postgres via Prisma · Cloudflare R2 (S3
 
 - A GitHub repository with this code.
 - Accounts: [Supabase](https://supabase.com), [Cloudflare](https://dash.cloudflare.com), [Vercel](https://vercel.com), and access to your domain's DNS.
-- Node 20+ locally. Run `npm install` once (this also runs `prisma generate`).
-- Copy `.env.example` to `.env` and fill it in as you go through the steps below.
+- Node **22** locally (`.nvmrc`; 20.9+ is supported and tested in CI). Run `npm install` once (this also runs `prisma generate`).
+- Copy `.env.example` to `.env` and fill it in as you go through the steps below. Every variable is documented inline there; `src/config/env.ts` validates the set at startup and a production build refuses to boot with a placeholder secret, a `localhost` root domain or a half-configured R2.
 
 Environment variables (from `.env.example`):
 
 | Variable | Purpose |
 |---|---|
 | `ROOT_DOMAIN` / `NEXT_PUBLIC_ROOT_DOMAIN` | Platform root host, e.g. `yourdomain.pk` (dev: `localhost`). Both must be identical. |
-| `SESSION_SECRET` | 32+ random characters (`openssl rand -base64 48`). |
+| `SESSION_SECRET` | 32+ random characters (`openssl rand -base64 48`), not a placeholder. Keys every session hash, upload-confirm token and public order-page link: **rotating it logs every user out** and voids outstanding order links — rotate only on suspected compromise and redeploy. |
+| `NEXT_PUBLIC_SITE_URL` | Optional. Canonical origin of the marketing site when it differs from `https://ROOT_DOMAIN` (e.g. `https://www.yourdomain.pk`). |
 | `DATABASE_URL` | Supabase **transaction pooler** URL (port 6543) used by the app at runtime. |
 | `DIRECT_URL` | Supabase **direct / session** URL (port 5432) used by migrations and the seed. |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` | Cloudflare R2 (see step 3). |

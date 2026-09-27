@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMetadata({
 export const dynamic = "force-dynamic";
 
 /** Label for a blog category key; posts written in the super admin may use "general". */
-export function blogCategoryName(key: string): string {
+function blogCategoryName(key: string): string {
   if (key === "general") return "General";
   return getCategory(key)?.name ?? key;
 }

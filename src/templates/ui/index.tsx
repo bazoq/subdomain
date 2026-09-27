@@ -470,8 +470,8 @@ export function Container({ className, children, as: Tag = "div" }: { className?
   return <Tag className={cn("t-container", className)}>{children}</Tag>;
 }
 
-/** "Skip to content" link; the target is the `#sf-content` wrapper rendered by the tenant site layout. */
-export function SkipLink({ lang = "en", target = "sf-content" }: { lang?: Lang; target?: string }) {
+/** "Skip to content" link. Every template Layout renders `<main id="main">`, which is the default target. */
+export function SkipLink({ lang = "en", target = "main" }: { lang?: Lang; target?: string }) {
   return (
     <a href={`#${target}`} className="t-skip">
       {t(ui.skipToContent, lang)}

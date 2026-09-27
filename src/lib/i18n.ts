@@ -154,6 +154,14 @@ export const ui = {
   comingSoonText: ls("This website is being set up. Please check back soon.", "یہ ویب سائٹ تیار کی جا رہی ہے۔ براہ کرم جلد دوبارہ آئیں۔"),
   popularPages: ls("Popular pages", "مقبول صفحات"),
   errorCode: ls("Error reference", "ایرر ریفرنس"),
+  previewTitle: ls("Preview — this website is not published yet", "پیش منظر — یہ ویب سائٹ ابھی شائع نہیں ہوئی"),
+  previewText: ls("Only signed-in staff can see it. Publish it from the admin panel when you are ready.", "صرف لاگ اِن عملہ اسے دیکھ سکتا ہے۔ تیار ہونے پر ایڈمن پینل سے شائع کریں۔"),
+  openAdmin: ls("Open admin panel", "ایڈمن پینل کھولیں"),
+  siteNotSetUpTitle: ls("This site is not set up yet", "یہ سائٹ ابھی تیار نہیں"),
+  siteNotSetUpText: ls("No website is connected to this address. If you own this domain, ask your administrator to assign a template to it.", "اس ایڈریس سے کوئی ویب سائٹ منسلک نہیں۔ اگر یہ ڈومین آپ کا ہے تو اپنے ایڈمنسٹریٹر سے ٹیمپلیٹ تفویض کرنے کا کہیں۔"),
+  visit: ls("Visit", "ملاحظہ کریں"),
+  unavailableEyebrow: ls("Temporarily unavailable", "عارضی طور پر دستیاب نہیں"),
+  reloadPage: ls("Reload page", "صفحہ دوبارہ لوڈ کریں"),
 } as const;
 
 export type UiKey = keyof typeof ui;
