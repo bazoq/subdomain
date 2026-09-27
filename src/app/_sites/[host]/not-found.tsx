@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCurrentTenant } from "@/server/tenant";
 import { currentLang } from "@/server/site";
 import { t, ui, type Lang } from "@/lib/i18n";
@@ -14,9 +15,9 @@ export default async function TenantNotFound() {
   const lang: Lang = tc?.settings.languages.urduEnabled ? await currentLang() : "en";
   return (
     <StatusPage eyebrow="404" title={t(ui.pageNotFound, lang)} text={t(ui.pageNotFoundText, lang)} lang={lang}>
-      <a href="/" className="t-btn t-btn-primary">
+      <Link href="/" className="t-btn t-btn-primary">
         {t(ui.backHome, lang)}
-      </a>
+      </Link>
     </StatusPage>
   );
 }

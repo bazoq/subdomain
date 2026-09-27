@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db, json } from "@/server/db";
-import { requireSuperAction } from "@/server/auth/guards";
-import { hashPassword, passwordPolicy } from "@/server/auth/password";
+import { requireSuperAction, requireSuperRole } from "@/server/auth/guards";
+import { hashPassword, passwordPolicy, PASSWORD_MAX, PASSWORD_MIN } from "@/server/auth/password";
+import { revokeSessions } from "@/server/auth/session";
 import { audit } from "@/server/audit";
 import { deleteObject } from "@/server/storage/r2";
 import { r2Configured } from "@/config/env";
@@ -12,6 +13,7 @@ import { ROOT_DOMAIN } from "@/config/site";
 import { getCategory } from "@/lib/categories";
 import { getTemplateMeta } from "@/templates/registry";
 import { parseSettings, tenantSettingsSchema } from "@/lib/tenant-settings";
+import { log, errorFields } from "@/lib/log";
 import { normalizePkPhone } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 import { buildTenantSettings, isValidSlug, migrateTenantSections, sectionRowsForTemplate, validateHostname, validateSubdomain } from "@/server/super/provision";
@@ -43,7 +45,7 @@ const createTenantSchema = z.object({
   owner: z.object({
     name: z.string().trim().min(2, "Owner name is required").max(80),
     username: z.string().trim().min(3, "Username must be at least 3 characters").max(40),
-    password: z.string().min(8, "Password must be at least 8 characters").max(200),
+    password: z.string().min(PASSWORD_MIN, `Password must be at least ${PASSWORD_MIN} characters`).max(PASSWORD_MAX),
     email: z.string().trim().max(120).optional().or(z.literal("")),
   }),
   contact: contactSchema.default({ phone: "", whatsapp: "", email: "", city: "", address: "" }),
@@ -89,7 +91,7 @@ const USERNAME = /^[a-z0-9][a-z0-9._-]{2,39}$/;
 
 export async function createTenant(input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const parsed = createTenantSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const d = parsed.data;
@@ -103,7 +105,7 @@ export async function createTenant(input: unknown): Promise<ActionResult<{ id: s
 
     const username = d.owner.username.toLowerCase();
     if (!USERNAME.test(username)) return fail("Invalid username.", { "owner.username": "Use lowercase letters, digits, dots, dashes or underscores." });
-    const pw = passwordPolicy(d.owner.password);
+    const pw = passwordPolicy(d.owner.password, { username });
     if (pw) return fail(pw, { "owner.password": pw });
 
     const hostnames: string[] = [];
@@ -152,7 +154,7 @@ export async function createTenant(input: unknown): Promise<ActionResult<{ id: s
 
 export async function updateTenantBasics(id: string, input: unknown): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const parsed = updateBasicsSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const tenant = await db.tenant.findUnique({ where: { id } });
@@ -178,7 +180,7 @@ export async function updateTenantBasics(id: string, input: unknown): Promise<Ac
 
 export async function setTenantStatus(id: string, status: "DRAFT" | "ACTIVE" | "SUSPENDED"): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     if (!["DRAFT", "ACTIVE", "SUSPENDED"].includes(status)) return fail("Invalid status.");
     const { count } = await db.tenant.updateMany({ where: { id }, data: { status } });
     if (!count) return fail("Website not found.");
@@ -194,7 +196,7 @@ export async function setTenantStatus(id: string, status: "DRAFT" | "ACTIVE" | "
 
 export async function addDomain(tenantId: string, entry: unknown): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const parsed = hostnameEntry.safeParse(entry);
     if (!parsed.success) return fromZod(parsed.error);
     const r = resolveHostname(parsed.data);
@@ -214,7 +216,7 @@ export async function addDomain(tenantId: string, entry: unknown): Promise<Actio
 
 export async function removeDomain(tenantId: string, domainId: string): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const domains = await db.domain.findMany({ where: { tenantId }, orderBy: { createdAt: "asc" } });
     const target = domains.find((d) => d.id === domainId);
     if (!target) return fail("Domain not found.");
@@ -236,7 +238,7 @@ export async function removeDomain(tenantId: string, domainId: string): Promise<
 
 export async function setPrimaryDomain(tenantId: string, domainId: string): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const target = await db.domain.findFirst({ where: { id: domainId, tenantId } });
     if (!target) return fail("Domain not found.");
     await db.$transaction([
@@ -255,7 +257,7 @@ export async function setPrimaryDomain(tenantId: string, domainId: string): Prom
 
 export async function changeTemplate(tenantId: string, templateId: string): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const tenant = await db.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) return fail("Website not found.");
     const meta = getTemplateMeta(templateId);
@@ -280,19 +282,19 @@ const addUserSchema = z.object({
   name: z.string().trim().min(2, "Name is required").max(80),
   username: z.string().trim().min(3, "Username must be at least 3 characters").max(40),
   email: z.string().trim().max(120).optional().or(z.literal("")),
-  password: z.string().min(8, "Password must be at least 8 characters").max(200),
+  password: z.string().min(PASSWORD_MIN, `Password must be at least ${PASSWORD_MIN} characters`).max(PASSWORD_MAX),
   role: z.enum(["OWNER", "ADMIN", "STAFF"]).default("ADMIN"),
 });
 export type AddTenantUserInput = z.infer<typeof addUserSchema>;
 
 export async function addTenantUser(tenantId: string, input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const parsed = addUserSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const username = parsed.data.username.toLowerCase();
     if (!USERNAME.test(username)) return fail("Invalid username.", { username: "Use lowercase letters, digits, dots, dashes or underscores." });
-    const pw = passwordPolicy(parsed.data.password);
+    const pw = passwordPolicy(parsed.data.password, { username });
     if (pw) return fail(pw, { password: pw });
     const tenant = await db.tenant.findUnique({ where: { id: tenantId }, select: { id: true } });
     if (!tenant) return fail("Website not found.");
@@ -310,7 +312,7 @@ export async function addTenantUser(tenantId: string, input: unknown): Promise<A
 
 export async function resetTenantUserPassword(tenantId: string, userId: string, password: string): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const pw = passwordPolicy(password ?? "");
     if (pw) return fail(pw);
     const target = await db.tenantUser.findFirst({ where: { id: userId, tenantId } });
@@ -328,7 +330,7 @@ export async function resetTenantUserPassword(tenantId: string, userId: string, 
 
 export async function toggleTenantUser(tenantId: string, userId: string, isActive: boolean): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const target = await db.tenantUser.findFirst({ where: { id: userId, tenantId } });
     if (!target) return fail("User not found.");
     if (!isActive && target.role === "OWNER" && target.isActive) {
@@ -350,7 +352,7 @@ export async function toggleTenantUser(tenantId: string, userId: string, isActiv
 
 export async function deleteTenant(id: string, confirmName: string): Promise<ActionResult> {
   try {
-    const user = await requireSuperAction();
+    const user = await requireTenantManager();
     const tenant = await db.tenant.findUnique({ where: { id }, select: { id: true, name: true, slug: true } });
     if (!tenant) return fail("Website not found.");
     if ((confirmName ?? "").trim() !== tenant.name) return fail("Type the website name exactly to confirm.");
@@ -364,7 +366,7 @@ export async function deleteTenant(id: string, confirmName: string): Promise<Act
           await deleteObject(m.key);
           objectsDeleted++;
         } catch (err) {
-          console.error("R2 delete failed", m.key, err);
+          log.warn("tenant.delete.r2Failed", { key: m.key, ...errorFields(err) });
         }
       }
     }

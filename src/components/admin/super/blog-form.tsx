@@ -67,13 +67,21 @@ export function BlogForm({ id, initial }: { id?: string; initial?: BlogPostInput
     }
   }
 
+  const [deleting, setDeleting] = React.useState(false);
   async function remove() {
-    if (!id || !window.confirm("Delete this post permanently?")) return;
-    const res = await deleteBlogPost(id);
-    if (res.ok) {
-      toast.push("success", res.message ?? "Deleted");
-      router.push("/super/blog");
-    } else toast.push("error", res.message);
+    if (!id || deleting || !window.confirm("Delete this post permanently?")) return;
+    setDeleting(true);
+    try {
+      const res = await deleteBlogPost(id);
+      if (res.ok) {
+        toast.push("success", res.message ?? "Deleted");
+        router.push("/super/blog");
+        return; // keep the button disabled while navigating away
+      }
+      toast.push("error", res.message);
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -175,7 +183,7 @@ export function BlogForm({ id, initial }: { id?: string; initial?: BlogPostInput
         </Card>
         <div className="flex items-center justify-between gap-2">
           {id ? (
-            <Button type="button" variant="ghost" className="text-red-600" onClick={remove}>
+            <Button type="button" variant="ghost" className="text-red-600" onClick={remove} loading={deleting} disabled={saving}>
               <Trash2 /> Delete
             </Button>
           ) : (

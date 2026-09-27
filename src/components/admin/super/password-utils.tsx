@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+/**
+ * Minimum password length shown in client-side help text. Mirrors `PASSWORD_MIN` in
+ * `src/server/auth/password.ts` (server-only, so it cannot be imported here) — keep the two in sync.
+ */
+export const PASSWORD_MIN = 10;
+
 /** Browser-side password generator (mirrors the server policy: 12 chars, letters + digits, no ambiguous glyphs). */
 export function generateClientPassword(length = 12) {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";

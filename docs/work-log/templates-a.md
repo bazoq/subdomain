@@ -77,3 +77,82 @@ electronics 01-03 · medical 01-03 · sports 01-05.
   Template-specific `features` (3-4 bullets each) present on all 35 owned blueprints (31 in ecommerce.ts + printing-01..04).
 - NEXT: confirm eyebrow field type (plain string vs LocalizedStrings), tsc/eslint one at a time → Batch C DONE →
   final sweep (360px, h1, landmarks, alt, RTL, defensive defaults, PKR formatter, i18n) → summary + score.
+- DONE: `eyebrow` is a plain `f.text` field (not LocalizedString) in shared sections — English eyebrows in overrides are
+  correct by type; nothing further to localise in catalog. tsc: 0 errors under src/templates (remaining errors are
+  src/server/notify.ts + src/components/site/* — commerce / tenant-site streams' WIP). eslint (owned + catalog) clean.
+
+## [2026-09-27 18:20] Batch C DONE: catalog Urdu overrides + template-specific features (all 35 owned blueprints)
+- NEXT: final sweep — 360px, one h1, landmarks, alt, RTL, defensive defaults, PKR formatter, i18n, distinctiveness.
+
+## [2026-09-27 18:20] Final sweep IN PROGRESS (35 templates)
+- DONE (sweep results, owned dirs):
+  · h1: exactly 1 per template (35/35). `<main id="main">`: exactly 1 per template; header + footer present in all.
+  · 360px: no `w-[Npx]`/`min-w-[…px]` left; only fixed widths are `hidden w-72 lg:flex` (electronics/01 search, hidden
+    on mobile) and a decorative `w-[28rem]` blob inside an `overflow-hidden` hero (printing/03). Base grid columns ≤ 2
+    everywhere except gifts/03 hero tiles `grid-cols-3` (6 square thumbnails, ~100px each — fits). Added `break-words`
+    to the 7 heroes whose base h1 is ≥48px uppercase/heavy (printing/03, blades/03, sports/01, sports/02, shoes/01,
+    gifts/04, clothing/02) so a long single word cannot overflow the 328px column.
+  · alt text: every `<Img>` carries `alt` (decorative → `alt=""`; logos → tenant name). No raw `<img>`.
+  · icons: lucide-react 1.46 renders `aria-hidden="true"` by default (verified in dist buildLucideIconNode) — the 127
+    icons without an explicit attribute are fine. No icon-only buttons without `aria-label`; every `<nav>` labelled.
+  · RTL: 0 physical `left-/right-/ml-/mr-/pl-/pr-/text-left/text-right` classes (only a comment + a border-radius
+    arbitrary value matched); 0 `space-x`/`divide-x` without `rtl:*-reverse`; all ArrowRight/ChevronRight carry
+    `rtl:rotate-180`. Fixed: phone numbers now `dir="ltr"` in electronics/01, electronics/03 (header + banner),
+    medical/01, sports/04 (kitchen/02 already had it).
+  · defensive defaults: scripted scan of every `x.y.map(` — all guarded within 8 lines by `?.length`/`?? []`
+    (clothing/04 guard is at fn top, verified manually); `ctx.nav` is a required array. `sectionData` returns null
+    for disabled sections and every renderer returns null on `!d` → all-sections-disabled renders hero + footer only.
+  · PKR: no `Rs`/`PKR`/`toLocaleString` literals; all prices go through shared `PriceTag`/`minPrice`/`salePercent`
+    or `formatPKR` (electronics/01 "from" price).
+  · i18n: 0 single-arg `ls("…")` in owned dirs (18 two-arg EN/UR pairs); 0 English `aria-label="…"`, `placeholder=`,
+    `title=` literals; 0 bare English JSX text nodes (heuristic grep).
+  · performance: hero (LCP) image now `priority` (eager + fetchPriority=high) in all 35 templates — 34 replacements
+    (slider/tile heroes mark only the first frame: clothing/01, electronics/01, gifts/03).
+  · distinctiveness: unchanged from audit — each category's templates differ in hero composition, product card
+    treatment, section chrome and header (documented in each file header).
+- NEXT: tsc / eslint / gen-registry, then summary + score.
+
+## [2026-09-27 18:30] Final sweep DONE — stream complete
+- Verification: `npx tsc --noEmit` → 0 errors under src/templates (remaining errors are other streams' WIP:
+  src/server/notify.ts, src/components/site/*); `npx eslint` (9 owned dirs + catalog) → clean;
+  `node scripts/gen-registry.mjs` → "Registry generated with 84 templates."
+- Per-category summary (35 templates, all: 1 h1, main/header/footer landmarks, alt on every image, logical RTL classes,
+  guarded sections, shared PriceTag/formatPKR, EN/UR strings, hero `priority`, template `features` + Urdu overrides):
+  · kitchen 01-04 — editorial split / retail category-bar header (custom, localized a11y) / transparent-on-scroll
+    masonry / playful pastel tiles. Fixes: header `<img>`→Img, contrast tokens, main landmark, hero priority.
+  · printing 01-04 — CMYK grid / letterpress craft (Urdu hero title) / urgent estimator (break-words h1) / dark
+    wide-format signage (Urdu hero title). Fixes: hero bg `<img>`→Img, tokens, features.
+  · clothing 01-04 — scroll-snap slider (custom header, localized nav labels, dark-fg tokens) / brutalist ticker
+    (mobile-safe h1, keyboard QUICK ADD) / soft bubbles / bento block-print. Fixes: `#ffffff` remap → token.
+  · shoes 01-04 — sneaker drop (break-words h1) / handmade leather (Urdu hero title) / speed gradient (2 hero imgs
+    priority) / gold couture. Fixes: text-white → theme tokens throughout.
+  · gifts 01-04 — occasions grid (Urdu items) / corporate hampers (Urdu banner) / personalise steps / dark botanical
+    (focus-within price row). Fixes: tokens, features, hero priority.
+  · blades 01-04 — forge timeline / catalogue exhibits (masthead logo Img) / rugged specs (break-words h1) /
+    comparison grid. Fixes: cart hover token, features.
+  · electronics 01-03 — spec retail (slider first frame priority, phone dir=ltr) / neon gaming / solar lead banner
+    (Urdu banner, phone dir=ltr ×2). medical 01-03 — clinical steps (phone dir=ltr) / wellness pastel / app-style
+    chips (variant order fixed). sports 01-05 — cricket (loadProducts fallback, localized categories nav, break-words
+    h1) / heavy-metal (break-words h1) / kids blobs / outdoor (phone dir=ltr) / team kits (Urdu banner).
+- Remaining issues (accepted / out of boundary):
+  · `text-white` kept intentionally in clothing/01 collection cards + clothing/02 collection tiles: copy sits over a
+    hard-coded `from-black` photo gradient, so white is the correct fixed contrast pair (not a theme surface).
+  · Hero `eyebrow`, section `eyebrow` defaults ("Welcome", "Reviews", …) are plain-text fields in shared sections →
+    cannot carry Urdu; see Handoffs.
+  · No runtime/visual test harness exists; 360px and RTL checks were static (class sweeps), not screenshot-verified.
+- SCORE: 88/100. Contract, a11y (landmarks, single h1, alt, labelled nav, keyboard-reachable hover controls),
+  theming (no hard-coded colours on themed surfaces), i18n (all owned strings EN/UR, catalog overrides bilingual),
+  RTL (logical classes, mirrored arrows, LTR phone numbers), defensive data handling and LCP hints are all verified
+  by grep/script across 35/35 templates. Points withheld: no screenshot/visual regression run (−6), eyebrow fields
+  not localizable at the contract level (−3), distinctiveness judged by reading rather than rendered side-by-side (−3).
+
+## Handoffs (appended)
+- tenant-site / shared: `f.text("eyebrow")` in `src/templates/shared/sections.ts` (hero, about, features, testimonials,
+  faq, gallery, contact, team, process) is a plain string → Urdu visitors see English eyebrows/defaults. Consider
+  `f.localized("eyebrow")` + `ls()` defaults (templates render via `h.eyebrow` directly; `t()` already accepts strings,
+  so switching the field type is backwards compatible if renderers wrap with `t(x, lang)`).
+- shared/packs: category pack hero titles/subtitles are single-arg `ls("…")` (English only) — e.g.
+  "Everything your kitchen needs", "Shoes made for Pakistani roads". Add Urdu second args.
+- commerce: `src/server/notify.ts` currently fails tsc (unterminated regex, lines 25-27) — blocks a clean repo-wide tsc.
+- tenant-site: `src/components/site/{preview-banner,suspended,unknown-host}.tsx` reference `ui.*` keys that do not
+  exist yet (previewTitle, openAdmin, unavailableEyebrow, siteNotSetUp*) — tsc errors.

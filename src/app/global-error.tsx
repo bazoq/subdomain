@@ -39,6 +39,8 @@ export default function GlobalError({ error, retry }: { error: Error & { digest?
             >
               Try again · دوبارہ کوشش کریں
             </button>
+            {/* A full document reload is intended after a fatal error: the client router state may be the cause. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a href="/" style={{ color: "#f8fafc", border: "2px solid #475569", borderRadius: "9999px", padding: "0.65rem 1.5rem", fontWeight: 600, textDecoration: "none" }}>
               Home · ہوم
             </a>

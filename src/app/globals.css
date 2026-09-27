@@ -261,3 +261,130 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ───────────────────────── platform-wide a11y / RTL / print (tenant shell) ───────────────────────── */
+
+:root {
+  color-scheme: light;
+  /* sticky headers: keep anchor targets visible */
+  scroll-padding-top: 5rem;
+}
+:target {
+  scroll-margin-top: 5rem;
+}
+
+/* One visible focus style everywhere (templates may add their own ring on top). */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--t-primary);
+  outline-offset: 2px;
+  border-radius: max(2px, var(--t-radius));
+}
+:where(.t-btn-primary, .t-btn-accent):focus-visible {
+  outline-color: var(--t-fg);
+}
+
+/* Skip link (templates/ui SkipLink): visually hidden until focused. */
+.t-skip {
+  position: fixed;
+  inset-inline-start: 1rem;
+  top: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--t-radius);
+  background: var(--t-primary);
+  color: var(--t-primary-fg);
+  font-weight: 600;
+  transform: translateY(-200%);
+  opacity: 0;
+  transition:
+    transform 0.15s,
+    opacity 0.15s;
+}
+.t-skip:focus-visible {
+  transform: translateY(0);
+  opacity: 1;
+  outline-color: var(--t-primary-fg);
+}
+
+/* Floating action button (WhatsApp): safe-area aware; cart bars raise it with --t-fab-offset. */
+.t-fab {
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px) + var(--t-fab-offset, 0px));
+}
+
+/* Rich text: numbered lists and quotes */
+.t-prose :where(ol) {
+  list-style: decimal;
+  padding-inline-start: 1.5rem;
+  margin-block: 0.75em;
+}
+.t-prose :where(blockquote) {
+  margin-block: 1em;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid var(--t-primary);
+  color: var(--t-muted-fg);
+  font-style: italic;
+}
+.t-prose :where(a):focus-visible {
+  outline-offset: 1px;
+}
+
+/* Urdu / RTL refinements */
+[dir="rtl"] {
+  /* Nastaliq has tall ascenders/descenders: give headings room too */
+  --t-urdu-leading: 1.9;
+}
+[dir="rtl"] :where(h1, h2, h3, h4, .font-heading) {
+  line-height: var(--t-urdu-leading);
+}
+[dir="rtl"] .t-eyebrow {
+  letter-spacing: 0;
+  text-transform: none;
+}
+/* Phone numbers, e-mails, URLs and codes stay left-to-right inside RTL pages. */
+[dir="rtl"] :where(input[type="tel"], input[type="email"], input[type="url"], input[type="number"], code, kbd, .ltr) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Reduced motion: honour the OS setting for everything, including smooth scrolling. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print: paper-friendly, no chrome */
+@media print {
+  :root {
+    --t-bg: #ffffff;
+    --t-fg: #000000;
+    --t-card: #ffffff;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .t-skip,
+  .t-fab,
+  [role="status"],
+  [data-print-hide] {
+    display: none !important;
+  }
+  a[href^="http"]:not([href*="wa.me"])::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+  .t-card {
+    break-inside: avoid;
+    border-color: #bbb;
+  }
+}

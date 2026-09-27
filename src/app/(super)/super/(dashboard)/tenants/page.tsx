@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Globe, Plus, ExternalLink } from "lucide-react";
-import { requireSuper } from "@/server/auth/guards";
+import { requireSuperPage } from "@/server/super/access";
 import { db } from "@/server/db";
 import { PageHeader, EmptyState } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD, Pagination } from "@/components/ui/table";
@@ -13,10 +13,12 @@ import { hostUrl } from "@/config/site";
 import { formatDate } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
+export const metadata = { title: "Websites" };
+
 const PAGE = 25;
 
 export default async function TenantsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  await requireSuper();
+  await requireSuperPage(["SUPERADMIN"]);
   const sp = await searchParams;
   const q = sp.q?.trim() ?? "";
   const category = sp.category ?? "";

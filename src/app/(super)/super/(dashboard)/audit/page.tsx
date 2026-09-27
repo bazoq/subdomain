@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
-import { requireSuper } from "@/server/auth/guards";
+import { requireSuperPage } from "@/server/super/access";
 import { db } from "@/server/db";
 import { PageHeader, EmptyState } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD, Pagination } from "@/components/ui/table";
@@ -10,10 +10,12 @@ import { Input, Select } from "@/components/ui/input";
 import { formatDate } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
+export const metadata = { title: "Audit log" };
+
 const PAGE = 50;
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  await requireSuper();
+  await requireSuperPage(["SUPERADMIN"]);
   const sp = await searchParams;
   const tenant = sp.tenant?.trim() ?? "";
   const actorKind = sp.actorKind ?? "";

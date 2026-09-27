@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Eye } from "lucide-react";
 import type { Lang } from "@/lib/i18n";
 import { t, ui } from "@/lib/i18n";
@@ -13,9 +14,9 @@ export function PreviewBanner({ lang = "en" }: { lang?: Lang }) {
             <strong className="font-semibold">{t(ui.previewTitle, lang)}</strong> <span className="hidden sm:inline">{t(ui.previewText, lang)}</span>
           </span>
         </p>
-        <a href="/admin" className="font-semibold underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
+        <Link href="/admin" className="font-semibold underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
           {t(ui.openAdmin, lang)}
-        </a>
+        </Link>
       </div>
     </div>
   );

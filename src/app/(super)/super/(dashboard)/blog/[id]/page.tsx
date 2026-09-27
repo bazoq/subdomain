@@ -4,6 +4,8 @@ import { db } from "@/server/db";
 import { PageHeader } from "@/components/ui/card";
 import { BlogForm } from "@/components/admin/super/blog-form";
 
+export const metadata = { title: "Edit post" };
+
 export default async function EditBlogPostPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuper();
   const { id } = await params;

@@ -10,6 +10,8 @@ import { getCategory } from "@/lib/categories";
 import { formatDate, whatsappLink } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
+export const metadata = { title: "Leads" };
+
 const PAGE = 25;
 const STATUSES = ["NEW", "CONTACTED", "IN_PROGRESS", "CLOSED", "SPAM"] as const;
 

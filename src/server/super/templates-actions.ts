@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/server/db";
-import { requireSuperAction } from "@/server/auth/guards";
+import { requireSuperAction, requireSuperRole } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
 import { getTemplateMeta } from "@/templates/registry";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
@@ -15,10 +15,11 @@ const schema = z.object({
 });
 export type TemplateSettingInput = z.infer<typeof schema>;
 
-/** Create or update the super-admin override row for a code template. */
+/** Create or update the super-admin override row for a code template (SUPERADMIN only — it changes the public gallery). */
 export async function upsertTemplateSetting(templateId: string, input: unknown): Promise<ActionResult> {
   try {
     const user = await requireSuperAction();
+    requireSuperRole(user, ["SUPERADMIN"]);
     const parsed = schema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     if (!getTemplateMeta(templateId)) return fail("Template not found in the registry.");

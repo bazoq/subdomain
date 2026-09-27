@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ExternalLink, ShieldCheck } from "lucide-react";
-import { requireSuper } from "@/server/auth/guards";
+import { requireSuperPage } from "@/server/super/access";
 import { db } from "@/server/db";
 import { PageHeader, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { StatusBadge, Badge } from "@/components/ui/badge";
@@ -24,7 +24,7 @@ function bytes(n: bigint) {
 }
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireSuper();
+  await requireSuperPage(["SUPERADMIN"]);
   const { id } = await params;
   const tenant = await db.tenant.findUnique({
     where: { id },

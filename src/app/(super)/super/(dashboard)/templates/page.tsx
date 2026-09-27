@@ -1,5 +1,5 @@
 import { LayoutTemplate, ExternalLink } from "lucide-react";
-import { requireSuper } from "@/server/auth/guards";
+import { requireSuperPage } from "@/server/super/access";
 import { db } from "@/server/db";
 import { PageHeader, EmptyState, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { hostUrl, subdomainHost } from "@/config/site";
 export const metadata = { title: "Templates" };
 
 export default async function TemplatesPage() {
-  await requireSuper();
+  await requireSuperPage(["SUPERADMIN"]);
   const [settings, usage] = await Promise.all([db.templateSetting.findMany(), db.tenant.groupBy({ by: ["templateId"], where: { isDemo: false }, _count: true })]);
   const settingById = new Map(settings.map((s) => [s.templateId, s]));
   const usageById = new Map(usage.map((u) => [u.templateId, u._count]));

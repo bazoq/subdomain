@@ -9,7 +9,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { Field, Input, Select, Help } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { ActionButton } from "@/components/admin/action-button";
-import { PasswordInput, CredentialReveal, generateClientPassword } from "@/components/admin/super/password-utils";
+import { PasswordInput, CredentialReveal, generateClientPassword, PASSWORD_MIN } from "@/components/admin/super/password-utils";
 import { changeOwnPassword, createSuperUser, resetSuperUserPassword, toggleSuperUser, type CreateSuperUserInput } from "@/server/super/users-actions";
 import { idle, type ActionResult } from "@/lib/action-result";
 
@@ -96,7 +96,7 @@ export function AddSuperUserButton() {
           </div>
           <Field label="Password" error={errors.password} required>
             <PasswordInput value={v.password} onChange={(password) => setV({ ...v, password })} />
-            <Help>Shown once after creation.</Help>
+            <Help>At least {PASSWORD_MIN} characters with letters and numbers. Shown once after creation.</Help>
           </Field>
         </div>
       </Dialog>
@@ -160,8 +160,8 @@ export function ChangePasswordForm() {
       <Field label="Current password" error={errors.current} required>
         <Input type="password" name="current" autoComplete="current-password" required />
       </Field>
-      <Field label="New password" error={errors.password} required help="At least 8 characters with letters and numbers.">
-        <Input type="password" name="password" autoComplete="new-password" required />
+      <Field label="New password" error={errors.password} required help={`At least ${PASSWORD_MIN} characters with letters and numbers; not a common password or your username.`}>
+        <Input type="password" name="password" autoComplete="new-password" required minLength={PASSWORD_MIN} />
       </Field>
       <Field label="Confirm new password" error={errors.confirm} required>
         <Input type="password" name="confirm" autoComplete="new-password" required />

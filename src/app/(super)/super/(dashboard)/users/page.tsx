@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { KeyRound } from "lucide-react";
-import { requireSuper } from "@/server/auth/guards";
+import { requireSuperPage } from "@/server/super/access";
 import { db } from "@/server/db";
 import { PageHeader } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/utils";
 export const metadata = { title: "Super users" };
 
 export default async function SuperUsersPage() {
-  const me = await requireSuper();
+  const me = await requireSuperPage(["SUPERADMIN"]);
   const users = await db.superUser.findMany({ orderBy: [{ role: "asc" }, { createdAt: "asc" }] });
   const canManage = me.role === "SUPERADMIN";
   return (

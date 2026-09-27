@@ -84,3 +84,12 @@ Everything else → `## Handoffs` at the bottom. Never `git commit`. DB not reac
 - NEXT: users (password policy 10+, strength meter, Enter submits dialogs, last-owner explanations).
 
 ## [2026-09-27 18:41] IN PROGRESS: users forms + page
+
+## [2026-09-27 19:00] DONE: users forms + page
+- DONE: `src/components/ui/input.tsx` — `PASSWORD_MIN=10`, `passwordPolicyMessage(pw, {username})` (exact client mirror of server `passwordPolicy`: length, letters+digits, denylist, repeated char, username), `passwordStrength(pw, ctx)` now scores against the policy (backwards-compatible signature), `PasswordStrength` takes `username`/`id`, meter has `aria-valuetext`.
+- DONE: `src/components/admin/shared/user-forms.tsx` — Add-user and Reset-password dialogs are real `<form>`s (Enter submits via `form=` on the footer button), client validation (name, username regex, email, password policy incl. username) with inline errors + focus first invalid, `PasswordInput` (show/hide) + strength meter with username context, help text says 10+ chars; `ChangePasswordForm` mirrors policy + confirm match before submit, clears fields on success inside the action wrapper (no setState-in-effect), server error in an `Alert`. Thrown action errors become messages.
+- DONE: `users/page.tsx` — responsive table (`<TD label>`), role/deactivate/remove all confirm through the accessible dialog with consequences spelled out (no `window.confirm`), last-owner and "your account" explained inline + info alert when there is a single owner, Locked badge explains unlock time; `users/password/page.tsx` passes `username`.
+- HANDOFF (security/users-actions): `createTenantUser`/`resetTenantUserPassword`/`changeOwnPassword` still call `passwordPolicy(password)` without `{ username }` — the UI now blocks username-containing passwords but the server does not.
+- NEXT: media library (search, alt editing, delete via dialog with usage warning, load-more via server action, PUBLIC-only URLs).
+
+## [2026-09-27 19:01] IN PROGRESS: media library

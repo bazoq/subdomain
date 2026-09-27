@@ -325,6 +325,59 @@ export function tenantMetadata(tc: TenantContext, lang: Lang, host: string = tc.
   };
 }
 
+export interface TenantPageMetadataInput {
+  /** Page title without the business name (the layout template appends ` | <name>`), or a full title with `absoluteTitle`. */
+  title?: string;
+  absoluteTitle?: boolean;
+  description?: string;
+  /** Path of this page, e.g. "/shop/lawn-3pc" — becomes the canonical URL and og:url. */
+  path: string;
+  /** Page-specific share image (product photo, post cover…); falls back to Settings › SEO. */
+  image?: string | null;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  noIndex?: boolean;
+}
+
+/**
+ * Per-page metadata on a tenant host. Next.js replaces (does not deep-merge) `openGraph`/`twitter` from the
+ * layout when a page sets them, so this builds the complete objects — pages should use it instead of
+ * writing partial `openGraph: { images }` blocks.
+ */
+export function tenantPageMetadata(tc: TenantContext, lang: Lang, input: TenantPageMetadataInput, host: string = tc.host): Metadata {
+  const name = tc.tenant.name;
+  const rawTitle = input.title?.trim();
+  const fullTitle = rawTitle ? (input.absoluteTitle ? truncate(rawTitle, 120) : `${truncate(rawTitle, 90)} | ${name}`) : defaultTitle(tc, lang);
+  const description = input.description?.trim() ? truncate(input.description.trim(), 300) : describeTenant(tc, lang);
+  const image = tenantOgImage(tc, input.image, host);
+  const path = input.path.startsWith("/") ? input.path : `/${input.path}`;
+  const indexable = tenantIsIndexable(tc) && !input.noIndex;
+  return {
+    ...(rawTitle ? { title: input.absoluteTitle ? { absolute: truncate(rawTitle, 120) } : truncate(rawTitle, 90) } : {}),
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: input.type ?? "website",
+      siteName: name,
+      locale: ogLocale(lang),
+      alternateLocale: tc.settings.languages.urduEnabled ? [ogLocale(otherLang(lang))] : undefined,
+      url: path,
+      title: fullTitle,
+      description,
+      images: image ? [{ url: image, width: 1200, height: 630, alt: fullTitle }] : undefined,
+      ...(input.type === "article" ? { publishedTime: input.publishedTime, modifiedTime: input.modifiedTime } : {}),
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title: fullTitle,
+      description,
+      images: image ? [{ url: image, alt: fullTitle }] : undefined,
+    },
+    ...(indexable ? {} : { robots: { index: false, follow: false, noarchive: true, googleBot: { index: false, follow: false } } }),
+  };
+}
+
 /** Viewport for tenant pages: brand colour for the browser chrome, light colour scheme (templates are light-first). */
 export function tenantViewport(tc: TenantContext): Viewport {
   const meta = getTemplateMeta(tc.tenant.templateId);

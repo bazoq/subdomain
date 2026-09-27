@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { t, ui, type Lang } from "@/lib/i18n";
 import { log } from "@/lib/log";
+
+const subscribeNoop = () => () => {};
+const readDocumentLang = (): Lang => (document.documentElement.lang.toLowerCase().startsWith("ur") ? "ur" : "en");
+const serverLang = (): Lang => "en";
 
 /**
  * Error boundary for public pages: renders inside the template layout, so the header/footer keep working.
  * Server-side error details never reach the client (Next replaces the message); the digest is shown so a
- * customer can quote it to support.
+ * customer can quote it to support. The language is read from `<html lang>` set by the root layout.
  */
 export default function SiteError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
-  const [lang, setLang] = useState<Lang>("en");
-
-  useEffect(() => {
-    setLang(document.documentElement.lang.toLowerCase().startsWith("ur") ? "ur" : "en");
-  }, []);
+  const lang = useSyncExternalStore(subscribeNoop, readDocumentLang, serverLang);
 
   useEffect(() => {
     log.error("site segment error", { digest: error.digest, message: error.message });
@@ -29,13 +30,16 @@ export default function SiteError({ error, retry }: { error: Error & { digest?: 
         <button type="button" onClick={() => retry()} className="t-btn t-btn-primary">
           {t(ui.tryAgain, lang)}
         </button>
-        <a href="/" className="t-btn t-btn-outline text-t-fg">
+        <Link href="/" className="t-btn t-btn-outline text-t-fg">
           {t(ui.backHome, lang)}
-        </a>
+        </Link>
       </div>
       {error.digest ? (
         <p className="mt-8 text-xs text-t-muted-fg">
-          {t(ui.errorCode, lang)}: <code dir="ltr" className="font-mono">{error.digest}</code>
+          {t(ui.errorCode, lang)}:{" "}
+          <code dir="ltr" className="font-mono">
+            {error.digest}
+          </code>
         </p>
       ) : null}
     </section>

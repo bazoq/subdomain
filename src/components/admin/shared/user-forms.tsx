@@ -297,24 +297,22 @@ export function ResetPasswordButton({ id, name, username }: { id: string; name: 
 
 /** Any user changes their own password. */
 export function ChangePasswordForm({ username }: { username?: string }) {
-  const [state, action, pending] = useActionState(changeOwnPassword, idle);
   const formRef = React.useRef<HTMLFormElement>(null);
   const [pw, setPw] = React.useState("");
   const [confirm, setConfirm] = React.useState("");
   const [clientErrors, setClientErrors] = React.useState<Record<string, string>>({});
   const toast = useToast();
-  const announced = React.useRef<typeof state | null>(null);
-
-  React.useEffect(() => {
-    if (state === announced.current) return;
-    announced.current = state;
-    if (state.ok) {
-      toast.push("success", state.message ?? "Password changed.");
+  // success handling lives in the action wrapper (not an effect): clear fields + announce once
+  const [state, action, pending] = useActionState(async (prev: Parameters<typeof changeOwnPassword>[0], fd: FormData) => {
+    const res = await changeOwnPassword(prev, fd);
+    if (res.ok) {
+      toast.push("success", res.message ?? "Password changed.");
       formRef.current?.reset();
       setPw("");
       setConfirm("");
     }
-  }, [state, toast]);
+    return res;
+  }, idle);
 
   const err = (k: string) => clientErrors[k] ?? (!state.ok ? state.fieldErrors?.[k] : undefined);
   const policy = pw ? passwordPolicyMessage(pw, { username }) : null;

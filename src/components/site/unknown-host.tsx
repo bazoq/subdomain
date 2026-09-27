@@ -9,11 +9,10 @@ import { t, ui } from "@/lib/i18n";
 export function UnknownHostDocument() {
   return (
     <html lang="en">
-      <head>
-        <meta name="robots" content="noindex, nofollow" />
-        <title>{`${t(ui.siteNotSetUpTitle)} | ${brand.name}`}</title>
-      </head>
       <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+        {/* React 19 hoists <title>/<meta> rendered anywhere into <head>. */}
+        <title>{`${t(ui.siteNotSetUpTitle)} | ${brand.name}`}</title>
+        <meta name="robots" content="noindex, nofollow" />
         <main id="main" className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-400">{brand.name}</p>
           <h1 className="mt-4 text-4xl font-bold text-balance sm:text-5xl">{t(ui.siteNotSetUpTitle)}</h1>

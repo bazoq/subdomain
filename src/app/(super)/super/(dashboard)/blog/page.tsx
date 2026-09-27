@@ -11,6 +11,8 @@ import { CATEGORIES, getCategory } from "@/lib/categories";
 import { formatDate } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
 
+export const metadata = { title: "Blog" };
+
 const PAGE = 25;
 
 export default async function BlogListPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
