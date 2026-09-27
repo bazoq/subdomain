@@ -9,7 +9,7 @@ export default async function ChangePasswordPage() {
       <PageHeader title="Change password" backHref="/admin/users" description={`Signed in as ${ctx.user.name} (@${ctx.user.username}).`} />
       <Card>
         <CardContent>
-          <ChangePasswordForm />
+          <ChangePasswordForm username={ctx.user.username} />
         </CardContent>
       </Card>
     </>

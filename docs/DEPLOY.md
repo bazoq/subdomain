@@ -23,7 +23,10 @@ Environment variables (from `.env.example`):
 | `DATABASE_URL` | Supabase **transaction pooler** URL (port 6543) used by the app at runtime. |
 | `DIRECT_URL` | Supabase **direct / session** URL (port 5432) used by migrations and the seed. |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` | Cloudflare R2 (see step 3). |
-| `RESEND_API_KEY`, `NOTIFY_FROM_EMAIL` | Optional email notifications. |
+| `RESEND_API_KEY`, `NOTIFY_FROM_EMAIL` | Optional email notifications (`NOTIFY_FROM_EMAIL` is required once the key is set; `Name <address>` allowed). |
+| `CRON_SECRET` | 16+ random characters (`openssl rand -hex 24`). Vercel Cron sends it as `Authorization: Bearer …` to `/api/cron/maintenance` (step 3.7); the same header unlocks the detailed `/api/health` body. Unset → cron route answers 404 and health stays minimal. |
+| `LOG_LEVEL` | Optional: `debug` / `info` (default) / `warn` / `error` threshold for the JSON logger. |
+| `SENTRY_DSN` | Optional, reserved: read by `src/instrumentation.ts` once the Sentry SDK is installed (see `docs/OPERATIONS.md §2`). |
 | `SEED_SUPER_USERNAME`, `SEED_SUPER_EMAIL`, `SEED_SUPER_PASSWORD` | Optional; read only by `npx prisma db seed` for the first super admin (defaults `admin` / `admin@example.com` / generated + printed once). |
 | `SEED_DEMO_PASSWORD`, `SEED_DEMO_TEMPLATES`, `SEED_DEMO_TENANTS` | Optional, seed only: owner password for all demo sites (generated + printed once when unset); which templates get a demo site (`all` · `first` · comma list of template ids / category keys); `0` skips demo sites entirely. |
 | `DB_POOL_MAX`, `DB_LOG_QUERIES` | Optional, runtime: connections per server instance (default 3 on Vercel, 10 locally); `DB_LOG_QUERIES=1` prints every SQL query in development. |
@@ -99,8 +102,8 @@ Environment variables (from `.env.example`):
 
 ## 3. Vercel
 
-1. **Import** the GitHub repository (Framework preset: Next.js). Build command stays `npm run build` (runs `gen:templates`, `prisma generate`, `next build`).
-2. **Environment variables** (Production + Preview): add every variable from the table above. Use the transaction pooler URL for `DATABASE_URL` and the direct URL for `DIRECT_URL`. Set `ROOT_DOMAIN` and `NEXT_PUBLIC_ROOT_DOMAIN` to `yourdomain.pk`.
+1. **Import** the GitHub repository (Framework preset: Next.js). Build command stays `npm run build` (runs `gen:templates`, `prisma generate`, `next build`). Under **Settings → General** set the Node.js version to **22.x** (matches `.nvmrc` and the CI build job). `vercel.json` already pins functions to the `bom1` (Mumbai) region — keep the Supabase project in `ap-south-1` so they sit together — and declares the cron job (step 7).
+2. **Environment variables** (Production + Preview): add every variable from the table above. Use the transaction pooler URL for `DATABASE_URL` and the direct URL for `DIRECT_URL`. Set `ROOT_DOMAIN` and `NEXT_PUBLIC_ROOT_DOMAIN` to `yourdomain.pk`. Generate fresh `SESSION_SECRET` and `CRON_SECRET` values for production; never reuse the ones from your `.env`. Nothing may be prefixed `NEXT_PUBLIC_` except the two root-domain/site-URL values. Env values are read at boot — **redeploy after every change**.
 3. Deploy once so the project exists, then add **Domains** (Project → Settings → Domains):
    - `yourdomain.pk` (root) and `www.yourdomain.pk` (redirect to root)
    - `*.yourdomain.pk` (wildcard — serves every tenant subdomain and every demo site)
@@ -121,8 +124,11 @@ Environment variables (from `.env.example`):
    - `https://yourdomain.pk` → super website
    - `https://yourdomain.pk/super/login` → super admin
    - `https://demo-pizza-01.yourdomain.pk` → a demo tenant (if templates are registered)
+   - `https://yourdomain.pk/api/health` → `{"status":"ok",…}` (503 `degraded` means the database is unreachable from Vercel — re-check `DATABASE_URL`)
+7. **Cron + monitoring.** `vercel.json` schedules `GET /api/cron/maintenance` daily at 03:00 UTC (08:00 PKT); Vercel picks it up on the first deploy after `CRON_SECRET` is set and lists it under **Project → Cron Jobs** (Hobby plan: daily schedules only, may run up to an hour late — fine, the tasks are idempotent). Point an uptime monitor at `/api/health`; the detailed body (build, DB latency) needs `Authorization: Bearer <CRON_SECRET>`. Log lines are JSON — attach a **Log Drain** if you want them outside Vercel. Everything else day-2 (rotation, incidents, rollback) is in `docs/OPERATIONS.md`.
+8. **CI.** `.github/workflows/ci.yml` runs lint, typecheck, tests (Node 20 + 22) and a production build on every push/PR with dummy env values — no secrets or database are needed in GitHub. Enable **Vercel → Settings → Git → "Only deploy if checks pass"** (or protect `main` on GitHub with the `CI` check) so a red build never reaches production.
 
-Preview deployments (`*.vercel.app`) render the super website only; tenant hosts need real DNS.
+Preview deployments (`*.vercel.app`) render the super website only; tenant hosts need real DNS. Preview env can reuse the dev Supabase project; never point Preview at the production database.
 
 ---
 
@@ -132,6 +138,7 @@ Preview deployments (`*.vercel.app`) render the super website only; tenant hosts
 - `npm run dev` → `http://localhost:3000` (super site), `http://localhost:3000/super` (super admin).
 - Tenant sites use `*.localhost`, which Chrome, Edge and Firefox resolve to `127.0.0.1` automatically — no hosts-file edits: `http://demo-pizza-01.localhost:3000`, admin at `http://demo-pizza-01.localhost:3000/admin`.
 - Safari does not resolve `*.localhost`; use Chrome for tenant testing or add entries to `/etc/hosts`.
+- Quality gates: `npm run check` (= `lint` + `typecheck` + `test`) is what CI runs; `npm test -- --watch` while developing. Tests never touch a database (`tests/setup.ts` provides dummy env; DB modules are mocked). `CRON_SECRET` is optional locally — set it to try `/api/cron/maintenance` or the detailed `/api/health` by hand.
 - Database in development: `npx prisma migrate dev` (dev database only) applies migrations and regenerates the client; `SEED_DEMO_TEMPLATES=first npx prisma db seed` gives one demo site per category in well under a minute; `DB_LOG_QUERIES=1 npm run dev` prints every SQL query; `npx prisma studio` opens a table browser on `DIRECT_URL`. The client is generated into `src/generated/prisma` by `npm install` (`postinstall`) — run `npx prisma generate` after pulling a schema change.
 
 ---
@@ -177,7 +184,8 @@ Preview deployments (`*.vercel.app`) render the super website only; tenant hosts
 - **Content cache**: public tenant pages read their sections from Next's data cache (tag `tenant-content:<tenantId>`, 60 s TTL). Tenant-admin saves expire the tag immediately; anything else that edits `SiteSection` outside the app (a SQL fix, a re-seed) is visible within 60 s.
 - **Rate-limit / idempotency rows**: expired `RateLimit` windows (checkout idempotency locks live there for 24 h), expired sessions and unconfirmed uploads are purged by `GET /api/cron/maintenance` — schedule it (Vercel Cron, e.g. hourly) with `Authorization: Bearer $CRON_SECRET`; the route is disabled until `CRON_SECRET` is set. No manual table maintenance is needed.
 - **Backups**: enable Supabase PITR/daily backups; R2 objects are not versioned — consider a periodic `rclone` copy for critical customers.
-- **Monitoring**: Vercel logs + the **Audit log** page in super admin (every super and tenant admin mutation, with actor and IP).
+- **Monitoring**: `/api/health` for uptime, JSON logs (`log.*` events) in Vercel or a log drain, the daily cron job's status page, and the **Audit log** page in super admin (every super and tenant admin mutation, with actor and IP).
+- **Runbook**: health, logs, cron, secret rotation (what breaks when), incident playbook, rollback and the routine checklist live in [`docs/OPERATIONS.md`](OPERATIONS.md).
 
 ---
 
