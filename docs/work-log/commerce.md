@@ -3,8 +3,8 @@
 Owner: COMMERCE agent. Ownership boundary (only edit):
 - src/modules/ecommerce/**, src/modules/restaurant/**
 - src/components/admin/ecommerce/**, src/components/admin/restaurant/**
-- src/app/_sites/[host]/(site)/{cart,checkout,shop,order,menu,reserve}/**
-- src/app/_sites/[host]/admin/(dashboard)/{orders,products,coupons,shipping,customers,menu,food-orders,kitchen,reservations,delivery-zones}/**
+- src/app/_sites/[host]/(site)/{cart,checkout,shop,order,menu,reserve,upload-prescription,custom-cake}/**
+- src/app/_sites/[host]/admin/(dashboard)/{orders,products,coupons,shipping,customers,menu,food-orders,kitchen,reservations,delivery-zones,prescriptions}/**
 
 Scope: COD-only, PKR integer rupees. Server-side pricing, stock, coupons, shipping, cart, checkout
 validation, restaurant modifiers/zones/hours/state machine, admin CRUD consistency, notifications,
@@ -211,3 +211,78 @@ UX states, cache invalidation. DB not reachable: reasoned from code only.
   inside the create loop re-read by key first (concurrent duplicate → return the winner's order), otherwise treat as the order-number
   race and retry. Phone mismatch on a found key → bilingual `alreadySubmitted` (no order data to a different phone). Local
   `isUniqueViolation` copies replaced by the shared one from `@/server/db`.
+
+## [2026-09-27 21:05] [resume] state reconciled
+- Fifth agent on this stream. HEAD e09cd5a, tree clean. Verified against code (`git diff cfc86f3` on owned paths, 8 files):
+  Task 1 action side is COMPLETE — `idempotency.ts` rewritten (no RateLimit lock rows; `findOrderByIdempotencyKey` via
+  `tenantId_idempotencyKey`, `isIdempotencyConflict`), `placeOrder`/`placeFoodOrder` write `idempotencyKey` on create, fast-path re-read
+  before pricing, and on any P2002 in the create loop re-read by key first (phone mismatch → bilingual `alreadySubmitted`), local
+  `isUniqueViolation` copies replaced by `@/server/db`'s. Schema + migration `20260927182500_order_idempotency_key` present.
+  Task 2 action side COMPLETE — grep for `revalidatePath("/admin` / `"/shop` / template-literal paths in owned dirs: none; every mutating
+  action calls `revalidatePath("/", "layout")` once. Task 3 action side COMPLETE — `hasModule(tc, …)` on all 8 public actions.
+  `seo.ts` helpers exist in both modules (`productJsonLd`, `menuJsonLd`) but no owned page uses them yet; all 12 pages still build
+  `"X · name"` titles by hand.
+- DONE now: eslint warning — `import type { Prisma }` in `src/modules/ecommerce/actions.ts` (only used for `Prisma.TransactionClient`).
+- NOTE: `duplicateInFlight` message keys are now unused in both catalogs (kept; harmless).
+- NEXT: task 3 pages (`requireModulePage`) + task 4 (12 pages: tenantPageMetadata + JSON-LD), then verify.
+
+## [2026-09-27 21:20] Task 1 — Order.idempotencyKey adoption — DONE
+- DONE (verified, no further change needed): `src/modules/ecommerce/idempotency.ts` is column-based only (`findOrderByIdempotencyKey` via
+  `tenantId_idempotencyKey`, `isIdempotencyConflict`), no RateLimit lock rows remain (`grep claimIdempotency|completeIdempotency|releaseIdempotency`
+  → none). `placeOrder` / `placeFoodOrder`: fast-path re-read before pricing, `idempotencyKey: idem` written on create, on any P2002 in the
+  create loop re-read by key first and hand back the winner's order (phone mismatch → `alreadySubmitted` EN+UR), otherwise treat as the
+  order-number race and retry (max 3). Lint: `import type { Prisma }` in `src/modules/ecommerce/actions.ts` (eslint 0 warnings).
+- Handoff item "RateLimit table doubles as the idempotency lock store" (security) is obsolete — struck below.
+
+## [2026-09-27 21:21] Task 2 — revalidation per CONVENTIONS — DONE
+- DONE (verified): no `revalidatePath("/admin/…")`, `"/shop"`, `"/menu"` or template-literal paths remain in owned dirs; every mutating
+  action (public + admin, both modules) ends with exactly one `revalidatePath("/", "layout")`. No `unstable_cache` readers exist in
+  ecommerce/restaurant, so no tags/`revalidate<Module>` helper is needed. Handoff item "revalidatePath('/admin/orders') pattern" is closed.
+
+## [2026-09-27 21:22] Task 3 — module gates — DONE
+- Actions (already in HEAD): `hasModule(tc, …)` on all 8 public actions (`ecommerce` ×3, `medical` on submitPrescription, `restaurant` ×4).
+- Pages (this session): `requireModulePage(ctx, …)` from `@/modules/shared/module-gate` on all 12 owned `(site)` pages — `ecommerce` on
+  cart/checkout/shop/shop/c/shop/[slug]/order; `restaurant` on menu/menu/checkout/menu/order/reserve; `medical` on upload-prescription;
+  custom-cake = `restaurant` + `ctx.category.key === "bakery"` (`bakery` is a CategoryKey, not a ModuleKey — `hasModule(tc,"bakery")` does
+  not type-check, so the category test stays). `shop/[slug]` medical-info block uses `hasModule(ctx, "medical")`.
+- Custom-cake ACTION is `submitLead` (`src/modules/leads/actions.ts`, formKey `custom_cake`) — outside this boundary → Handoffs.
+
+## [2026-09-27 21:35] Task 4 — tenantPageMetadata + JSON-LD on the 12 owned pages — DONE
+- All 12 pages now call `tenantPageMetadata(tc, ctx.lang, { title: <bare>, path, … })` (`tc` from `requireTenant()`, cached per request
+  like the home page does); no hand-built `"X · name"` titles remain (grep clean). `noIndex: true` on the transactional/private pages
+  that are also in `TENANT_DISALLOW` (cart, checkout, order/[n], menu/checkout, menu/order/[n]); canonical paths never carry `?t=` tokens
+  or shop query params (`/shop`, `/shop/c/<slug>` bare).
+- JSON-LD via `<JsonLd>`: `shop/[slug]` → `productJsonLd` (Product, PKR Offer/AggregateOffer, availability, seller @id) + BreadcrumbList
+  (Home › Shop › [Category] › Product), og image = first product/variant image; `shop`, `shop/c/[category]` (og image = category image),
+  `reserve`, `upload-prescription`, `custom-cake` → BreadcrumbList; `menu` → BreadcrumbList + new `restaurantMenuLinkJsonLd`
+  (`BUSINESS_TYPE[category]` node with the layout's business `@id` + `hasMenu`) + `menuJsonLd` (Menu › MenuSection › MenuItem with PKR
+  offers), emitted only when at least one item exists. Private pages emit no JSON-LD.
+- Files: `src/modules/restaurant/seo.ts` (+`restaurantMenuLinkJsonLd`), 12 × `src/app/_sites/[host]/(site)/{cart,checkout,custom-cake,
+  menu,menu/checkout,menu/order/[number],order/[number],reserve,shop,shop/[slug],shop/c/[category],upload-prescription}/page.tsx`.
+
+## [2026-09-27 21:40] Task 5 — verification — DONE (owned scope clean; tree has other streams' in-flight breakage)
+- `npx tsc --noEmit`: 0 errors in owned paths. The tree currently has 11–40 errors (count changes between runs) in `src/templates/**`
+  (`{en,ur}` LocalizedString passed where string/ReactNode expected) — templates-i18n stream is mid-edit on `src/templates/shared/sections.ts`.
+- `npx eslint` on all 17 changed/owned files: clean (0 warnings).
+- `npx vitest run`: 327 passed / 25 failed — all 25 in `tests/templates/registry.test.ts` (same in-flight sections change). At session
+  start (HEAD e09cd5a + other streams' edits at that moment) the run was fully green, so none of the failures are commerce.
+
+## [2026-09-27 21:42] Wave 4 follow-ups — complete: summary + remaining risks
+- CHANGED THIS WAVE (both agents): idempotency moved from RateLimit lock rows to `Order/FoodOrder.idempotencyKey` (unique per tenant);
+  revalidation normalised to one `revalidatePath("/", "layout")` per mutating action; module gates on 8 public actions + 12 pages;
+  `tenantPageMetadata` + JSON-LD (Product/Offer, BreadcrumbList, Menu graph) on all owned public pages; `seo.ts` helpers in both modules.
+- REMAINING RISKS: (a) migration `20260927182500_order_idempotency_key` has not run against a real DB (unreachable locally) — first deploy
+  needs `prisma migrate deploy` before the new actions ship, otherwise every `placeOrder` fails on the unknown column; (b) two concurrent
+  same-key submits roll back the loser's whole transaction (stock/coupon included) by design — the re-read returns the winner, but if the
+  winner has not committed yet the loser returns a generic failure and the client retries with the same key (correct, but one extra
+  round-trip); (c) `submitLead` accepts `formKey=custom_cake` for any category (handoff); (d) `restaurantMenuLinkJsonLd` re-declares the
+  business node's `@type` — identical to the layout's `localBusinessJsonLd` type mapping, but if that mapping changes the two must stay
+  in sync (both read `BUSINESS_TYPE`); (e) still no runtime smoke pass of checkout → token page → admin status change.
+
+## Handoffs (wave 4)
+- [services-modules / leads] `src/modules/leads/actions.ts` `submitLead`: `formKey === "custom_cake"` should be refused unless
+  `tc.category.key === "bakery"` (page is gated; the action is not — a direct POST from any tenant host still creates the lead).
+- [security] CLOSED: the "RateLimit table doubles as the idempotency lock store" note above is obsolete — idempotency no longer writes
+  RateLimit rows; `purgeExpiredRateLimits` TTL is free to change.
+- [platform-dx] CLOSED: the `revalidatePath("/admin/…")` handoff above — all commerce actions now follow CONVENTIONS.
+- [data-layer] CLOSED: `Order.idempotencyKey` / `FoodOrder.idempotencyKey` adopted (this wave).

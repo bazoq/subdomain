@@ -13,7 +13,7 @@ Baseline (2026-09-27): `tsc` clean, `eslint src` clean, 84 templates, no tests, 
 | templates-a | templates-a.md | done | 2026-09-27 18:30 | done — 35 templates hardened; score 88/100; see templates-a.md Handoffs (eyebrow localisation, pack Urdu, notify.ts + components/site tsc) |
 | templates-b | templates-b.md | done | 2026-09-27 18:40 | done - 49 templates + catalog Urdu; see templates-b.md summary (score 86) + Handoffs (packs eyebrow/note localized, notify.ts tsc error) |
 | admin-ux | admin-ux.md | done | 2026-09-27 20:10 | done - score 78/100; see admin-ux.md Handoffs (server-side settings/password validation, media usage index, unlock action, uploader a11y) |
-| templates-i18n | templates-i18n.md | in-progress | 2026-09-27 21:05 | fields.ts preprocess → sections/packs localized eyebrow/note + Urdu → template sweep → test |
+| templates-i18n | templates-i18n.md | done | 2026-09-27 22:45 | eyebrow/note localized + Urdu across sections/packs/catalog, 84 renderers swept, tests/unit/templates-i18n.test.ts (10). Handoff: src/modules section-types `eyebrow?: string` → `LocalizedString | string` |
 | platform-dx | platform-dx.md | done | 2026-09-27 13:05 | done — 252 tests, health gating, cron, env/docs, eslint fix; see platform-dx.md Handoffs (header.tsx lint error blocks CI; revalidatePath pattern → data-layer/commerce) |
 
 ## Wave 4 (handoff follow-ups, started 2026-09-27 after all 10 streams done; HEAD cfc86f3)
@@ -21,8 +21,8 @@ Consolidated handoffs: `_handoffs-consolidated.md`. Agents log under "## Wave 4 
 
 | Follow-up agent | Logs in | Scope |
 |---|---|---|
-| commerce-w4 | commerce.md | idempotencyKey adoption, revalidation pattern, module gates, tenantPageMetadata + JSON-LD |
-| services-w4 | services-modules.md | passwordPolicy username, unlock action, logging, footer PoweredBy/nav/carousel a11y, uploader a11y, revalidation, metadata + JSON-LD |
+| commerce-w4 | commerce.md | done | 2026-09-27 21:42 | done - idempotencyKey column adopted, revalidation normalised, module gates on 8 actions + 12 pages, tenantPageMetadata + JSON-LD on 12 pages; see commerce.md "Handoffs (wave 4)" (submitLead custom_cake gate → leads) |
+| services-w4 | services-modules.md | done | 2026-09-27 21:50 | done - unlock action, uploader a11y, revalidation, tenantPageMetadata + JSON-LD on 22 pages; see services-modules.md Handoffs (wave 4): templates-i18n eyebrow tsc/test breakage, jsonld tests, ImageField label |
 | templates-i18n | templates-i18n.md | eyebrow/note → localized (legacy-string tolerant), packs Urdu, sweep 84 renderers, tests |
-| data-super-w4 | data-layer.md | SuperLead.source migration, revalidateTenantContent in super actions, strict settings schema + hidePoweredBy toggle, Media index |
-| platform-w4 | platform-dx.md | db:seed script, .env.example, currentLang→resolveLang, tests (utils/theme/site-seo/proxy/module-gate), vitest config, CI |
+| data-super-w4 | data-layer.md | done | 2026-09-27 20:55 | tasks 1-6 done (SuperLead.source + migration, super revalidation, strict-write/lenient-read settings + hidePoweredBy toggle + 14 tests, Media index = not needed (PK lookup), DEPLOY.md migrations); see data-layer.md Handoffs (super leads UI `source` column, theme test fixtures if hidePoweredBy becomes required, templates eyebrow tsc) |
+| platform-w4 | platform-dx.md | done | 2026-09-27 21:40 | all 8 items done (+site-seo 31 tests, env.ts gate 11 tests, docs for runtime-scoped prod rules, vite-tsconfig-paths removed); tests/tsc red only via templates-i18n in-flight eyebrow defaults — see platform-dx.md Handoffs |

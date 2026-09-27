@@ -77,9 +77,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-t-dark via-t-dark/70 to-t-dark/20" aria-hidden="true" />
       <Container className="py-24 lg:py-36">
         <div className="max-w-2xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-[var(--t-radius)] border border-t-dark-fg/30 bg-t-dark-fg/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur">
-              <Compass className="size-4 text-t-accent" /> {h.eyebrow}
+              <Compass className="size-4 text-t-accent" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -176,7 +176,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center gap-0 overflow-hidden rounded-[var(--t-radius)] border border-t-border bg-t-card lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-8 sm:p-12">
-            {d.eyebrow ? <span className="inline-block rounded-[var(--t-radius)] bg-t-accent px-2.5 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-accent-fg">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="inline-block rounded-[var(--t-radius)] bg-t-accent px-2.5 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-accent-fg">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-7">

@@ -17,7 +17,7 @@ export const heroSection = defineSection({
   description: "The first thing visitors see. Headline, sub-headline, buttons and background image.",
   canDisable: false,
   fields: [
-    f.text("eyebrow", "Small label above the title"),
+    f.localized("eyebrow", "Small label above the title"),
     f.localized("title", "Headline"),
     f.localized("subtitle", "Sub-headline", { multiline: true }),
     f.link("primaryCta", "Primary button"),
@@ -27,9 +27,9 @@ export const heroSection = defineSection({
     f.repeater("badges", "Trust badges", [f.text("text", "Text"), f.icon("icon", "Icon")], { max: 4 }),
   ],
   defaults: {
-    eyebrow: "Welcome",
-    title: ls("Your headline goes here"),
-    subtitle: ls("A short, convincing sentence about what you offer and why customers in Pakistan love you."),
+    eyebrow: ls("Welcome", "خوش آمدید"),
+    title: ls("Your headline goes here", "آپ کی سرخی یہاں آئے گی"),
+    subtitle: ls("A short, convincing sentence about what you offer and why customers in Pakistan love you.", "ایک مختصر، قائل کرنے والا جملہ کہ آپ کیا پیش کرتے ہیں اور پاکستان میں گاہک آپ کو کیوں پسند کرتے ہیں۔"),
     primaryCta: { label: ls("Get Started", "شروع کریں"), href: "/contact" },
     secondaryCta: { label: ls("Learn More", "مزید جانیں"), href: "#about" },
     image: "",
@@ -45,7 +45,7 @@ export const aboutSection = defineSection({
   key: "about",
   label: "About us",
   fields: [
-    f.text("eyebrow", "Small label"),
+    f.localized("eyebrow", "Small label"),
     f.localized("title", "Title"),
     f.richtext("body", "Text"),
     f.image("image", "Image"),
@@ -53,16 +53,16 @@ export const aboutSection = defineSection({
     f.link("cta", "Button"),
   ],
   defaults: {
-    eyebrow: "About us",
-    title: ls("A trusted name since day one"),
-    body: ls("Tell your story: when you started, what you stand for, and why customers keep coming back."),
+    eyebrow: ls("About us", "ہمارے بارے میں"),
+    title: ls("A trusted name since day one", "پہلے دن سے ایک قابلِ اعتماد نام"),
+    body: ls("Tell your story: when you started, what you stand for, and why customers keep coming back.", "اپنی کہانی بتائیں: آپ نے کب شروع کیا، آپ کے اصول کیا ہیں، اور گاہک بار بار کیوں آتے ہیں۔"),
     image: "",
     highlights: [
-      { text: ls("Quality you can trust"), icon: "ShieldCheck" },
-      { text: ls("Friendly customer support"), icon: "Headset" },
-      { text: ls("Fair, transparent pricing"), icon: "BadgePercent" },
+      { text: ls("Quality you can trust", "معیار جس پر آپ بھروسہ کر سکیں"), icon: "ShieldCheck" },
+      { text: ls("Friendly customer support", "خوش اخلاق کسٹمر سپورٹ"), icon: "Headset" },
+      { text: ls("Fair, transparent pricing", "مناسب، شفاف قیمتیں"), icon: "BadgePercent" },
     ],
-    cta: { label: ls("Contact Us"), href: "/contact" },
+    cta: { label: ls("Contact Us", "رابطہ کریں"), href: "/contact" },
   },
 });
 
@@ -70,20 +70,20 @@ export const featuresSection = defineSection({
   key: "features",
   label: "Why choose us",
   fields: [
-    f.text("eyebrow", "Small label"),
+    f.localized("eyebrow", "Small label"),
     f.localized("title", "Title"),
     f.localized("subtitle", "Subtitle", { multiline: true }),
     f.repeater("items", "Features", [f.icon("icon", "Icon"), f.localized("title", "Title"), f.localized("text", "Text", { multiline: true })], { max: 8 }),
   ],
   defaults: {
-    eyebrow: "Why us",
-    title: ls("Why customers choose us"),
+    eyebrow: ls("Why us", "ہم کیوں"),
+    title: ls("Why customers choose us", "گاہک ہمیں کیوں چنتے ہیں"),
     subtitle: ls(""),
     items: [
-      { icon: "Truck", title: ls("Fast delivery"), text: ls("Delivered to your doorstep across Pakistan.") },
-      { icon: "BadgeCheck", title: ls("Guaranteed quality"), text: ls("Every item is checked before it ships.") },
-      { icon: "Banknote", title: ls("Cash on delivery"), text: ls("Pay when your order arrives. No card needed.") },
-      { icon: "Headset", title: ls("WhatsApp support"), text: ls("Talk to a real person, 7 days a week.") },
+      { icon: "Truck", title: ls("Fast delivery", "تیز ڈیلیوری"), text: ls("Delivered to your doorstep across Pakistan.", "پاکستان بھر میں آپ کے دروازے تک ڈیلیوری۔") },
+      { icon: "BadgeCheck", title: ls("Guaranteed quality", "معیار کی ضمانت"), text: ls("Every item is checked before it ships.", "ہر آئٹم بھیجنے سے پہلے چیک کیا جاتا ہے۔") },
+      { icon: "Banknote", title: ls("Cash on delivery", "کیش آن ڈیلیوری"), text: ls("Pay when your order arrives. No card needed.", "آرڈر ملنے پر ادائیگی کریں۔ کارڈ کی ضرورت نہیں۔") },
+      { icon: "Headset", title: ls("WhatsApp support", "واٹس ایپ سپورٹ"), text: ls("Talk to a real person, 7 days a week.", "ہفتے کے 7 دن حقیقی نمائندے سے بات کریں۔") },
     ],
   },
 });
@@ -106,24 +106,24 @@ export const testimonialsSection = defineSection({
   key: "testimonials",
   label: "Testimonials",
   description: "Reviews are managed under Content > Testimonials. This controls the heading.",
-  fields: [f.text("eyebrow", "Small label"), f.localized("title", "Title"), f.localized("subtitle", "Subtitle")],
-  defaults: { eyebrow: "Reviews", title: ls("What our customers say"), subtitle: ls("") },
+  fields: [f.localized("eyebrow", "Small label"), f.localized("title", "Title"), f.localized("subtitle", "Subtitle")],
+  defaults: { eyebrow: ls("Reviews", "جائزے"), title: ls("What our customers say", "ہمارے گاہک کیا کہتے ہیں"), subtitle: ls("") },
 });
 
 export const faqSection = defineSection({
   key: "faq",
   label: "FAQ",
   description: "Questions are managed under Content > FAQ. This controls the heading.",
-  fields: [f.text("eyebrow", "Small label"), f.localized("title", "Title"), f.localized("subtitle", "Subtitle")],
-  defaults: { eyebrow: "FAQ", title: ls("Frequently asked questions"), subtitle: ls("") },
+  fields: [f.localized("eyebrow", "Small label"), f.localized("title", "Title"), f.localized("subtitle", "Subtitle")],
+  defaults: { eyebrow: ls("FAQ", "سوالات"), title: ls("Frequently asked questions", "عام سوالات"), subtitle: ls("") },
 });
 
 export const gallerySection = defineSection({
   key: "gallery",
   label: "Gallery",
   description: "Images are managed under Content > Gallery. This controls the heading and album.",
-  fields: [f.text("eyebrow", "Small label"), f.localized("title", "Title"), f.text("album", "Album name (default: general)")],
-  defaults: { eyebrow: "Gallery", title: ls("A look inside"), album: "general" },
+  fields: [f.localized("eyebrow", "Small label"), f.localized("title", "Title"), f.text("album", "Album name (default: general)")],
+  defaults: { eyebrow: ls("Gallery", "گیلری"), title: ls("A look inside", "ایک جھلک"), album: "general" },
 });
 
 export const ctaSection = defineSection({
@@ -131,8 +131,8 @@ export const ctaSection = defineSection({
   label: "Call to action banner",
   fields: [f.localized("title", "Title"), f.localized("text", "Text", { multiline: true }), f.link("cta", "Button"), f.image("image", "Background image")],
   defaults: {
-    title: ls("Ready to get started?"),
-    text: ls("Call or WhatsApp us today. We reply within minutes during working hours."),
+    title: ls("Ready to get started?", "شروع کرنے کے لیے تیار ہیں؟"),
+    text: ls("Call or WhatsApp us today. We reply within minutes during working hours.", "آج ہی کال یا واٹس ایپ کریں۔ کام کے اوقات میں ہم منٹوں میں جواب دیتے ہیں۔"),
     cta: { label: ls("WhatsApp Us", "واٹس ایپ کریں"), href: "whatsapp" },
     image: "",
   },
@@ -143,21 +143,21 @@ export const contactSection = defineSection({
   label: "Contact section",
   description: "Phone, address and map are pulled from Settings > Contact. This controls the heading and form.",
   fields: [
-    f.text("eyebrow", "Small label"),
+    f.localized("eyebrow", "Small label"),
     f.localized("title", "Title"),
     f.localized("subtitle", "Subtitle", { multiline: true }),
     f.boolean("showForm", "Show contact form"),
     f.boolean("showMap", "Show map"),
   ],
-  defaults: { eyebrow: "Contact", title: ls("Get in touch"), subtitle: ls("We'd love to hear from you."), showForm: true, showMap: true },
+  defaults: { eyebrow: ls("Contact", "رابطہ"), title: ls("Get in touch", "رابطہ کریں"), subtitle: ls("We'd love to hear from you.", "ہمیں آپ سے سن کر خوشی ہوگی۔"), showForm: true, showMap: true },
 });
 
 export const teamSection = defineSection({
   key: "team",
   label: "Team",
   description: "Members are managed under Content > Team. This controls the heading.",
-  fields: [f.text("eyebrow", "Small label"), f.localized("title", "Title"), f.localized("subtitle", "Subtitle")],
-  defaults: { eyebrow: "Team", title: ls("Meet the team"), subtitle: ls("") },
+  fields: [f.localized("eyebrow", "Small label"), f.localized("title", "Title"), f.localized("subtitle", "Subtitle")],
+  defaults: { eyebrow: ls("Team", "ٹیم"), title: ls("Meet the team", "ہماری ٹیم سے ملیں"), subtitle: ls("") },
 });
 
 export const hoursSection = defineSection({
@@ -165,24 +165,24 @@ export const hoursSection = defineSection({
   label: "Opening hours",
   description: "Times come from Settings > Opening hours.",
   fields: [f.localized("title", "Title"), f.localized("note", "Note")],
-  defaults: { title: ls("Opening hours", "اوقات کار"), note: ls("Closed on public holidays.") },
+  defaults: { title: ls("Opening hours", "اوقات کار"), note: ls("Closed on public holidays.", "عام تعطیلات پر بند۔") },
 });
 
 export const processSection = defineSection({
   key: "process",
   label: "How it works",
   fields: [
-    f.text("eyebrow", "Small label"),
+    f.localized("eyebrow", "Small label"),
     f.localized("title", "Title"),
     f.repeater("steps", "Steps", [f.localized("title", "Title"), f.localized("text", "Text", { multiline: true }), f.icon("icon", "Icon")], { max: 6 }),
   ],
   defaults: {
-    eyebrow: "How it works",
-    title: ls("Simple, in three steps"),
+    eyebrow: ls("How it works", "طریقہ کار"),
+    title: ls("Simple, in three steps", "آسان، تین مراحل میں"),
     steps: [
-      { title: ls("Choose"), text: ls("Browse and pick what you need."), icon: "Search" },
-      { title: ls("Order"), text: ls("Checkout with cash on delivery."), icon: "ShoppingBag" },
-      { title: ls("Receive"), text: ls("Delivered to your door in 2-4 days."), icon: "PackageCheck" },
+      { title: ls("Choose", "منتخب کریں"), text: ls("Browse and pick what you need.", "دیکھیں اور جو چاہیں منتخب کریں۔"), icon: "Search" },
+      { title: ls("Order", "آرڈر کریں"), text: ls("Checkout with cash on delivery.", "کیش آن ڈیلیوری کے ساتھ چیک آؤٹ کریں۔"), icon: "ShoppingBag" },
+      { title: ls("Receive", "وصول کریں"), text: ls("Delivered to your door in 2-4 days.", "2 سے 4 دن میں آپ کے دروازے تک۔"), icon: "PackageCheck" },
     ],
   },
 });
@@ -191,14 +191,14 @@ export const promoSection = defineSection({
   key: "promo",
   label: "Promo / offer strip",
   fields: [f.localized("text", "Text"), f.text("code", "Coupon code"), f.link("cta", "Button"), f.color("bg", "Background colour")],
-  defaults: { text: ls("Flat 10% off your first order"), code: "WELCOME10", cta: { label: ls("Shop Now"), href: "/shop" }, bg: "" },
+  defaults: { text: ls("Flat 10% off your first order", "پہلے آرڈر پر 10% رعایت"), code: "WELCOME10", cta: { label: ls("Shop Now", "ابھی خریدیں"), href: "/shop" }, bg: "" },
 });
 
 export const brandsSection = defineSection({
   key: "brands",
   label: "Brands / partners strip",
   fields: [f.localized("title", "Title"), f.repeater("logos", "Logos", [f.text("name", "Name"), f.image("image", "Logo")], { max: 12 })],
-  defaults: { title: ls("Trusted by leading brands"), logos: [] },
+  defaults: { title: ls("Trusted by leading brands", "معروف برانڈز کا اعتماد"), logos: [] },
 });
 
 export const footerSection = defineSection({
@@ -211,9 +211,9 @@ export const footerSection = defineSection({
     f.text("bottomNote", "Bottom note"),
   ],
   defaults: {
-    about: ls("Proudly serving customers across Pakistan."),
+    about: ls("Proudly serving customers across Pakistan.", "پاکستان بھر میں گاہکوں کی خدمت پر فخر۔"),
     columns: [
-      { title: ls("Quick links"), links: [{ label: ls("Home"), href: "/" }, { label: ls("About"), href: "#about" }, { label: ls("Contact"), href: "/contact" }] },
+      { title: ls("Quick links", "فوری لنکس"), links: [{ label: ls("Home", "ہوم"), href: "/" }, { label: ls("About", "ہمارے بارے میں"), href: "#about" }, { label: ls("Contact", "رابطہ"), href: "/contact" }] },
     ],
     bottomNote: "",
   },

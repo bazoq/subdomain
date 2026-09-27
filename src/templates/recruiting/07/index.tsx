@@ -55,7 +55,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-muted">
       <Container className="grid items-center gap-10 py-16 lg:grid-cols-[1.2fr_0.8fr] lg:py-24">
         <div className="text-center lg:text-start">
-          {h.eyebrow ? <span className="inline-block rounded-full bg-t-primary px-5 py-2 text-base font-bold text-t-primary-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block rounded-full bg-t-primary px-5 py-2 text-base font-bold text-t-primary-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-6 text-4xl font-extrabold leading-[1.15] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mx-auto mt-6 max-w-2xl text-xl leading-9 text-t-muted-fg lg:mx-0">{t(h.subtitle, lang)}</p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
@@ -167,7 +167,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         stats: () => <StatsBlock ctx={ctx} variant="cards" className="bg-t-bg [&_dd]:text-5xl [&_dt]:text-base" />,
-        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={jobs.eyebrow} title={jobs.title} className={cn("bg-t-muted", big, "[&_.t-btn]:px-8 [&_.t-btn]:py-4 [&_.t-btn]:text-lg")} /> : null),
+        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={t(jobs.eyebrow, ctx.lang)} title={jobs.title} className={cn("bg-t-muted", big, "[&_.t-btn]:px-8 [&_.t-btn]:py-4 [&_.t-btn]:text-lg")} /> : null),
         industries: () => <Industries ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="icon" columns={2} className={cn("bg-t-muted", big)} />,
         process: () => <ProcessBlock ctx={ctx} variant="steps" className={big} />,

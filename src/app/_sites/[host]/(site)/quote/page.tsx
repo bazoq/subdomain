@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { Container } from "@/templates/ui";
 import { t, ui } from "@/lib/i18n";
 import { PageHero } from "@/modules/shared/ui/page-hero";
@@ -12,8 +13,8 @@ import { ContactInfo } from "@/modules/shared/ui/contact-info";
 type Props = { searchParams: Promise<{ service?: string }> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(ui.getQuote, ctx.lang)} · ${ctx.tenant.name}`, description: `Request a printing quote from ${ctx.tenant.name}. Upload your design and get a price on WhatsApp.` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: t(ui.getQuote, ctx.lang), description: `Request a printing quote from ${ctx.tenant.name}. Upload your design and get a price on WhatsApp.`, path: "/quote" });
 }
 
 export default async function QuotePage({ searchParams }: Props) {

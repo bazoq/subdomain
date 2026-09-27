@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClipboardList, Handshake, ShieldCheck, UserSearch } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
@@ -8,12 +9,13 @@ import { whatsappLink } from "@/lib/utils";
 import { EmployerRequestForm, recruitingStrings as rs } from "@/modules/recruiting/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
   requireModulePage(ctx, "recruiting");
-  return {
-    title: `${t(rs.employerTitle, ctx.lang)} · ${ctx.tenant.name}`,
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: t(rs.employerTitle, ctx.lang),
     description: `Hire skilled and semi-skilled staff for Pakistan and the Gulf through ${ctx.tenant.name}. Send us your manpower requirement.`,
-  };
+    path: "/employers",
+  });
 }
 
 const steps = [

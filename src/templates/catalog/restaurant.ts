@@ -83,7 +83,7 @@ export const restaurantBlueprints: Blueprint[] = [
       layout: "Dark neon, bold type, ticker motion.",
       motion: "Marquee ticker; neon glow hover.",
     },
-    overrides: { hero: { eyebrow: "Open till 3 AM", title: { en: "Late night? Pizza night.", ur: "رات دیر تک؟ پیزا نائٹ!" } } },
+    overrides: { hero: { eyebrow: { en: "Open till 3 AM", ur: "رات 3 بجے تک کھلا" }, title: { en: "Late night? Pizza night.", ur: "رات دیر تک؟ پیزا نائٹ!" } } },
     demo: { name: "Midnight Slice", city: "Lahore" },
   },
   {
@@ -132,7 +132,7 @@ export const restaurantBlueprints: Blueprint[] = [
       signature: "Deals as truck-art style cards with bright borders; testimonials with Urdu-friendly type.",
       layout: "Vibrant colours, pattern borders, rounded cards.",
     },
-    overrides: { hero: { eyebrow: "Tikka · Tandoori · Malai Boti", title: { en: "Desi flavours on a pizza", ur: "پیزا پر دیسی ذائقے" } } },
+    overrides: { hero: { eyebrow: { en: "Tikka · Tandoori · Malai Boti", ur: "تکہ · تندوری · ملائی بوٹی" }, title: { en: "Desi flavours on a pizza", ur: "پیزا پر دیسی ذائقے" } } },
     demo: { name: "Desi Tandoor Pizza", city: "Rawalpindi" },
   },
   {
@@ -232,7 +232,7 @@ export const restaurantBlueprints: Blueprint[] = [
       signature: "Custom cake section repurposed as 'Bulk & gift orders'; gallery in gold frames.",
       layout: "Festive maroon/gold, ornamental dividers.",
     },
-    overrides: { hero: { eyebrow: "Mithai · Cakes · Bakery", title: { en: "Sweetness for every celebration", ur: "ہر خوشی کے لیے مٹھاس" } }, customCake: { title: { en: "Bulk orders for Eid, weddings & events", ur: "عید، شادیوں اور تقریبات کے لیے بلک آرڈرز" }, text: { en: "Mithai boxes, cake towers and dessert tables for 50 to 5,000 guests. Order 3 days in advance.", ur: "50 سے 5,000 مہمانوں کے لیے مٹھائی کے ڈبے، کیک ٹاورز اور ڈیزرٹ ٹیبلز۔ 3 دن پہلے آرڈر کریں۔" }, cta: { label: { en: "Request bulk order", ur: "بلک آرڈر کی درخواست" }, href: "/custom-cake" } } },
+    overrides: { hero: { eyebrow: { en: "Mithai · Cakes · Bakery", ur: "مٹھائی · کیک · بیکری" }, title: { en: "Sweetness for every celebration", ur: "ہر خوشی کے لیے مٹھاس" } }, customCake: { title: { en: "Bulk orders for Eid, weddings & events", ur: "عید، شادیوں اور تقریبات کے لیے بلک آرڈرز" }, text: { en: "Mithai boxes, cake towers and dessert tables for 50 to 5,000 guests. Order 3 days in advance.", ur: "50 سے 5,000 مہمانوں کے لیے مٹھائی کے ڈبے، کیک ٹاورز اور ڈیزرٹ ٹیبلز۔ 3 دن پہلے آرڈر کریں۔" }, cta: { label: { en: "Request bulk order", ur: "بلک آرڈر کی درخواست" }, href: "/custom-cake" } } },
     demo: { name: "Mithai & More", city: "Multan" },
   },
   {

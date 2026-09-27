@@ -57,9 +57,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-bg">
       <Container className="grid items-center gap-12 py-20 lg:grid-cols-2 lg:py-28">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 border-b-2 border-t-accent pb-1 text-xs font-bold uppercase tracking-[0.25em] text-t-primary">
-              <Scale className="size-4" /> {h.eyebrow}
+              <Scale className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>

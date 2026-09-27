@@ -80,9 +80,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <Container className="grid items-stretch gap-6 py-10 lg:grid-cols-3 lg:gap-8 lg:py-16">
         <Img src={pics[0]} alt="" priority className="order-2 aspect-[3/4] w-full object-cover lg:order-1" fallback={<Gem className="size-12 text-t-accent" />} />
         <div className="t-fade-up order-1 flex flex-col items-center justify-center border border-t-accent/60 bg-t-bg p-8 text-center sm:p-10 lg:order-2">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className={cn(MICRO, "flex items-center gap-2 text-t-accent")}>
-              <Sparkle className="size-3.5" /> {h.eyebrow}
+              <Sparkle className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-3xl font-normal leading-[1.1] tracking-tight text-t-fg sm:text-4xl lg:text-5xl">{t(h.title, lang)}</h1>
@@ -158,7 +158,7 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-24">
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <div className={cn(d.align === "left" && "lg:order-2")}>
-          {d.eyebrow ? <span className={cn(MICRO, "block text-t-accent")}>{d.eyebrow}</span> : null}
+          {t(d.eyebrow, ctx.lang) ? <span className={cn(MICRO, "block text-t-accent")}>{t(d.eyebrow, ctx.lang)}</span> : null}
           <h2 className="font-heading mt-5 text-3xl font-normal leading-tight tracking-tight sm:text-4xl">{title}</h2>
           <span className="my-6 block h-px w-20 bg-t-accent" aria-hidden="true" />
           <p className="max-w-md text-sm leading-7 text-t-muted-fg">{t(d.text, ctx.lang)}</p>

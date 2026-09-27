@@ -98,7 +98,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-24 start-1/4 size-80 rounded-full bg-t-accent/30 blur-3xl" />
       <Container className="relative grid items-center gap-10 py-12 lg:grid-cols-[1.1fr_1fr] lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-flex rounded-full bg-t-primary-fg/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-flex rounded-full bg-t-primary-fg/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-4 text-4xl font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-4 max-w-xl text-lg leading-8 opacity-90">{t(h.subtitle, lang)}</p>
           {h.badges?.length ? (

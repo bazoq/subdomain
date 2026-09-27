@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
@@ -13,12 +14,13 @@ function str(v: string | string[] | undefined): string {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
   requireModulePage(ctx, "recruiting");
-  return {
-    title: `${t(rs.jobs, ctx.lang)} · ${ctx.tenant.name}`,
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: t(rs.jobs, ctx.lang),
     description: `Current job openings in Pakistan and overseas from ${ctx.tenant.name}. Apply online with your CV.`,
-  };
+    path: "/jobs",
+  });
 }
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {

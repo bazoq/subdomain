@@ -84,7 +84,7 @@ export async function createBooking(input: unknown): Promise<ActionResult<{ id: 
       date: d.date || null,
       message: d.message || null,
     });
-    revalidatePath("/admin/bookings");
+    // No revalidation: admin lists are rendered per request and the visitor sees nothing cached that changed.
     return success(t(ts.booked, lang), { id: booking.id });
   } catch (e) {
     return publicFailure(lang, e);
@@ -197,7 +197,7 @@ export async function updateBookingStatus(id: string, status: string): Promise<A
     }
     await db.booking.update({ where: { id }, data: { status: s.data } });
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "booking.status", entity: "Booking", entityId: id, meta: { from, to: s.data } });
-    revalidatePath("/admin/bookings");
+    revalidatePath("/", "layout");
     return success(`Booking marked ${s.data.toLowerCase()}.`);
   } catch (e) {
     return fail((e as Error).message);
@@ -211,7 +211,7 @@ export async function deleteBooking(id: string): Promise<ActionResult> {
     const { count } = await db.booking.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "booking.delete", entity: "Booking", entityId: id });
-    revalidatePath("/admin/bookings");
+    revalidatePath("/", "layout");
     return success("Booking deleted.");
   } catch (e) {
     return fail((e as Error).message);

@@ -85,9 +85,9 @@ function Hero({ ctx }: TemplatePageProps) {
             ))}
           </ul>
         ) : null}
-        {h.eyebrow ? (
+        {t(h.eyebrow, lang) ? (
           <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.35em] text-t-primary">
-            <Anvil className="size-4" /> {h.eyebrow}
+            <Anvil className="size-4" /> {t(h.eyebrow, lang)}
           </span>
         ) : null}
         <h1 className="font-heading mt-6 text-4xl font-bold uppercase leading-[1.1] tracking-wide text-t-secondary sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -262,7 +262,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center border border-t-border bg-t-card lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-8 sm:p-12">
-            {d.eyebrow ? <span className="text-xs font-bold uppercase tracking-[0.3em] text-t-primary">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="text-xs font-bold uppercase tracking-[0.3em] text-t-primary">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-3 text-3xl font-bold uppercase tracking-wide text-t-secondary sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-8">

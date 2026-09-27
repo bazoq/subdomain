@@ -29,15 +29,16 @@ async function loadProducts(ctx: SiteContext, mode: string, count: number): Prom
 }
 
 /* catalogue-style heading: small caps eyebrow between rules, serif title */
-function PlaqueHeading({ eyebrow, title, lang, align = "center", className }: { eyebrow?: string; title?: LocalizedString; lang: "en" | "ur"; align?: "center" | "left"; className?: string }) {
+function PlaqueHeading({ eyebrow, title, lang, align = "center", className }: { eyebrow?: LocalizedString | string; title?: LocalizedString; lang: "en" | "ur"; align?: "center" | "left"; className?: string }) {
   const ttl = t(title, lang);
-  if (!ttl && !eyebrow) return null;
+  const eb = t(eyebrow, lang);
+  if (!ttl && !eb) return null;
   return (
     <div className={cn("mb-10 max-w-2xl", align === "center" && "mx-auto text-center", className)}>
-      {eyebrow ? (
+      {eb ? (
         <span className={cn("flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-t-primary", align === "center" && "justify-center")}>
           <span className="h-px w-8 bg-t-border" aria-hidden="true" />
-          {eyebrow}
+          {eb}
           <span className="h-px w-8 bg-t-border" aria-hidden="true" />
         </span>
       ) : null}
@@ -94,10 +95,10 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="bg-t-bg py-16 sm:py-24">
       <Container className="text-center">
-        {h.eyebrow ? (
+        {t(h.eyebrow, lang) ? (
           <span className="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-t-primary">
             <span className="h-px w-10 bg-t-border" aria-hidden="true" />
-            {h.eyebrow}
+            {t(h.eyebrow, lang)}
             <span className="h-px w-10 bg-t-border" aria-hidden="true" />
           </span>
         ) : null}
@@ -279,7 +280,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center gap-8 border-y border-t-border py-8 lg:grid-cols-2 lg:gap-12", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="px-2 sm:px-6">
-            {d.eyebrow ? <span className="text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-3 text-3xl font-medium sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-8">

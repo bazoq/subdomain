@@ -129,7 +129,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           )}
           <div className="absolute inset-0 bg-gradient-to-r from-t-secondary/90 via-t-secondary/60 to-transparent rtl:bg-gradient-to-l" aria-hidden="true" />
           <div className="absolute inset-y-0 start-0 flex max-w-xl flex-col justify-center p-6 text-t-secondary-fg sm:p-10">
-            {h.eyebrow ? <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-t-accent-fg">{h.eyebrow}</span> : null}
+            {t(h.eyebrow, lang) ? <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-t-accent-fg">{t(h.eyebrow, lang)}</span> : null}
             <h1 className="font-heading mt-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{t(h.title, lang)}</h1>
             <p className="mt-3 max-w-md text-sm leading-6 opacity-85 sm:text-base">{t(h.subtitle, lang)}</p>
             {h.badges?.length ? (
@@ -294,7 +294,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center overflow-hidden rounded-[var(--t-radius)] border border-t-border bg-t-card lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-8 sm:p-12">
-            {d.eyebrow ? <span className="t-eyebrow">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="t-eyebrow">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-7">

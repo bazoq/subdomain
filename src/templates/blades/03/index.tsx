@@ -74,9 +74,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark via-t-dark/70 to-t-dark/20" aria-hidden="true" />
       <Container className="relative py-24 lg:py-36">
         <div className="max-w-2xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 border-s-4 border-t-accent ps-3 text-sm font-bold uppercase tracking-[0.25em] text-t-accent">
-              <Compass className="size-4" /> {h.eyebrow}
+              <Compass className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 break-words text-5xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
@@ -269,7 +269,7 @@ function Banner({ ctx }: TemplatePageProps) {
           <div className="relative p-8 sm:p-12">
             <div className="absolute inset-0 opacity-40 mix-blend-screen" style={TOPO} aria-hidden="true" />
             <div className="relative">
-              {d.eyebrow ? <span className="border-s-4 border-t-accent ps-3 text-xs font-bold uppercase tracking-[0.25em] text-t-accent">{d.eyebrow}</span> : null}
+              {t(d.eyebrow, lang) ? <span className="border-s-4 border-t-accent ps-3 text-xs font-bold uppercase tracking-[0.25em] text-t-accent">{t(d.eyebrow, lang)}</span> : null}
               <h2 className="font-heading mt-4 text-4xl font-extrabold uppercase leading-none tracking-tight sm:text-5xl">{title}</h2>
               <p className="mt-4 max-w-lg text-t-dark-fg/80">{t(d.text, lang)}</p>
               <div className="mt-8">

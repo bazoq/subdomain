@@ -11,7 +11,9 @@ Stack: Next.js 16 on Vercel · Supabase Postgres via Prisma · Cloudflare R2 (S3
 - A GitHub repository with this code.
 - Accounts: [Supabase](https://supabase.com), [Cloudflare](https://dash.cloudflare.com), [Vercel](https://vercel.com), and access to your domain's DNS.
 - Node **22** locally (`.nvmrc`; 20.9+ is supported and tested in CI). Run `npm install` once (this also runs `prisma generate`).
-- Copy `.env.example` to `.env` and fill it in as you go through the steps below. Every variable is documented inline there; `src/config/env.ts` validates the set at startup and a production build refuses to boot with a placeholder secret, a `localhost` root domain or a half-configured R2.
+- Copy `.env.example` to `.env` and fill it in as you go through the steps below. Every variable is documented inline there; `src/config/env.ts` validates the set at startup and a production deployment refuses to boot with a placeholder secret, a `localhost` root domain or a half-configured R2.
+
+**When the production rules apply.** `src/config/env.ts` has two layers. *Shape rules* (postgres URL, 32+ char secret, bare hostname, `NEXT_PUBLIC_ROOT_DOMAIN = ROOT_DOMAIN`, R2 all-or-nothing, no query string on `R2_PUBLIC_URL`, `NOTIFY_FROM_EMAIL` with `RESEND_API_KEY`) apply everywhere. *Production rules* (non-`localhost` `ROOT_DOMAIN`, strong non-placeholder `SESSION_SECRET`, `https` `R2_PUBLIC_URL`) apply only when the app is **running as a real production deployment**: `NODE_ENV=production` **and** not the `next build` phase (`NEXT_PHASE=phase-production-build`, where only the dummy build-time env exists) **and** `VERCEL_ENV` unset or `production`. So `npm run build` / CI passes with dummy values, Vercel **Preview** deployments (`VERCEL_ENV=preview`) boot with whatever env the Preview scope has, and only the **Production** deployment is strict. Consequence: a misconfigured production secret is caught on the first request of the production deployment, not in the build log — check the Vercel *Functions* log after the first production deploy (or hit `/api/health`, step 3.7).
 
 Environment variables (from `.env.example`):
 
@@ -52,7 +54,7 @@ Environment variables (from `.env.example`):
    npx prisma migrate deploy
    npx prisma migrate status   # must print "Database schema is up to date!"
    ```
-   This applies, in order, `20260916000000_init` (45 tables), `20260927130000_indexes_and_fks` (indexes for every list/sort query, FK indexes, `Property.agent` / `ClassSchedule.trainer` foreign keys) and `20260927182500_order_idempotency_key` (`Order.idempotencyKey` / `FoodOrder.idempotencyKey`). All migrations are additive and safe to run on a database that already has data. Never run `prisma migrate dev`, `db push` or `migrate reset` against production.
+   This applies, in order, `20260916000000_init` (45 tables), `20260927130000_indexes_and_fks` (indexes for every list/sort query, FK indexes, `Property.agent` / `ClassSchedule.trainer` foreign keys), `20260927182500_order_idempotency_key` (`Order.idempotencyKey` / `FoodOrder.idempotencyKey`) and `20260927200000_superlead_source` (`SuperLead.source`, the page/template a platform lead came from). `npx prisma migrate status` lists exactly these four as applied. All migrations are additive and safe to run on a database that already has data. Never run `prisma migrate dev`, `db push` or `migrate reset` against production.
 5. Seed the platform (idempotent — safe to re-run at any time):
    ```bash
    SEED_SUPER_USERNAME=admin SEED_SUPER_EMAIL=you@yourdomain.pk SEED_SUPER_PASSWORD='StrongPass123' npx prisma db seed

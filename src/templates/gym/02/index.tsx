@@ -62,9 +62,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute -end-24 -top-24 size-80 rounded-full bg-t-accent/20 blur-2xl" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-t-accent-fg">
-              <Sparkles className="size-3.5" /> {h.eyebrow}
+              <Sparkles className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -145,7 +145,7 @@ function Home({ ctx }: TemplatePageProps) {
               variant="grid"
               columns={4}
               id="transformations"
-              heading={{ eyebrow: trans.eyebrow, title: trans.title }}
+              heading={{ eyebrow: t(trans.eyebrow, ctx.lang), title: trans.title }}
               className="bg-t-bg [&_button]:rounded-[2rem]"
             />
           ) : null,

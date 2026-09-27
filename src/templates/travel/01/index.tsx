@@ -100,7 +100,7 @@ async function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark/90 via-t-dark/60 to-t-dark/20 rtl:bg-gradient-to-l" aria-hidden="true" />
       <Container className="relative py-20 lg:py-28">
         <div className="max-w-2xl t-fade-up">
-          {h.eyebrow ? <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-t-accent-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-t-accent-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-t-dark-fg/85">{t(h.subtitle, lang)}</p>
         </div>
@@ -144,7 +144,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-t-dark/85 via-t-dark/20 to-transparent" aria-hidden="true" />
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-5 text-t-dark-fg">
                   <span className="font-heading text-xl font-bold">{t(it.name, ctx.lang)}</span>
-                  {it.note ? <span className="shrink-0 rounded-full bg-t-accent px-2.5 py-1 text-xs font-bold text-t-accent-fg">{it.note}</span> : null}
+                  {t(it.note, ctx.lang) ? <span className="shrink-0 rounded-full bg-t-accent px-2.5 py-1 text-xs font-bold text-t-accent-fg">{t(it.note, ctx.lang)}</span> : null}
                 </div>
               </SmartLink>
             </li>
@@ -199,7 +199,7 @@ function Home({ ctx }: TemplatePageProps) {
     <>
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
-        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={fp.eyebrow} title={fp.title} /> : null),
+        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={t(fp.eyebrow, ctx.lang)} title={fp.title} /> : null),
         destinations: () => <Destinations ctx={ctx} />,
         umrah: () => <Umrah ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="icon" columns={3} className="bg-t-muted" />,

@@ -85,7 +85,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           <Img src={portrait} alt={adv?.name ?? ""} className="relative aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<UserRound className="size-20 opacity-30" />} />
         </div>
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-block rounded-[var(--t-radius)] bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block rounded-[var(--t-radius)] bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{t(h.eyebrow, lang)}</span> : null}
           {adv ? (
             <p className="font-heading mt-5 text-2xl text-t-muted-fg">
               {adv.name}

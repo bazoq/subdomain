@@ -64,9 +64,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute -start-32 top-0 size-96 rounded-full bg-t-accent/40 blur-3xl" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-t-accent-fg">
-              <Sparkles className="size-3.5" /> {h.eyebrow}
+              <Sparkles className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>

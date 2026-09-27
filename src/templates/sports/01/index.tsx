@@ -97,9 +97,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark via-t-dark/85 to-t-dark/30 rtl:bg-gradient-to-l" aria-hidden="true" />
       <Container className="relative py-24 lg:py-36">
         <div className="t-fade-up max-w-2xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-[var(--t-radius)] bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-t-accent-fg">
-              <Trophy className="size-4" /> {h.eyebrow}
+              <Trophy className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 break-words text-5xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
@@ -198,7 +198,7 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-20">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
         <div className={cn(imgLeft && "lg:order-2")}>
-          {d.eyebrow ? <span className="inline-block bg-t-primary px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-t-primary-fg">{d.eyebrow}</span> : null}
+          {t(d.eyebrow, ctx.lang) ? <span className="inline-block bg-t-primary px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-t-primary-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
           <h2 className="font-heading mt-4 text-3xl font-black uppercase tracking-tight sm:text-4xl">{title}</h2>
           <p className="mt-4 text-lg text-t-muted-fg">{t(d.text, ctx.lang)}</p>
           <div className="mt-6">

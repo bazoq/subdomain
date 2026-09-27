@@ -98,7 +98,7 @@ function Hero({ ctx }: TemplatePageProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/40 to-transparent" aria-hidden="true" />
         <Container className="relative py-20 sm:py-28 lg:py-36">
           <div className="t-fade-up">
-            {h.eyebrow ? <span className="inline-block bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{h.eyebrow}</span> : null}
+            {t(h.eyebrow, lang) ? <span className="inline-block bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{t(h.eyebrow, lang)}</span> : null}
             <h1 className="font-heading mt-6 max-w-4xl break-words text-5xl font-normal uppercase leading-[0.88] tracking-tight sm:text-7xl lg:text-[8rem]">{t(h.title, lang)}</h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-t-muted-fg">{t(h.subtitle, lang)}</p>
             <div className="mt-9 flex flex-wrap gap-3">
@@ -215,7 +215,7 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-24">
       <Container className="grid items-stretch gap-0 border border-t-border lg:grid-cols-2">
         <div className={cn("bg-t-card p-8 sm:p-12", d.align === "left" && "lg:order-2")}>
-          {d.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-t-accent-fg">{d.eyebrow}</span> : null}
+          {t(d.eyebrow, ctx.lang) ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-t-accent-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
           <h2 className="font-heading mt-5 text-4xl font-normal uppercase leading-[0.95] tracking-tight sm:text-5xl">{title}</h2>
           <p className="mt-4 max-w-md text-sm leading-7 text-t-muted-fg">{t(d.text, ctx.lang)}</p>
           <div className="mt-8">

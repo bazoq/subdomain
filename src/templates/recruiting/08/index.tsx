@@ -63,9 +63,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="overflow-hidden bg-t-bg">
       <Container className="grid items-center gap-12 py-14 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-muted px-4 py-1.5 text-sm font-bold text-t-primary">
-              <Sparkles className="size-4" /> {h.eyebrow}
+              <Sparkles className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -176,7 +176,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         stats: () => <CoralStats ctx={ctx} />,
-        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={jobs.eyebrow} title={jobs.title} className={cn("bg-t-muted", round)} /> : null),
+        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={t(jobs.eyebrow, ctx.lang)} title={jobs.title} className={cn("bg-t-muted", round)} /> : null),
         industries: () => <PhotoTiles ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="image" columns={3} className={cn("bg-t-muted", round)} />,
         process: () => <ProcessBlock ctx={ctx} variant="steps" />,

@@ -37,13 +37,14 @@ async function loadProducts(ctx: SiteContext, d: FeaturedData): Promise<ProductD
 }
 
 /** black section header bar with an orange eyebrow */
-function BlackHeading({ eyebrow, title, lang, action }: { eyebrow?: string; title?: LocalizedString; lang: "en" | "ur"; action?: React.ReactNode }) {
+function BlackHeading({ eyebrow, title, lang, action }: { eyebrow?: LocalizedString | string; title?: LocalizedString; lang: "en" | "ur"; action?: React.ReactNode }) {
   const ttl = t(title, lang);
-  if (!ttl && !eyebrow) return null;
+  const eb = t(eyebrow, lang);
+  if (!ttl && !eb) return null;
   return (
     <div className="mb-8 flex flex-wrap items-center justify-between gap-4 bg-t-secondary px-5 py-4 sm:px-7">
       <div>
-        {eyebrow ? <span className="block text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{eyebrow}</span> : null}
+        {eb ? <span className="block text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{eb}</span> : null}
         {ttl ? <h2 className="font-heading text-2xl font-medium uppercase tracking-wide text-t-secondary-fg sm:text-3xl">{ttl}</h2> : null}
       </div>
       {action}
@@ -129,7 +130,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-muted">
       <Container className="relative grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-block bg-t-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block bg-t-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 break-words text-5xl font-medium uppercase leading-[0.92] tracking-tight text-t-secondary sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-md text-base leading-7 text-t-muted-fg sm:text-lg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -221,7 +222,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-stretch border-2 border-t-secondary lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="bg-t-secondary p-8 text-t-secondary-fg sm:p-12">
-            {d.eyebrow ? <span className="block text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="block text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-4 text-3xl font-medium uppercase leading-tight tracking-wide sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-md text-sm leading-7 text-t-secondary-fg/75 sm:text-base">{t(d.text, ctx.lang)}</p>
             <div className="mt-8">

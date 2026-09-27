@@ -82,9 +82,9 @@ function Hero({ ctx }: TemplatePageProps) {
         <div className={cn("grid items-center gap-8 p-4 sm:gap-12 sm:p-8 lg:grid-cols-2", STITCH)}>
           <Img src={h.image} alt="" priority className="aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover" fallback={<Hammer className="size-16 text-t-primary/30" />} />
           <div className="t-fade-up">
-            {h.eyebrow ? (
+            {t(h.eyebrow, lang) ? (
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-t-primary">
-                <Scissors className="size-4" /> {h.eyebrow}
+                <Scissors className="size-4" /> {t(h.eyebrow, lang)}
               </span>
             ) : null}
             <h1 className="font-heading mt-5 text-3xl font-bold leading-[1.15] text-t-secondary sm:text-4xl lg:text-5xl">{t(h.title, lang)}</h1>
@@ -167,7 +167,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center gap-8 rounded-[var(--t-radius)] bg-t-muted p-5 sm:p-10 lg:grid-cols-2", STITCH, d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div>
-            {d.eyebrow ? <span className="text-xs font-bold uppercase tracking-[0.2em] text-t-primary">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="text-xs font-bold uppercase tracking-[0.2em] text-t-primary">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-4 text-2xl font-bold leading-tight text-t-secondary sm:text-3xl">{title}</h2>
             <p className="mt-4 max-w-md text-base leading-7 text-t-muted-fg">{t(d.text, ctx.lang)}</p>
             <div className="mt-7">

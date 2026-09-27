@@ -72,9 +72,9 @@ async function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="order-1 lg:order-2">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-4 py-1.5 text-sm font-semibold text-t-accent-fg">
-              <Heart className="size-4" /> {h.eyebrow}
+              <Heart className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -181,7 +181,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         stats: () => <StatsBlock ctx={ctx} variant="row" className="border-y border-t-border bg-t-bg [&_dd]:font-semibold" />,
-        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={jobs.eyebrow} title={jobs.title} className={cn("bg-t-muted", soft, "[&_.t-btn]:rounded-full")} /> : null),
+        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={t(jobs.eyebrow, ctx.lang)} title={jobs.title} className={cn("bg-t-muted", soft, "[&_.t-btn]:rounded-full")} /> : null),
         industries: () => <Industries ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="image" columns={3} className={cn("bg-t-muted", soft)} />,
         process: () => <ProcessBlock ctx={ctx} variant="timeline" />,

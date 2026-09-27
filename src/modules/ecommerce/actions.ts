@@ -8,7 +8,7 @@
  */
 import { revalidatePath } from "next/cache";
 import { db, isUniqueViolation, json } from "@/server/db";
-import { Prisma } from "@/generated/prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { requireTenant, currentLang } from "@/server/site";
 import { requireTenantAdminAction } from "@/server/auth/guards";
 import { clientIp, rateLimit } from "@/server/rate-limit";

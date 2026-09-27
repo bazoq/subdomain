@@ -57,7 +57,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-bg">
       <Container className="grid items-center gap-10 py-14 lg:grid-cols-[1.05fr_1fr] lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-block bg-t-primary px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-t-primary-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block bg-t-primary px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-t-primary-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-6 text-5xl font-black uppercase leading-[0.95] tracking-tighter sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
           <p className="mt-6 max-w-lg text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -118,9 +118,9 @@ function FeaturedMenu({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <div id="menu" className="bg-t-bg">
-      {d.eyebrow ? (
+      {t(d.eyebrow, lang) ? (
         <Container>
-          <span className="block pt-14 text-xs font-black uppercase tracking-[0.3em] text-t-primary">{d.eyebrow}</span>
+          <span className="block pt-14 text-xs font-black uppercase tracking-[0.3em] text-t-primary">{t(d.eyebrow, lang)}</span>
         </Container>
       ) : null}
       <FeaturedItems

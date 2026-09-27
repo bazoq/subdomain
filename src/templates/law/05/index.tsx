@@ -83,9 +83,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-t-bg via-t-dark/60 to-t-dark/30" aria-hidden="true" />
       <Container className="flex min-h-[70vh] flex-col justify-end pb-20 pt-24 lg:pb-28 lg:pt-36">
         <div className="t-fade-up max-w-3xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-t-primary">
-              <span className="h-px w-10 bg-t-primary" aria-hidden="true" /> {h.eyebrow}
+              <span className="h-px w-10 bg-t-primary" aria-hidden="true" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-bold leading-[1.1] text-t-primary sm:text-5xl lg:text-7xl">{t(h.title, lang)}</h1>

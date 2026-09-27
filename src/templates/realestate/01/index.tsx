@@ -12,7 +12,7 @@ import { heroSection } from "@/templates/shared/sections";
 import { areasSection, featuredPropertiesSection, servicesSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
 import { Container, CtaButton, Icon, Img, SectionHeading, SmartLink, WhatsAppFloat } from "@/templates/ui";
-import { t } from "@/lib/i18n";
+import { t, type LocalizedString } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   AboutBlock,
@@ -35,7 +35,7 @@ import { FeaturedProperties, PropertySearch } from "@/modules/realestate/ui";
 import { getPropertyCities } from "@/modules/realestate/queries";
 
 type FeaturedData = HeadingData & { count?: number; cta?: LinkData };
-type AreasData = HeadingData & { items: { name: string; image: string; href: string; note: string }[] };
+type AreasData = HeadingData & { items: { name: string; image: string; href: string; note: LocalizedString }[] };
 type ServicesHeading = HeadingData & { count?: number };
 
 /* ---------- Layout: white header, gold list-your-property, dark footer ---------- */
@@ -81,7 +81,7 @@ async function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-x-0 top-0 h-1 bg-t-accent" aria-hidden="true" />
       <Container className="pb-10 pt-20 lg:pt-28">
         <div className="t-fade-up mx-auto max-w-3xl text-center">
-          {h.eyebrow ? <span className="inline-block border-b border-t-accent pb-1 text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block border-b border-t-accent pb-1 text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-6 text-4xl font-bold leading-[1.1] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-t-dark-fg/80">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -126,9 +126,9 @@ function AreaTiles({ ctx }: TemplatePageProps) {
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
                   <div>
                     <h3 className="font-heading text-xl font-bold">{a.name}</h3>
-                    {a.note ? (
+                    {t(a.note, ctx.lang) ? (
                       <p className="mt-1 flex items-center gap-1 text-sm text-t-dark-fg/75">
-                        <MapPin className="size-3.5 text-t-accent" /> {a.note}
+                        <MapPin className="size-3.5 text-t-accent" /> {t(a.note, ctx.lang)}
                       </p>
                     ) : null}
                   </div>
@@ -154,7 +154,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         featuredProperties: () =>
-          featured ? <FeaturedProperties ctx={ctx} take={featured.count ?? 6} eyebrow={featured.eyebrow} title={featured.title} subtitle={featured.subtitle} className="bg-t-bg" /> : null,
+          featured ? <FeaturedProperties ctx={ctx} take={featured.count ?? 6} eyebrow={t(featured.eyebrow, ctx.lang)} title={featured.title} subtitle={featured.subtitle} className="bg-t-bg" /> : null,
         areas: () => <AreaTiles ctx={ctx} />,
         services: () => (services ? <ServicesBlock ctx={ctx} variant="icon" columns={3} take={services.count ?? 6} heading={services} showPrice={false} /> : null),
         features: () => <FeaturesBlock ctx={ctx} variant="grid" columns={4} className="border-t border-t-border" />,

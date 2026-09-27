@@ -59,7 +59,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative bg-t-bg">
       <Container className="py-24 lg:py-40">
         <div className="mx-auto max-w-4xl">
-          {h.eyebrow ? <Eyebrow>{h.eyebrow}</Eyebrow> : null}
+          {t(h.eyebrow, lang) ? <Eyebrow>{t(h.eyebrow, lang)}</Eyebrow> : null}
           <h1 className="font-heading mt-8 text-5xl font-medium leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">{t(h.title, lang)}</h1>
           <div className="mt-10 h-px w-32 bg-t-primary" aria-hidden="true" />
           <p className="mt-8 max-w-2xl text-lg leading-8 text-t-muted-fg lg:text-xl">{t(h.subtitle, lang)}</p>
@@ -96,7 +96,7 @@ async function JobRows({ ctx }: TemplatePageProps) {
       <Container>
         <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
           <div>
-            {d.eyebrow ? <Eyebrow>{d.eyebrow}</Eyebrow> : null}
+            {t(d.eyebrow, lang) ? <Eyebrow>{t(d.eyebrow, lang)}</Eyebrow> : null}
             <h2 className="font-heading mt-4 text-4xl font-medium tracking-tight sm:text-5xl">{t(d.title, lang)}</h2>
           </div>
           <CtaButton value={d.cta} ctx={ctx} className="text-sm font-semibold uppercase tracking-[0.2em] text-t-primary hover:underline" />
@@ -129,7 +129,7 @@ function Industries({ ctx }: TemplatePageProps) {
   return (
     <section id="industries" className="border-y border-t-border bg-t-muted py-20 lg:py-28">
       <Container>
-        {d.eyebrow ? <Eyebrow>{d.eyebrow}</Eyebrow> : null}
+        {t(d.eyebrow, ctx.lang) ? <Eyebrow>{t(d.eyebrow, ctx.lang)}</Eyebrow> : null}
         <h2 className="font-heading mt-4 max-w-2xl text-4xl font-medium tracking-tight sm:text-5xl">{t(d.title, ctx.lang)}</h2>
         <ol className="mt-12 grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
           {d.items.map((it, i) => (

@@ -91,7 +91,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Container className="relative py-16 text-center sm:py-20">
         <div className="t-fade-up mx-auto max-w-3xl">
           <Ornament className="mb-6" />
-          {h.eyebrow ? <span className="text-xs font-semibold uppercase tracking-[0.35em] text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="text-xs font-semibold uppercase tracking-[0.35em] text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 text-4xl font-normal leading-[1.15] text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <Ornament className="mt-7" />
@@ -163,7 +163,7 @@ function FeaturedMenu({ ctx }: TemplatePageProps) {
   return (
     <section id="menu" className="bg-t-bg py-16 sm:py-20">
       <Container>
-        {d.eyebrow ? <p className="text-center text-xs font-semibold uppercase tracking-[0.35em] text-t-primary">{d.eyebrow}</p> : null}
+        {t(d.eyebrow, lang) ? <p className="text-center text-xs font-semibold uppercase tracking-[0.35em] text-t-primary">{t(d.eyebrow, lang)}</p> : null}
         <Ornament className="mt-5" />
         <div className="mt-6 border border-t-accent/50 p-4 sm:p-8">
           <FeaturedItems ctx={ctx} take={d.count || 6} title={t(d.title, lang)} layout="list" className="[&_h2]:font-normal" />

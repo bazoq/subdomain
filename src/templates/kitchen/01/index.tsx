@@ -75,9 +75,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">
-              <Rule className="w-10" /> {h.eyebrow}
+              <Rule className="w-10" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-[2.75rem] font-semibold leading-[1.02] tracking-tight text-t-fg sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
@@ -164,9 +164,9 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-24">
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <div className={cn(d.align === "left" && "lg:order-2")}>
-          {d.eyebrow ? (
+          {t(d.eyebrow, lang) ? (
             <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">
-              <Rule className="w-10" /> {d.eyebrow}
+              <Rule className="w-10" /> {t(d.eyebrow, lang)}
             </span>
           ) : null}
           <h2 className="font-heading mt-5 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">{title}</h2>

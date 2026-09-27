@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Mail, MessageCircle, Phone } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { breadcrumbJsonLd, tenantPageMetadata } from "@/server/site-seo";
+import { JsonLd } from "@/components/site/json-ld";
+import { personJsonLd } from "@/modules/shared/jsonld";
 import { Container, Img, RichText } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/utils";
@@ -17,16 +20,20 @@ import { db } from "@/server/db";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const ctx = await getSiteContext();
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const m = await getTeamMember(ctx.tenant.id, slug);
   if (!m) return {};
-  return { title: `${m.name} · ${ctx.tenant.name}`, description: t(m.role as LocalizedString, ctx.lang) || undefined, openGraph: m.imageUrl ? { images: [m.imageUrl] } : undefined };
+  const role = t(m.role as LocalizedString, ctx.lang);
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: m.name,
+    description: role ? `${m.name} — ${role}, ${ctx.tenant.name}.` : undefined,
+    path: `/team/${m.slug}`,
+    image: m.imageUrl,
+  });
 }
 
 export default async function TeamMemberPage({ params }: Props) {
-  const { slug } = await params;
-  const ctx = await getSiteContext();
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const m = await getTeamMember(ctx.tenant.id, slug);
   if (!m) notFound();
   const role = t(m.role as LocalizedString, ctx.lang);
@@ -39,6 +46,16 @@ export default async function TeamMemberPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd
+        data={[
+          personJsonLd(tc, m, ctx.lang),
+          breadcrumbJsonLd(tc, [
+            { name: t(ui.home, ctx.lang), path: "/" },
+            { name: listLabel, path: "/team" },
+            { name: m.name, path: `/team/${m.slug}` },
+          ]),
+        ]}
+      />
       <PageHero ctx={ctx} title={m.name} subtitle={role} variant="gradient" breadcrumbs={[{ label: listLabel, href: "/team" }, { label: m.name }]} />
       <section className="py-14 sm:py-20">
         <Container className="grid gap-10 lg:grid-cols-3">

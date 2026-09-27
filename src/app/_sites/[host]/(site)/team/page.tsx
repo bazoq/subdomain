@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { Container } from "@/templates/ui";
 import { t, ui } from "@/lib/i18n";
 import { getTeam } from "@/modules/shared/queries";
@@ -16,8 +17,8 @@ function pageTitle(ctx: Awaited<ReturnType<typeof getSiteContext>>) {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${pageTitle(ctx)} · ${ctx.tenant.name}`, description: `Meet the people behind ${ctx.tenant.name}.` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: pageTitle(ctx), description: `Meet the people behind ${ctx.tenant.name}.`, path: "/team" });
 }
 
 export default async function TeamPage() {

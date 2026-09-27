@@ -112,9 +112,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div aria-hidden="true" className="pointer-events-none absolute -end-24 bottom-0 size-96 rounded-full bg-t-accent/30 blur-[100px]" />
       <Container className="relative grid items-center gap-12 lg:grid-cols-2">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full border border-t-primary px-4 py-1.5 text-xs font-bold uppercase tracking-[0.3em] text-t-primary">
-              <Moon className="size-3.5" /> {h.eyebrow}
+              <Moon className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-5xl uppercase leading-[0.95] text-t-fg drop-shadow-[0_0_30px_color-mix(in_srgb,var(--t-primary)_55%,transparent)] sm:text-7xl lg:text-8xl">

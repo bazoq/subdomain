@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CheckCircle2, Phone } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import { t, ui } from "@/lib/i18n";
 import { formatPKR, whatsappLink } from "@/lib/utils";
@@ -17,10 +19,12 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 
 const PK_TIME: Intl.DateTimeFormatOptions = { timeZone: "Asia/Karachi", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" };
 
+/** Private page (token-gated): never indexed (also listed in TENANT_DISALLOW). The canonical never carries the token. */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  const { number } = await params;
-  return { title: `${t(ui.orderNumber, ctx.lang)} #${number} · ${ctx.tenant.name}`, robots: { index: false, follow: false } };
+  const [ctx, tc, { number }] = await Promise.all([getSiteContext(), requireTenant(), params]);
+  const n = Number(number);
+  const valid = Number.isInteger(n) && n > 0;
+  return tenantPageMetadata(tc, ctx.lang, { title: valid ? `${t(ui.orderNumber, ctx.lang)} #${n}` : t(ui.orderNumber, ctx.lang), path: valid ? `/menu/order/${n}` : "/menu", noIndex: true });
 }
 
 /**
@@ -29,9 +33,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  * token the page shows only the lookup form — order numbers are sequential, so nothing else may be revealed.
  */
 export default async function OrderStatusPage({ params, searchParams }: { params: Params; searchParams: Search }) {
-  const ctx = await getSiteContext();
-  const { number } = await params;
-  const sp = await searchParams;
+  const [ctx, { number }, sp] = await Promise.all([getSiteContext(), params, searchParams]);
+  requireModulePage(ctx, "restaurant");
   const n = Number(number);
   if (!Number.isInteger(n) || n <= 0) notFound();
   const lang = ctx.lang;

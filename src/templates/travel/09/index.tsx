@@ -121,7 +121,7 @@ async function Hero({ ctx }: TemplatePageProps) {
       </div>
       <div className="pointer-events-none absolute inset-0 flex items-end justify-start p-4 sm:items-center sm:p-10">
         <div className="pointer-events-auto max-w-lg bg-t-bg p-6 shadow-2xl sm:p-10 t-fade-up">
-          {h.eyebrow ? <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-t-accent">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-t-accent">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-3 text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl">{t(h.title, lang)}</h1>
           <p className="mt-4 text-sm leading-relaxed text-t-muted-fg sm:text-base">{t(h.subtitle, lang)}</p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -204,7 +204,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                   <Img src={it.image} alt="" className="aspect-square w-full object-cover grayscale transition duration-700 group-hover:scale-105 group-hover:grayscale-0" />
                 </div>
                 <p className="font-heading mt-3 text-lg font-bold">{t(it.name, ctx.lang)}</p>
-                {it.note ? <p className="text-xs uppercase tracking-widest text-t-muted-fg">{it.note}</p> : null}
+                {t(it.note, ctx.lang) ? <p className="text-xs uppercase tracking-widest text-t-muted-fg">{t(it.note, ctx.lang)}</p> : null}
               </SmartLink>
             </li>
           ))}

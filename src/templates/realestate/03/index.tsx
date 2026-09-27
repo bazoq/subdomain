@@ -13,7 +13,7 @@ import { heroSection, statsSection } from "@/templates/shared/sections";
 import { areasSection, featuredPropertiesSection, servicesSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
 import { Container, CtaButton, Icon, Img, SectionHeading, SmartLink, WhatsAppFloat } from "@/templates/ui";
-import { t, ui } from "@/lib/i18n";
+import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import {
   AboutBlock,
@@ -34,7 +34,7 @@ import type { HeadingData, LinkData, StatsData } from "@/modules/shared/ui/secti
 import { FeaturedProperties } from "@/modules/realestate/ui";
 
 type FeaturedData = HeadingData & { count?: number; cta?: LinkData };
-type AreasData = HeadingData & { items: { name: string; image: string; href: string; note: string }[] };
+type AreasData = HeadingData & { items: { name: string; image: string; href: string; note: LocalizedString }[] };
 type ServicesHeading = HeadingData & { count?: number };
 
 /** Map-style grid lines (theme border colour) used behind the hero and stats. */
@@ -64,9 +64,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-b from-t-bg/40 via-transparent to-t-bg" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 border border-t-primary/30 bg-t-bg px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary">
-              <MapPinned className="size-4" /> {h.eyebrow}
+              <MapPinned className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-bold leading-[1.08] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -129,9 +129,9 @@ function SocietyCards({ ctx }: TemplatePageProps) {
                 </div>
                 <div className="flex flex-1 flex-col p-5">
                   <h3 className="font-heading text-lg font-bold text-t-fg group-hover:text-t-primary">{a.name}</h3>
-                  {a.note ? (
+                  {t(a.note, ctx.lang) ? (
                     <p className="mt-2 inline-flex w-fit items-center gap-1.5 bg-t-accent/15 px-2 py-1 text-xs font-bold text-t-accent">
-                      <TrendingUp className="size-3.5" /> {a.note}
+                      <TrendingUp className="size-3.5" /> {t(a.note, ctx.lang)}
                     </p>
                   ) : null}
                   <span className="mt-auto flex items-center gap-1 pt-4 text-sm font-semibold text-t-primary">
@@ -176,7 +176,7 @@ function Home({ ctx }: TemplatePageProps) {
     <>
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
-        featuredProperties: () => (featured ? <FeaturedProperties ctx={ctx} take={featured.count ?? 6} eyebrow={featured.eyebrow} title={featured.title} subtitle={featured.subtitle} className="bg-t-muted" /> : null),
+        featuredProperties: () => (featured ? <FeaturedProperties ctx={ctx} take={featured.count ?? 6} eyebrow={t(featured.eyebrow, ctx.lang)} title={featured.title} subtitle={featured.subtitle} className="bg-t-muted" /> : null),
         areas: () => <SocietyCards ctx={ctx} />,
         services: () => (services ? <ServicesBlock ctx={ctx} variant="icon" columns={3} take={services.count ?? 6} heading={services} className="bg-t-muted" /> : null),
         features: () => <FeaturesBlock ctx={ctx} variant="grid" columns={2} />,

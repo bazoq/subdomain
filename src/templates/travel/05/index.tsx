@@ -111,7 +111,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Sparkles className="size-24 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/40 to-t-bg/20" aria-hidden="true" />
       <Container className="relative py-24 text-center">
-        {h.eyebrow ? <span className="text-xs font-semibold uppercase tracking-[0.4em] text-t-primary">{h.eyebrow}</span> : null}
+        {t(h.eyebrow, lang) ? <span className="text-xs font-semibold uppercase tracking-[0.4em] text-t-primary">{t(h.eyebrow, lang)}</span> : null}
         <div className="mx-auto mt-6 h-px w-16 bg-t-primary" aria-hidden="true" />
         <h1 className="font-heading mx-auto mt-6 max-w-4xl text-5xl font-medium leading-[1.05] sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
@@ -202,7 +202,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                   </div>
                 </div>
                 <p className="font-heading mt-4 text-center text-2xl">{t(it.name, ctx.lang)}</p>
-                {it.note ? <p className="mt-1 text-center text-[11px] uppercase tracking-[0.25em] text-t-primary">{it.note}</p> : null}
+                {t(it.note, ctx.lang) ? <p className="mt-1 text-center text-[11px] uppercase tracking-[0.25em] text-t-primary">{t(it.note, ctx.lang)}</p> : null}
               </SmartLink>
             </li>
           ))}

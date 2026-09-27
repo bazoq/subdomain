@@ -72,9 +72,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative bg-t-muted">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-primary/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-t-primary">
-              <Wrench className="size-3.5" /> {h.eyebrow}
+              <Wrench className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl">{t(h.title, lang)}</h1>
@@ -182,9 +182,9 @@ function SolarBanner({ ctx }: TemplatePageProps) {
         <div className={cn("grid items-center overflow-hidden rounded-[1.5rem] bg-t-secondary text-t-secondary-fg lg:grid-cols-[1.05fr_0.95fr]", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="relative p-8 sm:p-12">
             <Sun className="absolute -end-6 -top-6 size-40 text-t-accent/20" aria-hidden="true" />
-            {d.eyebrow ? (
+            {t(d.eyebrow, lang) ? (
               <span className="relative inline-flex items-center gap-2 rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-t-accent-fg">
-                <Sun className="size-3.5" /> {d.eyebrow}
+                <Sun className="size-3.5" /> {t(d.eyebrow, lang)}
               </span>
             ) : null}
             <h2 className="font-heading relative mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>

@@ -12,7 +12,7 @@ import { heroSection } from "@/templates/shared/sections";
 import { bannerSection, collectionsSection, featuredProductsSection } from "@/templates/shared/packs";
 import { renderOrdered } from "@/templates/shared/render";
 import { Container, CtaButton, Icon, Img, SmartLink, WhatsAppFloat } from "@/templates/ui";
-import { ls, t } from "@/lib/i18n";
+import { ls, t, type LocalizedString } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { AboutBlock, AnnouncementBar, CtaBlock, FaqBlock, FeaturesBlock, GalleryBlock, PromoStrip, SiteFooter, SiteHeader, StatsBlock, TestimonialsBlock } from "@/modules/shared/ui";
 import { CartButton, CartDrawer, EcommerceProviders, ProductGrid, type ProductDTO } from "@/modules/ecommerce/ui";
@@ -38,12 +38,13 @@ function GoldRule({ className }: { className?: string }) {
   );
 }
 
-function FormalHeading({ eyebrow, title, light, lang }: { eyebrow?: string; title?: { en: string; ur?: string }; light?: boolean; lang: "en" | "ur" }) {
+function FormalHeading({ eyebrow, title, light, lang }: { eyebrow?: LocalizedString | string; title?: { en: string; ur?: string }; light?: boolean; lang: "en" | "ur" }) {
   const ttl = t(title, lang);
-  if (!ttl && !eyebrow) return null;
+  const eb = t(eyebrow, lang);
+  if (!ttl && !eb) return null;
   return (
     <div className="mx-auto mb-12 max-w-2xl text-center">
-      {eyebrow ? <span className="text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{eyebrow}</span> : null}
+      {eb ? <span className="text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{eb}</span> : null}
       {ttl ? <h2 className={cn("font-heading mt-3 text-3xl font-semibold tracking-wide sm:text-4xl", light ? "text-t-dark-fg" : "text-t-fg")}>{ttl}</h2> : null}
       <GoldRule className="mt-5" />
     </div>
@@ -91,10 +92,10 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-dark text-t-dark-fg">
       <Container className="grid items-center gap-14 py-20 lg:grid-cols-2 lg:py-28">
         <div className="text-center lg:text-start">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-t-accent">
               <span className="h-px w-8 bg-t-accent" aria-hidden="true" />
-              {h.eyebrow}
+              {t(h.eyebrow, lang)}
               <span className="h-px w-8 bg-t-accent" aria-hidden="true" />
             </span>
           ) : null}
@@ -193,7 +194,7 @@ function CorporateBanner({ ctx }: TemplatePageProps) {
         <div className="border border-t-accent p-2">
           <div className={cn("grid items-center gap-8 border border-t-accent/40 bg-t-dark text-t-dark-fg lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
             <div className="p-8 text-center sm:p-12 lg:text-start">
-              {d.eyebrow ? <span className="text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{d.eyebrow}</span> : null}
+              {t(d.eyebrow, lang) ? <span className="text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{t(d.eyebrow, lang)}</span> : null}
               <h2 className="font-heading mt-3 text-3xl font-semibold tracking-wide sm:text-4xl">{title}</h2>
               <GoldRule className="mt-5 justify-center lg:justify-start" />
               <p className="mt-5 max-w-lg text-t-dark-fg/75">{t(d.text, lang)}</p>

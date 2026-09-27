@@ -84,7 +84,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute -end-24 bottom-0 size-80 rounded-full bg-t-muted blur-3xl" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up order-2 text-center lg:order-1 lg:text-start">
-          {h.eyebrow ? <span className="font-heading text-2xl text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="font-heading text-2xl text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-t-muted-fg lg:mx-0">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">

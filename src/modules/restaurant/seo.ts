@@ -1,5 +1,5 @@
 import type { TenantContext } from "@/server/tenant";
-import { businessId, tenantUrl, type JsonLdObject } from "@/server/site-seo";
+import { BUSINESS_TYPE, businessId, tenantUrl, type JsonLdObject } from "@/server/site-seo";
 import { t, ui, type Lang } from "@/lib/i18n";
 import { safeExternalUrl } from "@/lib/utils";
 import { itemStartingPrice, type MenuCategoryDto } from "./types";
@@ -42,4 +42,17 @@ export function menuJsonLd(tc: TenantContext, categories: MenuCategoryDto[], lan
     hasMenuSection: sections,
     provider: { "@id": businessId(tc, host) },
   });
+}
+
+/**
+ * Links the business node the site layout already emits (`localBusinessJsonLd`, `@id` = businessId) to the Menu node
+ * via `hasMenu`, so the graph on `/menu` reads Restaurant/Bakery → hasMenu → Menu → MenuSection → MenuItem.
+ */
+export function restaurantMenuLinkJsonLd(tc: TenantContext, host: string = tc.host): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": BUSINESS_TYPE[tc.category.key],
+    "@id": businessId(tc, host),
+    hasMenu: { "@id": `${tenantUrl(tc, "/menu", host)}#menu` },
+  };
 }

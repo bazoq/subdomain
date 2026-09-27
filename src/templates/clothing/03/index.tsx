@@ -50,7 +50,7 @@ function FloralDivider() {
 /* ---------- Layout ---------- */
 function Layout({ ctx, children }: TemplateLayoutProps) {
   const lc = { lang: ctx.lang };
-  const tagline = (ctx.sections.hero?.data as { eyebrow?: string } | undefined)?.eyebrow;
+  const tagline = t((ctx.sections.hero?.data as { eyebrow?: LocalizedString | string } | undefined)?.eyebrow, ctx.lang);
   return (
     <EcommerceProviders ctx={ctx}>
       <div className="flex min-h-screen flex-col bg-t-bg text-t-fg">
@@ -88,9 +88,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <span className="pointer-events-none absolute -end-24 -top-24 size-72 rounded-full bg-t-accent/40 blur-2xl" aria-hidden="true" />
       <Container className="relative grid items-center gap-14 py-14 lg:grid-cols-2 lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="font-heading flex items-center gap-2 text-lg italic text-t-primary">
-              <Sparkles className="size-4" /> {h.eyebrow}
+              <Sparkles className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-4 text-4xl font-bold leading-[1.1] tracking-tight text-t-secondary sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -182,7 +182,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center overflow-hidden rounded-[2rem] bg-t-accent/40 lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-8 sm:p-12">
-            {d.eyebrow ? <span className="font-heading text-base italic text-t-primary">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="font-heading text-base italic text-t-primary">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-2 text-3xl font-bold leading-tight text-t-secondary sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-md text-base text-t-muted-fg">{t(d.text, ctx.lang)}</p>
             <div className="mt-7">

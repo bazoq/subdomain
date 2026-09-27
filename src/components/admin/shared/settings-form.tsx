@@ -10,6 +10,7 @@ import { ImageField } from "@/components/admin/uploader";
 import { saveSettings, type SettingsSection } from "@/server/settings/actions";
 import { DEFAULT_HOURS, type TenantSettings } from "@/lib/tenant-settings";
 import { cn, formatPkPhone, normalizePkPhone } from "@/lib/utils";
+import { brand } from "@/config/brand";
 
 type TabKey = SettingsSection;
 type Errors = Record<string, string>;
@@ -348,6 +349,14 @@ export function SettingsForm({ initial, modules, initialTab }: { initial: Tenant
                     </Field>
                   );
                 })}
+              </div>
+              <div className="border-t border-slate-100 pt-5">
+                <Switch
+                  checked={b.hidePoweredBy ?? false}
+                  onChange={(v) => patch("branding", { hidePoweredBy: v })}
+                  label={`Hide the “Powered by ${brand.name}” credit in the footer`}
+                  description="White-label your site. When off, a small credit line links back to the platform."
+                />
               </div>
             </div>
           ) : null}

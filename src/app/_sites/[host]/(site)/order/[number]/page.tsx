@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { t, ui } from "@/lib/i18n";
 import { getOrderByNumber } from "@/modules/ecommerce/queries";
 import { firstParam, verifyOrderToken } from "@/modules/ecommerce/order-token";
@@ -8,9 +10,13 @@ import { EcommerceProviders, OrderSuccess, OrderSummary, OrderTracker, PageTitle
 type Params = { number: string };
 type Search = Record<string, string | string[] | undefined>;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(ui.trackOrder, ctx.lang)} · ${ctx.tenant.name}`, robots: { index: false, follow: false } };
+const orderNo = (raw: string) => parseInt(String(raw).replace(/\D/g, ""), 10);
+
+/** Private page (token-gated): never indexed (also listed in TENANT_DISALLOW). The canonical never carries the token. */
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const [ctx, tc, { number }] = await Promise.all([getSiteContext(), requireTenant(), params]);
+  const n = orderNo(number);
+  return tenantPageMetadata(tc, ctx.lang, { title: t(ui.trackOrder, ctx.lang), path: Number.isFinite(n) && n > 0 ? `/order/${n}` : "/shop", noIndex: true });
 }
 
 /**
@@ -20,7 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function OrderRoute({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<Search> }) {
   const [ctx, { number }, sp] = await Promise.all([getSiteContext(), params, searchParams]);
-  const n = parseInt(String(number).replace(/\D/g, ""), 10);
+  requireModulePage(ctx, "ecommerce");
+  const n = orderNo(number);
   const verified = verifyOrderToken("shop", ctx.tenant.id, n, firstParam(sp.t));
   const order = verified ? await getOrderByNumber(ctx.tenant.id, n) : null;
   const store = toStoreCtx(ctx);

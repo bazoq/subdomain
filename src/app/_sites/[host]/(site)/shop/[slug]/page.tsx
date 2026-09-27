@@ -2,34 +2,40 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { breadcrumbJsonLd, tenantPageMetadata, type BreadcrumbItem } from "@/server/site-seo";
+import { JsonLd } from "@/components/site/json-ld";
+import { hasModule, requireModulePage } from "@/modules/shared/module-gate";
 import { RichText } from "@/templates/ui";
 import { t, ui } from "@/lib/i18n";
 import { getProduct, getRelatedProducts } from "@/modules/ecommerce/queries";
+import { productJsonLd } from "@/modules/ecommerce/seo";
 import { AddToCart, EcommerceProviders, ProductGallery, ProductGrid, sui, toStoreCtx } from "@/modules/ecommerce/ui";
 
 type Params = { slug: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const [ctx, { slug }] = await Promise.all([getSiteContext(), params]);
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const product = await getProduct(ctx.tenant.id, slug);
   if (!product) return {};
-  const name = t(product.name, ctx.lang);
-  return {
-    title: product.seo.title || `${name} · ${ctx.tenant.name}`,
-    description: product.seo.description || t(product.shortDesc, ctx.lang) || undefined,
-    openGraph: product.images[0] ? { images: [{ url: product.images[0] }] } : undefined,
-  };
+  return tenantPageMetadata(tc, ctx.lang, {
+    // the admin's SEO title is a bare page title; the layout template appends the business name
+    title: product.seo.title?.trim() || t(product.name, ctx.lang),
+    description: product.seo.description?.trim() || t(product.shortDesc, ctx.lang) || undefined,
+    path: `/shop/${product.slug}`,
+    image: product.images[0] ?? product.variants.find((v) => v.imageUrl)?.imageUrl ?? null,
+  });
 }
 
 export default async function ProductPage({ params }: { params: Promise<Params> }) {
-  const [ctx, { slug }] = await Promise.all([getSiteContext(), params]);
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
+  requireModulePage(ctx, "ecommerce");
   const product = await getProduct(ctx.tenant.id, slug);
   if (!product) notFound();
   const related = await getRelatedProducts(ctx.tenant.id, product, 4);
   const lang = ctx.lang;
   const name = t(product.name, lang);
-  const isMedical = ctx.category.modules.includes("medical");
+  const isMedical = hasModule(ctx, "medical");
   const images = [...product.images, ...product.variants.map((v) => v.imageUrl).filter((x): x is string => !!x)];
   const medical = [
     [t(sui.genericName, lang), product.genericName],
@@ -38,9 +44,16 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     [t(sui.strength, lang), product.strength],
   ].filter((r): r is [string, string] => !!r[1]);
   const store = toStoreCtx(ctx);
+  const crumbs: BreadcrumbItem[] = [
+    { name: t(ui.home, lang), path: "/" },
+    { name: t(ui.shop, lang), path: "/shop" },
+    ...(product.category ? [{ name: t(product.category.name, lang), path: `/shop/c/${product.category.slug}` }] : []),
+    { name, path: `/shop/${product.slug}` },
+  ];
 
   return (
     <EcommerceProviders ctx={ctx}>
+      <JsonLd data={[productJsonLd(tc, product, lang), breadcrumbJsonLd(tc, crumbs)]} />
       <div className="t-container py-6 sm:py-10">
         <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-1 text-xs text-t-muted-fg">
           <Link href="/" className="hover:text-t-fg">

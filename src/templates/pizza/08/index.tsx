@@ -103,9 +103,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div aria-hidden="true" className="pointer-events-none absolute -end-16 -top-16 size-72 rounded-full bg-t-accent/40 blur-3xl" />
       <Container className="relative grid items-center gap-12 py-14 lg:grid-cols-2 lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-secondary px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-t-secondary-fg">
-              <Flame className="size-3.5" /> {h.eyebrow}
+              <Flame className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 flex flex-wrap items-center gap-3 text-4xl uppercase leading-[1.05] text-t-primary sm:text-5xl lg:text-6xl">

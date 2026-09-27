@@ -60,8 +60,11 @@ Tasks (each isolated; one failure does not stop the others):
 | `RESEND_API_KEY` | Resend dashboard + Vercel env | Emails silently fall back to "not sent" (`notify.email_rejected`) until updated. |
 
 Redeploy after every env change (Vercel → Deployments → ⋯ → Redeploy); env vars are read at boot, and
-`src/config/env.ts` refuses to start a production build with a weak or placeholder `SESSION_SECRET`, a `localhost`
-root domain, a half-configured R2 or `NEXT_PUBLIC_ROOT_DOMAIN ≠ ROOT_DOMAIN`.
+`src/config/env.ts` refuses to boot a **production deployment** (`NODE_ENV=production`, `VERCEL_ENV` unset or `production`,
+not the build phase) with a weak or placeholder `SESSION_SECRET`, a `localhost` root domain or an `http` `R2_PUBLIC_URL`;
+a half-configured R2 or `NEXT_PUBLIC_ROOT_DOMAIN ≠ ROOT_DOMAIN` is rejected in every environment. The build itself and
+Preview deployments are not strict, so after a production env change watch the first request in the Functions log
+(or `/api/health`) rather than the build log — see `docs/DEPLOY.md §0`.
 
 ## 5. Deploys and rollback
 

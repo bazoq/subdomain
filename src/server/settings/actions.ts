@@ -5,17 +5,19 @@ import { dbErrorMessage } from "@/server/db";
 import { readTenantSettings, updateTenantSettings } from "@/server/settings/store";
 import { requireTenantAdminAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
-import { tenantSettingsSchema, type TenantSettings } from "@/lib/tenant-settings";
-import { normalizePkPhone } from "@/lib/utils";
-import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
+import { SETTINGS_MESSAGES, settingsFieldErrors, tenantSettingsWriteSchema, type SettingsSection, type TenantSettings } from "@/lib/tenant-settings";
+import { fail, success, type ActionResult } from "@/lib/action-result";
 
-export type SettingsSection = keyof TenantSettings;
+export type { SettingsSection };
 
 const SECTIONS: SettingsSection[] = ["branding", "contact", "social", "languages", "commerce", "restaurant", "hours", "seo", "notifications", "announcement"];
 
 /**
  * Merge a partial update for one settings section into Tenant.settings.
- * The whole object is re-validated with `tenantSettingsSchema` so bad data never lands.
+ * Strict on write: the merged section must pass `tenantSettingsWriteSchema` (PK phones normalised,
+ * e-mails, safe http(s) links, hex colours, SEO lengths); zod issues come back as bilingual field errors
+ * keyed the way the settings form expects. The store then re-validates the whole document with the
+ * lenient read schema so a legacy value in another section never blocks this save.
  */
 export async function saveSettings(section: SettingsSection, partial: unknown): Promise<ActionResult<{ settings: TenantSettings }>> {
   try {
@@ -26,19 +28,13 @@ export async function saveSettings(section: SettingsSection, partial: unknown): 
 
     const current = await readTenantSettings(ctx.tenant.id);
     const incoming = normaliseIncoming(section, partial);
-    const merged: Record<string, unknown> = { ...current };
-    merged[section] = Array.isArray(incoming) || section === "hours" ? incoming : { ...(current[section] as object), ...(incoming as object) };
+    const mergedSection: unknown = section === "hours" ? incoming : { ...(current[section] as object), ...(incoming as object) };
 
-    const parsed = tenantSettingsSchema.safeParse(merged);
-    if (!parsed.success) {
-      const r = fromZod(parsed.error);
-      // strip the section prefix so field errors map to the form fields
-      const fieldErrors = Object.fromEntries(Object.entries(r.ok ? {} : (r.fieldErrors ?? {})).map(([k, v]) => [k.replace(`${section}.`, ""), v]));
-      return fail("Please fix the highlighted fields.", fieldErrors);
-    }
+    const parsed = tenantSettingsWriteSchema.shape[section].safeParse(mergedSection);
+    if (!parsed.success) return fail(SETTINGS_MESSAGES.fixFields, settingsFieldErrors(section, parsed.error, mergedSection));
     // Re-read inside the transaction and replace only this section, so a concurrent save of another
     // section (or the restaurant "accepting orders" switch) is never overwritten with our stale copy.
-    const saved = await updateTenantSettings(ctx.tenant.id, (latest) => ({ ...latest, [section]: parsed.data[section] }));
+    const saved = await updateTenantSettings(ctx.tenant.id, (latest) => ({ ...latest, [section]: parsed.data }));
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "settings.update", entity: "Tenant", entityId: ctx.tenant.id, meta: { section } });
     revalidatePath("/", "layout");
     return success("Settings saved.", { settings: saved });
@@ -66,17 +62,10 @@ function normaliseIncoming(section: SettingsSection, partial: unknown): unknown 
   for (const [k, v] of Object.entries(obj)) {
     if (typeof v === "string") obj[k] = v.trim();
   }
+  // phones / e-mails / links / colours are normalised and rejected by tenantSettingsWriteSchema
   if (section === "contact") {
-    for (const k of ["phone", "phone2", "whatsapp"]) {
-      const v = obj[k];
-      if (typeof v === "string" && v) obj[k] = normalizePkPhone(v) ?? v;
-    }
     if (obj.mapEmbedUrl === "") delete obj.mapEmbedUrl;
     if (obj.phone2 === "") delete obj.phone2;
-  }
-  if (section === "notifications") {
-    const w = obj.whatsappTo;
-    if (typeof w === "string" && w) obj.whatsappTo = normalizePkPhone(w) ?? w;
   }
   if (section === "commerce" || section === "restaurant") {
     for (const [k, v] of Object.entries(obj)) if (typeof v === "string" && v !== "" && !Number.isNaN(Number(v)) && k !== "orderPrefix" && k !== "currency") obj[k] = Number(v);

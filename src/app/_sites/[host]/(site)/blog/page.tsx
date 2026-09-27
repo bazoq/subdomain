@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { db } from "@/server/db";
 import { Container } from "@/templates/ui";
 import { t, ui } from "@/lib/i18n";
@@ -11,9 +12,14 @@ import { publicPostsWhere } from "@/modules/shared/queries";
 const PAGE_SIZE = 9;
 type Props = { searchParams: Promise<{ page?: string }> };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(ui.blog, ctx.lang)} · ${ctx.tenant.name}`, description: `News, offers and updates from ${ctx.tenant.name}.` };
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const [ctx, tc, sp] = await Promise.all([getSiteContext(), requireTenant(), searchParams]);
+  const page = Math.max(1, Number(sp.page) || 1);
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: page > 1 ? `${t(ui.blog, ctx.lang)} – ${page}` : t(ui.blog, ctx.lang),
+    description: `News, offers and updates from ${ctx.tenant.name}.`,
+    path: page > 1 ? `/blog?page=${page}` : "/blog",
+  });
 }
 
 export default async function BlogPage({ searchParams }: Props) {

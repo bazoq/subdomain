@@ -65,9 +65,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark/70 to-transparent" aria-hidden="true" />
       <Container className="relative flex min-h-[88vh] flex-col justify-end pb-20 pt-36 lg:pb-28">
         <div className="max-w-2xl t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">
-              <Leaf className="size-4" /> {h.eyebrow}
+              <Leaf className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 break-words text-5xl font-medium leading-[1.05] text-t-fg sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
@@ -220,7 +220,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-stretch overflow-hidden rounded-[var(--t-radius)] border border-t-primary/40 bg-t-card lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="flex flex-col justify-center p-8 sm:p-12">
-            {d.eyebrow ? <span className="text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-3 text-3xl font-medium sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-8">

@@ -66,7 +66,7 @@ function Hero({ ctx }: TemplatePageProps) {
               {first.text}
             </span>
           ) : null}
-          {h.eyebrow ? <span className="mt-5 block text-sm font-semibold text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="mt-5 block text-sm font-semibold text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-3 text-4xl font-semibold leading-[1.12] text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-6 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap items-center gap-3">

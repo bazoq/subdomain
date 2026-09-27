@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { db } from "@/server/db";
 import { Container } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
@@ -11,8 +12,8 @@ import { GalleryGrid } from "@/modules/shared/ui/gallery-grid";
 type Props = { searchParams: Promise<{ album?: string }> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(ui.gallery, ctx.lang)} · ${ctx.tenant.name}`, description: `Photos from ${ctx.tenant.name}.` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: t(ui.gallery, ctx.lang), description: `Photos from ${ctx.tenant.name}.`, path: "/gallery" });
 }
 
 function albumLabel(a: string) {

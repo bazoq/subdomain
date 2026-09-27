@@ -62,9 +62,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-x-0 bottom-0 h-20 -skew-y-3 bg-t-primary/90" aria-hidden="true" />
       <Container className="relative py-24 lg:py-36">
         <div className="t-fade-up max-w-3xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-primary-fg">
-              <Flame className="size-3.5" /> {h.eyebrow}
+              <Flame className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-5xl uppercase leading-[0.9] tracking-tight sm:text-6xl lg:text-8xl">{t(h.title, lang)}</h1>

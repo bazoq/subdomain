@@ -96,9 +96,9 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="t-fade-up order-1 lg:order-2">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.3em] text-t-primary">
-              <Wheat className="size-4" /> {h.eyebrow}
+              <Wheat className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.15] text-t-fg sm:text-5xl">{t(h.title, lang)}</h1>

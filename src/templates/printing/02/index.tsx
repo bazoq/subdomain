@@ -86,7 +86,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-muted">
       <Container className="py-14 sm:py-20">
         <div className={cn("t-fade-up mx-auto max-w-3xl px-6 py-12 text-center sm:px-12 sm:py-16", EMBOSS)}>
-          {h.eyebrow ? <span className="block text-[0.7rem] font-bold uppercase tracking-[0.3em] text-t-accent">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="block text-[0.7rem] font-bold uppercase tracking-[0.3em] text-t-accent">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.1] text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <span className="mx-auto mt-6 flex items-center justify-center gap-3 text-t-accent" aria-hidden="true">
             <span className="h-px w-12 bg-t-border" />

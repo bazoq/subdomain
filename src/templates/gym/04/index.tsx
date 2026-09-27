@@ -89,7 +89,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Concrete />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.15fr_1fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-block bg-t-secondary px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block bg-t-secondary px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-6 text-5xl uppercase leading-[0.95] tracking-[0.02em] sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
           <div className="mt-6 max-w-lg -rotate-1 bg-t-primary px-4 py-2 text-sm font-bold uppercase tracking-wider text-t-primary-fg">
             {ctx.settings.contact.city || ctx.tenant.name}
@@ -180,7 +180,7 @@ function Home({ ctx }: TemplatePageProps) {
               variant="grid"
               columns={4}
               id="transformations"
-              heading={{ eyebrow: trans.eyebrow, title: trans.title }}
+              heading={{ eyebrow: t(trans.eyebrow, ctx.lang), title: trans.title }}
               className={`bg-t-muted ${STENCIL} [&_button]:border-2 [&_button]:border-t-secondary`}
             />
           ) : null,

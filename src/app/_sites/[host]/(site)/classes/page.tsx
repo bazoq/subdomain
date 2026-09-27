@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { t, ui } from "@/lib/i18n";
 import { PageHero } from "@/modules/shared/ui/page-hero";
 import { ClassTimetable } from "@/modules/gym/ui/class-timetable";
@@ -8,8 +9,8 @@ import { TeamBlock } from "@/modules/shared/ui/team-block";
 import { CtaBlock } from "@/modules/shared/ui/section-blocks";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(ui.classes, ctx.lang)} · ${ctx.tenant.name}`, description: `Weekly class timetable at ${ctx.tenant.name}.` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: t(ui.classes, ctx.lang), description: `Weekly class timetable at ${ctx.tenant.name}.`, path: "/classes" });
 }
 
 export default async function ClassesPage() {

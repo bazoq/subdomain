@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check, MessageCircle } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { breadcrumbJsonLd, tenantPageMetadata } from "@/server/site-seo";
+import { JsonLd } from "@/components/site/json-ld";
+import { serviceJsonLd } from "@/modules/shared/jsonld";
 import { Container, Icon, Img, RichText } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/utils";
@@ -15,17 +18,20 @@ import { ContactForm } from "@/modules/leads/ui/contact-form";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const ctx = await getSiteContext();
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const s = await getService(ctx.tenant.id, slug);
   if (!s) return {};
   const name = t(s.name as LocalizedString, ctx.lang);
-  return { title: `${name} · ${ctx.tenant.name}`, description: t(s.summary as LocalizedString, ctx.lang) || undefined, openGraph: s.imageUrl ? { images: [s.imageUrl] } : undefined };
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: name,
+    description: t(s.summary as LocalizedString, ctx.lang) || undefined,
+    path: `/services/${s.slug}`,
+    image: s.imageUrl,
+  });
 }
 
 export default async function ServiceDetailPage({ params }: Props) {
-  const { slug } = await params;
-  const ctx = await getSiteContext();
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const s = await getService(ctx.tenant.id, slug);
   if (!s) notFound();
   const name = t(s.name as LocalizedString, ctx.lang);
@@ -42,6 +48,16 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd
+        data={[
+          serviceJsonLd(tc, s, ctx.lang),
+          breadcrumbJsonLd(tc, [
+            { name: t(ui.home, ctx.lang), path: "/" },
+            { name: listLabel, path: "/services" },
+            { name, path: `/services/${s.slug}` },
+          ]),
+        ]}
+      />
       <PageHero ctx={ctx} title={name} subtitle={summary} image={s.imageUrl ?? undefined} variant="gradient" breadcrumbs={[{ label: listLabel, href: "/services" }, { label: name }]} />
       <section className="py-14 sm:py-20">
         <Container className="grid gap-12 lg:grid-cols-3">

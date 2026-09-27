@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
@@ -14,12 +15,13 @@ const num = (v: string) => {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
   requireModulePage(ctx, "realestate");
-  return {
-    title: `${t(rs.properties, ctx.lang)} · ${ctx.tenant.name}`,
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: t(rs.properties, ctx.lang),
     description: `Houses, flats, plots and commercial property for sale and rent — browse verified listings from ${ctx.tenant.name}.`,
-  };
+    path: "/properties",
+  });
 }
 
 export default async function PropertiesPage({ searchParams }: { searchParams: SearchParams }) {

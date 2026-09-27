@@ -76,7 +76,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:28px_28px]" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.15fr_1fr] lg:py-28">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-flex items-center rounded-[var(--t-radius)] bg-t-primary-fg/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-accent">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-flex items-center rounded-[var(--t-radius)] bg-t-primary-fg/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-accent">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-t-primary-fg/80">{t(h.subtitle, lang)}</p>
           <div className="mt-8">
@@ -165,7 +165,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         stats: () => <StatsBlock ctx={ctx} variant="row" className="border-b border-t-border bg-t-bg" />,
-        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={jobs.eyebrow} title={jobs.title} className="bg-t-muted" /> : null),
+        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={t(jobs.eyebrow, ctx.lang)} title={jobs.title} className="bg-t-muted" /> : null),
         industries: () => <Industries ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="icon" columns={3} className="bg-t-muted" />,
         process: () => <ProcessBlock ctx={ctx} variant="steps" />,

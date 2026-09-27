@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_THEME, DEFAULT_URDU_FONT, googleFontsHref, isHexColor, safeFontName, safeHex, themePrimary, themeVars } from "@/templates/theme";
 import type { TemplateTheme } from "@/templates/types";
+import { parseSettings, type TenantSettings } from "@/lib/tenant-settings";
+
+/** Branding as the app sees it (schema defaults filled in) so the fixture survives new required fields. */
+const branding = (b: Partial<TenantSettings["branding"]>): TenantSettings["branding"] => parseSettings({ branding: b }).branding;
 
 /**
  * Theme → CSS custom properties (src/templates/theme.ts). Branding colours and font names come from the
@@ -67,7 +71,7 @@ describe("themeVars", () => {
   });
 
   it("lets valid branding colours override the template, ignores invalid ones", () => {
-    const vars = themeVars(theme, { primaryColor: "#123456", secondaryColor: "red; x", accentColor: "url(#fff)" });
+    const vars = themeVars(theme, branding({ primaryColor: "#123456", secondaryColor: "red; x", accentColor: "url(#fff)" }));
     expect(vars["--t-primary"]).toBe("#123456");
     expect(vars["--t-secondary"]).toBe(theme.colors.secondary.toLowerCase());
     expect(vars["--t-accent"]).toBe(theme.colors.accent.toLowerCase());
@@ -104,15 +108,15 @@ describe("themeVars", () => {
       colors: Object.fromEntries(Object.keys(theme.colors).map((k) => [k, "#fff; background: url(//evil)"])) as TemplateTheme["colors"],
       fonts: { heading: "A; }", body: "url(x)", urdu: "</style>" },
     };
-    const vars = themeVars(hostile, { primaryColor: "#000}", secondaryColor: "url(x)", accentColor: "#123; x" });
+    const vars = themeVars(hostile, branding({ primaryColor: "#000}", secondaryColor: "url(x)", accentColor: "#123; x" }));
     for (const [k, v] of Object.entries(vars)) expect(v, k).not.toMatch(/[;{}<>]|url\(/);
   });
 });
 
 describe("themePrimary", () => {
   it("prefers valid branding, then the template, then the default", () => {
-    expect(themePrimary(theme, { primaryColor: "#00FF00" })).toBe("#00ff00");
-    expect(themePrimary(theme, { primaryColor: "green" })).toBe("#b91c1c");
+    expect(themePrimary(theme, branding({ primaryColor: "#00FF00" }))).toBe("#00ff00");
+    expect(themePrimary(theme, branding({ primaryColor: "green" }))).toBe("#b91c1c");
     expect(themePrimary(null)).toBe(DEFAULT_THEME.colors.primary);
     expect(themePrimary({ ...theme, colors: { ...theme.colors, primary: "nope" } })).toBe(DEFAULT_THEME.colors.primary);
   });

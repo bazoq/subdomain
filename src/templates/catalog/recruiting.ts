@@ -32,7 +32,7 @@ export const recruitingBlueprints: Blueprint[] = [
       signature: "Featured jobs grouped with country flags/labels; process as gold-numbered steps.",
       layout: "Formal, gold hairlines, green sections.",
     },
-    overrides: { hero: { eyebrow: "Saudi · UAE · Qatar · Oman", title: { en: "Verified Gulf jobs for Pakistani workers", ur: "پاکستانی کارکنوں کے لیے تصدیق شدہ خلیجی نوکریاں" } } },
+    overrides: { hero: { eyebrow: { en: "Saudi · UAE · Qatar · Oman", ur: "سعودیہ · یو اے ای · قطر · عمان" }, title: { en: "Verified Gulf jobs for Pakistani workers", ur: "پاکستانی کارکنوں کے لیے تصدیق شدہ خلیجی نوکریاں" } } },
     demo: { name: "GulfGate Recruitment", city: "Rawalpindi" },
   },
   {
@@ -82,7 +82,7 @@ export const recruitingBlueprints: Blueprint[] = [
       signature: "Process section covers licensing steps; industries replaced by specialities chips.",
       layout: "Clean clinical, teal CTAs, rounded-lg.",
     },
-    overrides: { hero: { eyebrow: "Nurses · Doctors · Technicians", title: { en: "Healthcare careers abroad, handled end to end", ur: "بیرونِ ملک ہیلتھ کیئر کیریئر، شروع سے آخر تک ہماری ذمہ داری" } }, industries: { title: { en: "Specialities we place", ur: "ہم جن شعبوں میں تعینات کرتے ہیں" }, items: [{ icon: "Stethoscope", title: { en: "Registered nurses", ur: "رجسٹرڈ نرسیں" }, href: "/jobs?q=nurse" }, { icon: "HeartPulse", title: { en: "Doctors & specialists", ur: "ڈاکٹرز اور اسپیشلسٹس" }, href: "/jobs?q=doctor" }, { icon: "Microscope", title: { en: "Lab technicians", ur: "لیب ٹیکنیشنز" }, href: "/jobs?q=lab" }, { icon: "Pill", title: { en: "Pharmacists", ur: "فارماسسٹس" }, href: "/jobs?q=pharmacist" }, { icon: "Activity", title: { en: "Physiotherapists", ur: "فزیوتھراپسٹس" }, href: "/jobs?q=physio" }, { icon: "Syringe", title: { en: "Paramedics", ur: "پیرامیڈیکس" }, href: "/jobs?q=paramedic" }] } },
+    overrides: { hero: { eyebrow: { en: "Nurses · Doctors · Technicians", ur: "نرسیں · ڈاکٹرز · ٹیکنیشنز" }, title: { en: "Healthcare careers abroad, handled end to end", ur: "بیرونِ ملک ہیلتھ کیئر کیریئر، شروع سے آخر تک ہماری ذمہ داری" } }, industries: { title: { en: "Specialities we place", ur: "ہم جن شعبوں میں تعینات کرتے ہیں" }, items: [{ icon: "Stethoscope", title: { en: "Registered nurses", ur: "رجسٹرڈ نرسیں" }, href: "/jobs?q=nurse" }, { icon: "HeartPulse", title: { en: "Doctors & specialists", ur: "ڈاکٹرز اور اسپیشلسٹس" }, href: "/jobs?q=doctor" }, { icon: "Microscope", title: { en: "Lab technicians", ur: "لیب ٹیکنیشنز" }, href: "/jobs?q=lab" }, { icon: "Pill", title: { en: "Pharmacists", ur: "فارماسسٹس" }, href: "/jobs?q=pharmacist" }, { icon: "Activity", title: { en: "Physiotherapists", ur: "فزیوتھراپسٹس" }, href: "/jobs?q=physio" }, { icon: "Syringe", title: { en: "Paramedics", ur: "پیرامیڈیکس" }, href: "/jobs?q=paramedic" }] } },
     demo: { name: "MedStaff International", city: "Islamabad" },
   },
   {

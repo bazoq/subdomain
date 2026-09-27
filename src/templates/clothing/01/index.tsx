@@ -72,9 +72,9 @@ function Hero({ ctx }: TemplatePageProps) {
           <div key={i} id={`zarnish-slide-${i}`} className="relative flex min-h-[calc(100vh-4rem)] w-full shrink-0 snap-center items-end bg-t-dark text-t-dark-fg lg:min-h-[calc(100vh-5rem)]">
             <Img src={src} alt="" priority={i === 0} className="absolute inset-0 h-full w-full object-cover" fallback={<Shirt className="size-24 opacity-20" />} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/25" aria-hidden="true" />
-            {h.eyebrow ? (
+            {t(h.eyebrow, lang) ? (
               <span className={cn("absolute end-6 top-1/2 -translate-y-1/2 [writing-mode:vertical-rl] text-t-accent", LABEL)} aria-hidden={i > 0}>
-                {h.eyebrow}
+                {t(h.eyebrow, lang)}
               </span>
             ) : null}
             <Container className="relative pb-16 sm:pb-24">
@@ -169,7 +169,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Img src={d.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Shirt className="size-20 opacity-20" />} />
       <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
       <Container className="relative py-20 text-center">
-        {d.eyebrow ? <span className={cn("block text-t-accent", LABEL)}>{d.eyebrow}</span> : null}
+        {t(d.eyebrow, ctx.lang) ? <span className={cn("block text-t-accent", LABEL)}>{t(d.eyebrow, ctx.lang)}</span> : null}
         <h2 className="font-heading mx-auto mt-5 max-w-2xl text-3xl font-light leading-tight tracking-tight sm:text-5xl">{title}</h2>
         <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-t-dark-fg/80">{t(d.text, ctx.lang)}</p>
         <div className="mt-9">

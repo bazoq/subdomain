@@ -68,7 +68,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/30" aria-hidden="true" />
       <Container className="relative pb-14 pt-32 sm:pb-20">
         <div className="t-fade-up max-w-md bg-t-bg p-7 sm:p-9">
-          {h.eyebrow ? <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-4 text-3xl font-light leading-[1.15] tracking-tight text-t-fg sm:text-4xl">{t(h.title, lang)}</h1>
           <p className="mt-4 text-sm leading-7 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-7">
@@ -167,7 +167,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
       <Container className="relative py-16">
         <div className={cn("max-w-md bg-t-bg p-7 sm:p-9", d.align === "left" && "ms-auto")}>
-          {d.eyebrow ? <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-t-primary">{d.eyebrow}</span> : null}
+          {t(d.eyebrow, ctx.lang) ? <span className="block text-[11px] font-semibold uppercase tracking-[0.3em] text-t-primary">{t(d.eyebrow, ctx.lang)}</span> : null}
           <h2 className="font-heading mt-3 text-2xl font-light leading-tight tracking-tight sm:text-3xl">{title}</h2>
           <p className="mt-3 text-sm leading-7 text-t-muted-fg">{t(d.text, ctx.lang)}</p>
           <div className="mt-6">

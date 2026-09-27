@@ -1,31 +1,36 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSiteContext } from "@/server/site";
-import { t } from "@/lib/i18n";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { breadcrumbJsonLd, tenantPageMetadata } from "@/server/site-seo";
+import { JsonLd } from "@/components/site/json-ld";
+import { requireModulePage } from "@/modules/shared/module-gate";
+import { t, ui, type Lang } from "@/lib/i18n";
 import { dayName } from "@/templates/ui";
 import { rs } from "@/modules/restaurant/strings";
 import { toRestaurantCtx } from "@/modules/restaurant/types";
 import { ReservationForm } from "@/modules/restaurant/ui/reservation-form";
 import { OpenBadge } from "@/modules/restaurant/ui/open-badge";
 
+const intro = (lang: Lang) => (lang === "ur" ? "اپنی تفصیلات بھیجیں، ہم فون پر تصدیق کریں گے۔" : "Send us your details and we will confirm your table by phone.");
+
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(rs.reserveTable, ctx.lang)} · ${ctx.tenant.name}` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: t(rs.reserveTable, ctx.lang), description: intro(ctx.lang), path: "/reserve" });
 }
 
 export default async function ReservePage() {
-  const ctx = await getSiteContext();
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  requireModulePage(ctx, "restaurant");
   if (!ctx.settings.restaurant.reservations) notFound();
   const lang = ctx.lang;
   const hours = ctx.settings.hours;
   return (
     <div className="t-container py-8 sm:py-12">
+      <JsonLd data={breadcrumbJsonLd(tc, [{ name: t(ui.home, lang), path: "/" }, { name: t(rs.reserveTable, lang), path: "/reserve" }])} />
       <div className="grid gap-10 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">{t(rs.reserveTable, lang)}</h1>
-          <p className="mt-2 text-t-muted-fg">
-            {lang === "ur" ? "اپنی تفصیلات بھیجیں، ہم فون پر تصدیق کریں گے۔" : "Send us your details and we will confirm your table by phone."}
-          </p>
+          <p className="mt-2 text-t-muted-fg">{intro(lang)}</p>
           <OpenBadge ctx={ctx} className="mt-3" />
           <ReservationForm ctx={toRestaurantCtx(ctx)} className="mt-8" />
         </div>

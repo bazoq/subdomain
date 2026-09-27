@@ -103,7 +103,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-t-secondary via-t-secondary/85 to-t-secondary/40 rtl:bg-gradient-to-l" aria-hidden="true" />
           <div className="relative max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              {h.eyebrow ? <span className="inline-flex items-center gap-1.5 rounded-full bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-t-primary-fg">{h.eyebrow}</span> : null}
+              {t(h.eyebrow, lang) ? <span className="inline-flex items-center gap-1.5 rounded-full bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-t-primary-fg">{t(h.eyebrow, lang)}</span> : null}
               {eta ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-t-accent px-3 py-1 text-xs font-bold text-t-accent-fg">
                   <span className="[&_svg]:size-3.5">
@@ -226,7 +226,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center overflow-hidden rounded-[1.5rem] bg-t-primary text-t-primary-fg lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-7 sm:p-11">
-            {d.eyebrow ? <span className="inline-block rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-t-accent-fg">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="inline-block rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-t-accent-fg">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
             <p className="mt-3 max-w-lg opacity-90">{t(d.text, lang)}</p>
             <div className="mt-6">

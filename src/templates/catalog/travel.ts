@@ -1,4 +1,8 @@
 import { theme, type Blueprint } from "@/templates/catalog/index";
+import { formatPKR } from "@/lib/utils";
+
+/** destination note "5 days from Rs 45,000" / "5 دن، 45,000 روپے سے" — rupee amounts go through formatPKR */
+const fromPrice = (en: string, ur: string, amount: number) => ({ en: `${en} from ${formatPKR(amount)}`, ur: `${ur}، ${formatPKR(amount, { lang: "ur" })} سے` });
 
 /** 10 travel agency templates */
 export const travelBlueprints: Blueprint[] = [
@@ -33,7 +37,7 @@ export const travelBlueprints: Blueprint[] = [
       layout: "Formal, ornamental, emerald/gold.",
     },
     order: ["hero", "umrah", "featuredPackages", "process", "features", "services", "stats", "testimonials", "faq", "cta", "contact", "footer", "seo"],
-    overrides: { hero: { eyebrow: "Ministry approved · Umrah · Hajj", title: { en: "Umrah packages with comfort and care", ur: "آرام اور خیال کے ساتھ عمرہ پیکجز" }, primaryCta: { label: { en: "View Umrah packages", ur: "عمرہ پیکجز دیکھیں" }, href: "/packages?kind=UMRAH" } }, featuredPackages: { title: { en: "Umrah & Hajj packages", ur: "عمرہ اور حج پیکجز" } } },
+    overrides: { hero: { eyebrow: { en: "Ministry approved · Umrah · Hajj", ur: "وزارت سے منظور شدہ · عمرہ · حج" }, title: { en: "Umrah packages with comfort and care", ur: "آرام اور خیال کے ساتھ عمرہ پیکجز" }, primaryCta: { label: { en: "View Umrah packages", ur: "عمرہ پیکجز دیکھیں" }, href: "/packages?kind=UMRAH" } }, featuredPackages: { title: { en: "Umrah & Hajj packages", ur: "عمرہ اور حج پیکجز" } } },
     demo: { name: "Noor Umrah Services", city: "Karachi" },
   },
   {
@@ -50,7 +54,7 @@ export const travelBlueprints: Blueprint[] = [
       signature: "Packages as tall image cards with day count badge; destinations strip horizontal scroll.",
       layout: "Photo-led, green CTAs, wide sections.",
     },
-    overrides: { hero: { eyebrow: "Hunza · Skardu · Swat · Naran", title: { en: "Discover the north with expert guides", ur: "ماہر گائیڈز کے ساتھ شمالی علاقوں کی سیر کریں" } }, destinations: { items: [{ name: { en: "Hunza Valley", ur: "وادیٔ ہنزہ" }, image: "", href: "/packages?destination=Hunza", note: "5 days from Rs 45,000" }, { name: { en: "Skardu", ur: "سکردو" }, image: "", href: "/packages?destination=Skardu", note: "7 days from Rs 65,000" }, { name: { en: "Swat & Kalam", ur: "سوات اور کالام" }, image: "", href: "/packages?destination=Swat", note: "3 days from Rs 22,000" }, { name: { en: "Naran & Kaghan", ur: "ناران اور کاغان" }, image: "", href: "/packages?destination=Naran", note: "4 days from Rs 30,000" }] } },
+    overrides: { hero: { eyebrow: { en: "Hunza · Skardu · Swat · Naran", ur: "ہنزہ · سکردو · سوات · ناران" }, title: { en: "Discover the north with expert guides", ur: "ماہر گائیڈز کے ساتھ شمالی علاقوں کی سیر کریں" } }, destinations: { items: [{ name: { en: "Hunza Valley", ur: "وادیٔ ہنزہ" }, image: "", href: "/packages?destination=Hunza", note: fromPrice("5 days", "5 دن", 45_000) }, { name: { en: "Skardu", ur: "سکردو" }, image: "", href: "/packages?destination=Skardu", note: fromPrice("7 days", "7 دن", 65_000) }, { name: { en: "Swat & Kalam", ur: "سوات اور کالام" }, image: "", href: "/packages?destination=Swat", note: fromPrice("3 days", "3 دن", 22_000) }, { name: { en: "Naran & Kaghan", ur: "ناران اور کاغان" }, image: "", href: "/packages?destination=Naran", note: fromPrice("4 days", "4 دن", 30_000) }] } },
     demo: { name: "North Trails", city: "Islamabad" },
   },
   {
@@ -115,7 +119,7 @@ export const travelBlueprints: Blueprint[] = [
       signature: "Packages as postcard cards; destinations strip with sunset overlays.",
       layout: "Warm gradients, rounded-lg, postcard motifs.",
     },
-    overrides: { hero: { eyebrow: "Dubai · Baku · Istanbul", title: { en: "Sunsets, skylines and unforgettable getaways", ur: "غروبِ آفتاب، بلند و بالا عمارتیں اور ناقابلِ فراموش سفر" } } },
+    overrides: { hero: { eyebrow: { en: "Dubai · Baku · Istanbul", ur: "دبئی · باکو · استنبول" }, title: { en: "Sunsets, skylines and unforgettable getaways", ur: "غروبِ آفتاب، بلند و بالا عمارتیں اور ناقابلِ فراموش سفر" } } },
     demo: { name: "Desert Rose Tours", city: "Lahore" },
   },
   {
@@ -133,7 +137,7 @@ export const travelBlueprints: Blueprint[] = [
       layout: "Clean, navy/mint, document motifs.",
     },
     order: ["hero", "services", "process", "featuredPackages", "features", "stats", "about", "testimonials", "faq", "cta", "contact", "footer", "seo"],
-    overrides: { hero: { eyebrow: "Visit · Study · Work visas", title: { en: "Visa guidance you can trust", ur: "ویزا رہنمائی جس پر آپ بھروسہ کر سکیں" }, primaryCta: { label: { en: "Explore visa services", ur: "ویزا سروسز دیکھیں" }, href: "/services" } } },
+    overrides: { hero: { eyebrow: { en: "Visit · Study · Work visas", ur: "وزٹ · اسٹڈی · ورک ویزا" }, title: { en: "Visa guidance you can trust", ur: "ویزا رہنمائی جس پر آپ بھروسہ کر سکیں" }, primaryCta: { label: { en: "Explore visa services", ur: "ویزا سروسز دیکھیں" }, href: "/services" } } },
     demo: { name: "Visa Desk Consultants", city: "Islamabad" },
   },
   {
@@ -166,7 +170,7 @@ export const travelBlueprints: Blueprint[] = [
       signature: "Services as formal table-like cards; brands strip; contact CTA for corporate accounts.",
       layout: "Formal grid, restrained colour, sharp corners.",
     },
-    overrides: { hero: { eyebrow: "Corporate travel management", title: { en: "Travel logistics for growing companies", ur: "بڑھتی ہوئی کمپنیوں کے لیے سفری انتظامات" }, primaryCta: { label: { en: "Open a corporate account", ur: "کارپوریٹ اکاؤنٹ کھولیں" }, href: "/contact" } } },
+    overrides: { hero: { eyebrow: { en: "Corporate travel management", ur: "کارپوریٹ ٹریول مینجمنٹ" }, title: { en: "Travel logistics for growing companies", ur: "بڑھتی ہوئی کمپنیوں کے لیے سفری انتظامات" }, primaryCta: { label: { en: "Open a corporate account", ur: "کارپوریٹ اکاؤنٹ کھولیں" }, href: "/contact" } } },
     demo: { name: "Corporate Travel Co.", city: "Karachi" },
   },
 ];

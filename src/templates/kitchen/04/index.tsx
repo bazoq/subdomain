@@ -87,9 +87,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <span className="pointer-events-none absolute -bottom-24 end-1/3 size-72 rounded-full bg-t-primary/10" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-14 lg:grid-cols-2 lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-card px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-t-primary shadow-sm">
-              <Sparkles className="size-4" /> {h.eyebrow}
+              <Sparkles className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.1] text-t-secondary sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -181,7 +181,7 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-20">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
         <div className={cn(d.align === "left" && "lg:order-2")}>
-          {d.eyebrow ? <span className="inline-block rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-t-accent-fg">{d.eyebrow}</span> : null}
+          {t(d.eyebrow, ctx.lang) ? <span className="inline-block rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-t-accent-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
           <h2 className="font-heading mt-4 text-3xl font-bold leading-tight text-t-secondary sm:text-4xl">{title}</h2>
           <p className="mt-4 max-w-lg text-lg text-t-muted-fg">{t(d.text, ctx.lang)}</p>
           <div className="mt-7">

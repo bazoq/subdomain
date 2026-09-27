@@ -100,7 +100,7 @@ function Hero({ ctx }: TemplatePageProps) {
           </span>
         </div>
         <div className="t-fade-up order-1 lg:order-2">
-          {h.eyebrow ? <span className="t-eyebrow">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="t-eyebrow">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-3 text-4xl leading-[1.08] text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <Tricolore className="mt-6 w-24" />
           <p className="mt-6 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
@@ -176,7 +176,7 @@ async function FeaturedMenu({ ctx }: TemplatePageProps) {
         <div className="mx-auto max-w-4xl border border-t-border bg-t-bg p-6 sm:p-10">
           <Tricolore className="mx-auto mb-6 w-28" />
           <div className="text-center">
-            <span className="t-eyebrow">{fm.eyebrow || t(L.laCarta, lang)}</span>
+            <span className="t-eyebrow">{t(fm.eyebrow, lang) || t(L.laCarta, lang)}</span>
             <h2 className="font-heading mt-2 text-3xl sm:text-4xl">{t(fm.title, lang)}</h2>
           </div>
           <ul className="mt-10 grid gap-x-12 gap-y-6 lg:grid-cols-2">

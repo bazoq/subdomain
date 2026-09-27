@@ -66,9 +66,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute -start-24 top-1/3 h-24 w-[140%] -rotate-6 bg-t-primary/80" aria-hidden="true" />
       <Container className="relative py-24 lg:py-32">
         <div className="max-w-3xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">
-              <Flame className="size-4" /> {h.eyebrow}
+              <Flame className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 break-words text-5xl uppercase leading-[0.9] tracking-tight text-t-secondary sm:text-6xl lg:text-8xl">{t(h.title, lang)}</h1>
@@ -206,7 +206,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-stretch border border-t-border lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="bg-t-primary p-8 text-t-primary-fg sm:p-12">
-            {d.eyebrow ? <span className="text-xs font-bold uppercase tracking-[0.3em] opacity-80">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="text-xs font-bold uppercase tracking-[0.3em] opacity-80">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-3 text-3xl uppercase leading-none sm:text-5xl">{title}</h2>
             <p className="mt-4 max-w-lg opacity-90">{t(d.text, lang)}</p>
             <div className="mt-8">

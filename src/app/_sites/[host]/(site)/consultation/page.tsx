@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { Container } from "@/templates/ui";
 import { t, ui } from "@/lib/i18n";
 import { PageHero } from "@/modules/shared/ui/page-hero";
@@ -13,8 +14,8 @@ import { WhyChooseUs } from "@/modules/law/ui/why-choose-us";
 type Props = { searchParams: Promise<{ area?: string }> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${t(ui.bookConsultation, ctx.lang)} · ${ctx.tenant.name}`, description: `Request a legal consultation with ${ctx.tenant.name}.` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: t(ui.bookConsultation, ctx.lang), description: `Request a legal consultation with ${ctx.tenant.name}.`, path: "/consultation" });
 }
 
 export default async function ConsultationPage({ searchParams }: Props) {

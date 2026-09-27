@@ -80,9 +80,9 @@ async function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute -start-24 bottom-0 size-80 rounded-full bg-t-primary-fg/10 blur-3xl" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_1fr] lg:py-28">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-primary-fg/15 px-3 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur">
-              <Plane className="size-3.5" /> {h.eyebrow}
+              <Plane className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -224,7 +224,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                 <Img src={it.image} alt="" className="size-16 shrink-0 rounded-full object-cover" />
                 <span className="min-w-0">
                   <span className="font-heading block truncate font-bold group-hover:text-t-primary">{t(it.name, ctx.lang)}</span>
-                  {it.note ? <span className="block truncate text-xs text-t-muted-fg">{it.note}</span> : null}
+                  {t(it.note, ctx.lang) ? <span className="block truncate text-xs text-t-muted-fg">{t(it.note, ctx.lang)}</span> : null}
                 </span>
               </SmartLink>
             </li>

@@ -92,9 +92,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <span className="absolute -top-24 end-[-6rem] -z-10 h-[28rem] w-[28rem] rotate-12 bg-t-primary/20" aria-hidden="true" />
       <Container className="grid items-center gap-10 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 bg-t-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">
-              <Zap className="size-4" /> {h.eyebrow}
+              <Zap className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 break-words text-5xl font-bold uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>

@@ -63,9 +63,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="border-b border-t-border bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 border-s-4 border-t-primary ps-3 text-xs font-bold uppercase tracking-[0.2em] text-t-primary">
-              <Briefcase className="size-4" /> {h.eyebrow}
+              <Briefcase className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-semibold leading-[1.1] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -182,7 +182,7 @@ function Destinations({ ctx }: TemplatePageProps) {
               <SmartLink href={it.href || "/packages"} ctx={ctx} className="group block p-4 transition hover:bg-t-muted">
                 <Img src={it.image} alt="" className="aspect-[16/10] w-full object-cover" />
                 <p className="font-heading mt-3 font-semibold group-hover:text-t-primary">{t(it.name, ctx.lang)}</p>
-                {it.note ? <p className="text-xs text-t-muted-fg">{it.note}</p> : null}
+                {t(it.note, ctx.lang) ? <p className="text-xs text-t-muted-fg">{t(it.note, ctx.lang)}</p> : null}
               </SmartLink>
             </li>
           ))}
@@ -230,7 +230,7 @@ function Home({ ctx }: TemplatePageProps) {
     <>
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
-        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={fp.eyebrow} title={fp.title} className="bg-t-muted" /> : null),
+        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={t(fp.eyebrow, ctx.lang)} title={fp.title} className="bg-t-muted" /> : null),
         destinations: () => <Destinations ctx={ctx} />,
         umrah: () => <Umrah ctx={ctx} />,
         services: () => <Services ctx={ctx} />,

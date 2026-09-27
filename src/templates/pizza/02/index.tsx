@@ -99,9 +99,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-t-bg to-transparent" />
       <Container className="relative py-20 lg:py-28">
         <div className="t-fade-up max-w-3xl">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 border border-t-primary/60 px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-primary">
-              <Flame className="size-3.5" /> {h.eyebrow}
+              <Flame className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 text-4xl font-bold leading-[1.05] text-t-fg sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
@@ -218,7 +218,7 @@ function About({ ctx }: TemplatePageProps) {
           <span className="absolute -bottom-4 -end-4 hidden bg-t-primary px-5 py-3 font-heading text-lg text-t-primary-fg lg:block">{t(L.woodFired, lang)}</span>
         </div>
         <div>
-          <span className="t-eyebrow">{a.eyebrow || t(L.ourStory, lang)}</span>
+          <span className="t-eyebrow">{t(a.eyebrow, lang) || t(L.ourStory, lang)}</span>
           <h2 className="font-heading mt-2 text-3xl sm:text-4xl">{t(a.title, lang)}</h2>
           <RichText value={a.body} lang={lang} className="mt-4 text-t-muted-fg" />
           {a.highlights?.length ? (

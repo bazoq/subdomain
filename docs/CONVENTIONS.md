@@ -106,12 +106,15 @@ Never call `revalidatePath` with a browser-visible tenant path (`/admin/...`, `/
 
 - Read server env through `env` from `@/config/env` (zod-validated, `server-only`), never `process.env.X` in app code — the exceptions are `next.config.ts`, `src/proxy.ts`, the logger and the health/instrumentation files, which run before/without the validated object.
 - Adding a variable means three edits: the zod schema in `src/config/env.ts`, a documented line in `.env.example`, and the table in `docs/DEPLOY.md §0`. Secrets are never `NEXT_PUBLIC_`.
+- Two layers of validation. *Shape* rules run everywhere (dev, test, build, preview, production). *Production* rules (real `ROOT_DOMAIN`, strong non-placeholder `SESSION_SECRET`, https `R2_PUBLIC_URL`) are gated by `isProdEnv` = `NODE_ENV === "production"` **and** `NEXT_PHASE !== "phase-production-build"` **and** (`VERCEL_ENV` unset or `"production"`). That is what lets `next build` and CI run on dummy env and lets Vercel preview deployments boot on preview-scoped env while the production deployment stays strict. Put a new rule under `if (prod)` only when a violation would be *wrong in production but fine in a build/preview*; everything else is a shape rule. `tests/unit/env.test.ts` pins this matrix — extend it when you touch the gate.
+- Do not read `NEXT_PHASE` or `VERCEL_ENV` elsewhere to branch behaviour; use `isProd` / `isVercel` from `@/config/env`, and keep "am I a real production runtime" logic in that one file.
 
 ## Tests (Vitest)
 
 - `npm test` runs `tests/**/*.test.ts` (and colocated `src/**/*.test.ts`) in Node with **no database**: `tests/setup.ts` supplies dummy env, `server-only` is aliased to a stub, and anything that imports `@/server/db` (or `next/headers`) is replaced with `vi.mock(...)` at the top of the test file (see `tests/unit/audit-redact.test.ts`, `tests/api/health.test.ts`).
 - Write pure helpers so they can be tested directly (`src/proxy.ts#resolveRewrite`, `src/server/auth/redirect.ts`, `src/modules/restaurant/hours.ts` are the pattern) and add a test whenever you add one. Security-relevant helpers (host/path normalisation, redirects, tokens, filenames, CSRF) must have negative tests for the bypasses they are meant to stop.
-- Modules whose behaviour depends on env read at import time (`ROOT_DOMAIN`, `VERCEL`) are re-imported after `vi.stubEnv` + `vi.resetModules()` (see `tests/unit/proxy.test.ts`).
+- Modules whose behaviour depends on env read at import time (`ROOT_DOMAIN`, `VERCEL`, the whole of `src/config/env.ts`) are re-imported after `vi.stubEnv` + `vi.resetModules()` (see `tests/unit/proxy.test.ts`, `tests/unit/env.test.ts`).
+- The `@/*` alias comes from `tsconfig.json` via Vite's native `resolve.tsconfigPaths` in `vitest.config.mts` — no path plugin; a database-backed module gets its Prisma calls stubbed per collection (`tests/unit/site-seo.test.ts` is the pattern for `findMany`-heavy code).
 - CI (`.github/workflows/ci.yml`) runs `gen:templates` freshness, lint, typecheck, tests (Node 20 + 22) and a production build; `npm run check` runs the same locally.
 
 ## Storefront UI kits (modules)

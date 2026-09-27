@@ -95,7 +95,7 @@ function Hero({ ctx }: TemplatePageProps) {
                 <Img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Flame className="size-16 opacity-25" />} />
                 <div className="absolute inset-0 bg-gradient-to-r from-t-dark via-t-dark/80 to-t-dark/20 rtl:bg-gradient-to-l" aria-hidden="true" />
                 <div className="relative w-full px-6 py-12 sm:px-10 sm:py-16 lg:py-20">
-                  {h.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-t-accent-fg">{h.eyebrow}</span> : null}
+                  {t(h.eyebrow, lang) ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-t-accent-fg">{t(h.eyebrow, lang)}</span> : null}
                   {i === 0 ? (
                     <>
                       <h1 className="font-heading mt-4 max-w-xl text-3xl font-extrabold uppercase leading-[1.05] sm:text-5xl">{t(h.title, lang)}</h1>
@@ -240,7 +240,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid overflow-hidden bg-t-dark text-t-dark-fg lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-7 sm:p-10">
-            {d.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-t-accent-fg">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-t-accent-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-4 text-2xl font-extrabold uppercase leading-tight sm:text-4xl">{title}</h2>
             <p className="mt-3 max-w-md text-sm text-t-dark-fg/80 sm:text-base">{t(d.text, ctx.lang)}</p>
             <div className="mt-6">

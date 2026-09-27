@@ -65,7 +65,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1fr_1.05fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="text-xs font-semibold uppercase tracking-[0.3em] text-t-primary">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 text-4xl font-normal leading-[1.15] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-6 max-w-lg text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap items-center gap-4">

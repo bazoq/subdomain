@@ -84,9 +84,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div aria-hidden="true" className="pointer-events-none absolute -end-10 bottom-4 size-72 bg-t-accent/25" style={BLOB_B} />
       <Container className="relative grid items-center gap-12 lg:grid-cols-2">
         <div className="t-fade-up text-center lg:text-start">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest text-t-accent-fg">
-              <Smile className="size-4" /> {h.eyebrow}
+              <Smile className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl leading-[1.05] text-t-accent sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { Container } from "@/templates/ui";
 import { PageHero } from "@/modules/shared/ui/page-hero";
 import { TrialForm } from "@/modules/gym/ui/trial-form";
@@ -12,8 +13,8 @@ import { TestimonialsBlock } from "@/modules/shared/ui/testimonials-block";
 type Props = { searchParams: Promise<{ plan?: string }> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
-  return { title: `${ctx.lang === "ur" ? "مفت ٹرائل" : "Join / free trial"} · ${ctx.tenant.name}`, description: `Book a free trial session at ${ctx.tenant.name}.` };
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
+  return tenantPageMetadata(tc, ctx.lang, { title: ctx.lang === "ur" ? "مفت ٹرائل" : "Join / free trial", description: `Book a free trial session at ${ctx.tenant.name}.`, path: "/join" });
 }
 
 export default async function JoinPage({ searchParams }: Props) {

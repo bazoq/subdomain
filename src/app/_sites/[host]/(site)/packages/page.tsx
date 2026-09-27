@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { tenantPageMetadata } from "@/server/site-seo";
 import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
@@ -10,12 +11,13 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?.trim().slice(0, 120) ?? "";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const ctx = await getSiteContext();
+  const [ctx, tc] = await Promise.all([getSiteContext(), requireTenant()]);
   requireModulePage(ctx, "travel");
-  return {
-    title: `${t(ts.packages, ctx.lang)} · ${ctx.tenant.name}`,
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: t(ts.packages, ctx.lang),
     description: `Umrah, Hajj, northern-areas tours and international holiday packages from ${ctx.tenant.name}. Book online or on WhatsApp.`,
-  };
+    path: "/packages",
+  });
 }
 
 export default async function PackagesPage({ searchParams }: { searchParams: SearchParams }) {

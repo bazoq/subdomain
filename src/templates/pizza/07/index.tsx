@@ -90,7 +90,7 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="border-b border-t-border">
       <Container className="py-16 lg:py-24">
-        {h.eyebrow ? <span className="block text-[11px] font-semibold uppercase tracking-[0.35em] text-t-muted-fg">{h.eyebrow}</span> : null}
+        {t(h.eyebrow, lang) ? <span className="block text-[11px] font-semibold uppercase tracking-[0.35em] text-t-muted-fg">{t(h.eyebrow, lang)}</span> : null}
         <AccentHeadline value={h.title} lang={lang} className="font-heading t-fade-up mt-6 max-w-5xl text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-7xl lg:text-[5.5rem]" />
         <div className="mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-end">
           <div>

@@ -64,10 +64,10 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em] text-t-primary">
               <span className="h-px w-8 bg-t-primary" aria-hidden="true" />
-              {h.eyebrow}
+              {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.4rem]">{t(h.title, lang)}</h1>
@@ -272,7 +272,7 @@ function Banner({ ctx }: TemplatePageProps) {
     <section id="banner" className="py-16 sm:py-20">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
         <div className={cn(d.align === "left" && "lg:order-2")}>
-          {d.eyebrow ? <span className="t-eyebrow">{d.eyebrow}</span> : null}
+          {t(d.eyebrow, lang) ? <span className="t-eyebrow">{t(d.eyebrow, lang)}</span> : null}
           <h2 className="font-heading mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
           <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
           <div className="mt-7">

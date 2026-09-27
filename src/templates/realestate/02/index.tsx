@@ -37,7 +37,7 @@ import { PropertySearch, propertyPrice, purposeLabel, realestateStrings as rs, t
 import { getFeaturedProperties, getPropertyCities } from "@/modules/realestate/queries";
 
 type FeaturedData = HeadingData & { count?: number; cta?: LinkData };
-type AreasData = HeadingData & { items: { name: string; image: string; href: string; note: string }[] };
+type AreasData = HeadingData & { items: { name: string; image: string; href: string; note: LocalizedString }[] };
 type ServicesHeading = HeadingData & { count?: number };
 
 /* ---------- Layout: minimal header with Rent / Buy toggle + search icon ---------- */
@@ -79,7 +79,7 @@ async function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-bg">
       <Container className="pb-14 pt-10 sm:pt-16 lg:pb-20">
         <div className="t-fade-up mx-auto max-w-2xl text-center">
-          {h.eyebrow ? <span className="inline-flex items-center gap-2 rounded-full bg-t-muted px-3 py-1 text-xs font-semibold text-t-muted-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-flex items-center gap-2 rounded-full bg-t-muted px-3 py-1 text-xs font-semibold text-t-muted-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-4 text-3xl font-extrabold tracking-tight text-t-fg sm:text-4xl">{t(h.title, lang)}</h1>
           <p className="mt-3 text-base text-t-muted-fg sm:text-lg">{t(h.subtitle, lang)}</p>
         </div>
@@ -178,7 +178,7 @@ async function AreaList({ ctx }: TemplatePageProps) {
                 <SmartLink href={a.href || "/properties"} ctx={ctx} className="group flex items-center gap-4 py-4 transition hover:text-t-accent">
                   <span className="font-heading w-8 text-sm font-bold text-t-muted-fg">{String(i + 1).padStart(2, "0")}</span>
                   <span className="font-heading flex-1 text-xl font-bold">{a.name}</span>
-                  {a.note ? <span className="hidden text-sm text-t-muted-fg sm:block">{a.note}</span> : null}
+                  {t(a.note, ctx.lang) ? <span className="hidden text-sm text-t-muted-fg sm:block">{t(a.note, ctx.lang)}</span> : null}
                   {n ? <span className="rounded-full bg-t-muted px-2.5 py-0.5 text-xs font-semibold text-t-fg">{n}</span> : null}
                   <ArrowUpRight className="size-5 text-t-muted-fg transition group-hover:text-t-accent rtl:-scale-x-100" />
                 </SmartLink>

@@ -87,9 +87,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute inset-y-1/4 start-0 w-2/3 opacity-70" style={SPEED} aria-hidden="true" />
       <Container className="relative grid gap-10 py-16 lg:grid-cols-2 lg:py-28">
         <div className="t-fade-up text-t-primary-fg">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-primary-fg/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest text-t-accent backdrop-blur">
-              <Zap className="size-4" /> {h.eyebrow}
+              <Zap className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-6 max-w-xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -220,7 +220,7 @@ function Banner({ ctx }: TemplatePageProps) {
         <div className={cn("relative grid items-center overflow-hidden rounded-[var(--t-radius)] text-t-primary-fg lg:grid-cols-2", GRADIENT, d.align === "left" && "lg:[&>*:nth-child(2)]:order-2")}>
           <div className="pointer-events-none absolute inset-y-1/3 start-0 w-1/2 opacity-60" style={SPEED} aria-hidden="true" />
           <div className="relative p-8 sm:p-12">
-            {d.eyebrow ? <span className="inline-block rounded-full bg-t-primary-fg/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-t-accent">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="inline-block rounded-full bg-t-primary-fg/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-t-accent">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-5 text-3xl font-extrabold leading-tight sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-md text-base text-t-primary-fg/85">{t(d.text, ctx.lang)}</p>
             <div className="mt-7">

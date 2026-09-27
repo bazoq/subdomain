@@ -52,9 +52,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute -end-24 -top-24 size-96 rounded-full bg-t-primary/10" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-t-primary">
-              <HeartPulse className="size-4" /> {h.eyebrow}
+              <HeartPulse className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -170,7 +170,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         stats: () => <StatsBlock ctx={ctx} variant="row" className="border-b border-t-border bg-t-bg" />,
-        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={jobs.eyebrow} title={jobs.title} /> : null),
+        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={t(jobs.eyebrow, ctx.lang)} title={jobs.title} /> : null),
         industries: () => <Specialities ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="icon" columns={3} className="bg-t-muted" />,
         process: () => <LicensingSteps ctx={ctx} />,

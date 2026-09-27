@@ -75,9 +75,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-muted">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-card px-4 py-1.5 text-sm font-bold text-t-primary shadow-sm">
-              <Leaf className="size-4" /> {h.eyebrow}
+              <Leaf className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-t-secondary sm:text-5xl">{t(h.title, lang)}</h1>
@@ -224,7 +224,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center gap-8 overflow-hidden rounded-[2rem] bg-t-secondary p-8 text-t-secondary-fg sm:p-12 lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div>
-            {d.eyebrow ? <span className="inline-block rounded-full bg-t-accent px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-t-accent-fg">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="inline-block rounded-full bg-t-accent px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-t-accent-fg">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg opacity-85">{t(d.text, lang)}</p>
             <div className="mt-7">

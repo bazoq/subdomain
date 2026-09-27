@@ -113,7 +113,7 @@ async function Hero({ ctx }: TemplatePageProps) {
                   <div className="t-fade-up max-w-2xl">
                     {i === 0 ? (
                       <>
-                        {h.eyebrow ? <span className="inline-flex bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{h.eyebrow}</span> : null}
+                        {t(h.eyebrow, lang) ? <span className="inline-flex bg-t-primary px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-t-primary-fg">{t(h.eyebrow, lang)}</span> : null}
                         <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.1] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
                         <p className="mt-5 max-w-xl text-lg leading-8 text-t-dark-fg/85">{t(h.subtitle, lang)}</p>
                       </>

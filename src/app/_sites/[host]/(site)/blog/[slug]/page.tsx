@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays } from "lucide-react";
-import { getSiteContext } from "@/server/site";
+import { getSiteContext, requireTenant } from "@/server/site";
+import { breadcrumbJsonLd, tenantPageMetadata } from "@/server/site-seo";
+import { JsonLd } from "@/components/site/json-ld";
+import { blogPostingJsonLd } from "@/modules/shared/jsonld";
 import { db } from "@/server/db";
 import { Container, RichText } from "@/templates/ui";
 import { t, ui, type LocalizedString } from "@/lib/i18n";
@@ -15,20 +18,22 @@ import { CtaBlock } from "@/modules/shared/ui/section-blocks";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const ctx = await getSiteContext();
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const p = await getPost(ctx.tenant.id, slug);
   if (!p) return {};
-  return {
-    title: `${t(p.title as LocalizedString, ctx.lang)} · ${ctx.tenant.name}`,
+  return tenantPageMetadata(tc, ctx.lang, {
+    title: t(p.title as LocalizedString, ctx.lang),
     description: t(p.excerpt as LocalizedString, ctx.lang) || undefined,
-    openGraph: { type: "article", publishedTime: p.publishedAt?.toISOString(), images: p.coverUrl ? [p.coverUrl] : undefined },
-  };
+    path: `/blog/${p.slug}`,
+    image: p.coverUrl,
+    type: "article",
+    publishedTime: (p.publishedAt ?? p.createdAt).toISOString(),
+    modifiedTime: p.updatedAt.toISOString(),
+  });
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params;
-  const ctx = await getSiteContext();
+  const [ctx, tc, { slug }] = await Promise.all([getSiteContext(), requireTenant(), params]);
   const p = await getPost(ctx.tenant.id, slug);
   if (!p) notFound();
   const title = t(p.title as LocalizedString, ctx.lang);
@@ -36,6 +41,16 @@ export default async function BlogPostPage({ params }: Props) {
   const more = await db.tenantPost.findMany({ where: { ...publicPostsWhere(ctx.tenant.id), NOT: { id: p.id } }, orderBy: { publishedAt: "desc" }, take: 3 });
   return (
     <>
+      <JsonLd
+        data={[
+          blogPostingJsonLd(tc, p, ctx.lang),
+          breadcrumbJsonLd(tc, [
+            { name: t(ui.home, ctx.lang), path: "/" },
+            { name: t(ui.blog, ctx.lang), path: "/blog" },
+            { name: title, path: `/blog/${p.slug}` },
+          ]),
+        ]}
+      />
       <article>
         <header className="border-b border-t-border bg-t-muted">
           <Container className="max-w-3xl py-12 sm:py-16">

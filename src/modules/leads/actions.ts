@@ -163,6 +163,7 @@ export async function updateLeadStatus(id: string, status: string, notes?: strin
     });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "lead.status", entity: "Lead", entityId: id, meta: { status: s.data } });
+    revalidatePath("/", "layout");
     return success("Updated.");
   } catch (e) {
     return fail((e as Error).message);
@@ -175,7 +176,7 @@ export async function deleteLead(id: string): Promise<ActionResult> {
     const { count } = await db.lead.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "lead.delete", entity: "Lead", entityId: id });
-    revalidatePath("/admin/leads");
+    revalidatePath("/", "layout");
     return success("Deleted.");
   } catch (e) {
     return fail((e as Error).message);

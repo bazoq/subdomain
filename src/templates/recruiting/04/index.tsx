@@ -64,7 +64,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-bg">
       <div className="grid lg:grid-cols-2">
         <div className="order-2 flex flex-col justify-center px-4 py-14 sm:px-8 lg:order-1 lg:px-16 lg:py-24">
-          {h.eyebrow ? <span className="inline-block bg-t-accent px-3 py-1 font-heading text-sm font-bold uppercase tracking-widest text-t-accent-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block bg-t-accent px-3 py-1 font-heading text-sm font-bold uppercase tracking-widest text-t-accent-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-5 text-5xl font-bold uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-lg text-xl leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <ul className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -209,7 +209,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         stats: () => <StatsBlock ctx={ctx} variant="cards" className="bg-t-bg [&_dd]:text-5xl" />,
-        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={jobs.eyebrow} title={jobs.title} className="bg-t-muted [&_h2]:uppercase [&_.t-btn]:px-8 [&_.t-btn]:py-4 [&_.t-btn]:text-lg" /> : null),
+        featuredJobs: () => (jobs ? <FeaturedJobs ctx={ctx} take={jobs.count || 6} eyebrow={t(jobs.eyebrow, ctx.lang)} title={jobs.title} className="bg-t-muted [&_h2]:uppercase [&_.t-btn]:px-8 [&_.t-btn]:py-4 [&_.t-btn]:text-lg" /> : null),
         industries: () => <Industries ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="list" className="[&_h2]:uppercase" />,
         process: () => <BigNumberProcess ctx={ctx} />,

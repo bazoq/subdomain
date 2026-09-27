@@ -96,7 +96,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Container>
         <div className="grid gap-3 lg:grid-cols-3 lg:grid-rows-2">
           <div className="t-fade-up flex flex-col justify-center bg-t-muted p-8 sm:p-12 lg:col-span-2 lg:row-span-2">
-            {h.eyebrow ? <span className="inline-block self-start bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{h.eyebrow}</span> : null}
+            {t(h.eyebrow, lang) ? <span className="inline-block self-start bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{t(h.eyebrow, lang)}</span> : null}
             <h1 className="font-heading mt-6 text-4xl leading-[1.08] tracking-tight text-t-primary sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-t-muted-fg sm:text-lg">{t(h.subtitle, lang)}</p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -136,7 +136,7 @@ function Collections({ ctx }: TemplatePageProps) {
     <section id="collections" className="py-16 sm:py-20">
       <Container>
         <div className="mb-8">
-          {d.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{d.eyebrow}</span> : null}
+          {t(d.eyebrow, ctx.lang) ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
           <h2 className="font-heading mt-3 text-3xl tracking-tight text-t-primary sm:text-4xl">{t(d.title, ctx.lang)}</h2>
         </div>
         <ul className="grid auto-rows-[11rem] grid-cols-2 gap-3 sm:auto-rows-[12rem] sm:grid-cols-4">
@@ -169,7 +169,7 @@ async function Products({ ctx }: TemplatePageProps) {
       <Container className="relative">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            {d.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-3 text-3xl tracking-tight text-t-primary sm:text-4xl">{t(d.title, ctx.lang)}</h2>
           </div>
           <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-outline px-5 py-2 text-sm text-t-primary" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
@@ -192,7 +192,7 @@ function Banner({ ctx }: TemplatePageProps) {
         <div className={cn("grid items-stretch lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="relative bg-t-primary p-8 text-t-primary-fg sm:p-12">
             <div className="absolute inset-y-0 end-0 w-6 opacity-40" style={PATTERN} aria-hidden="true" />
-            {d.eyebrow ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, ctx.lang) ? <span className="inline-block bg-t-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-t-accent-fg">{t(d.eyebrow, ctx.lang)}</span> : null}
             <h2 className="font-heading mt-5 text-3xl leading-tight sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-md text-base text-t-primary-fg/80">{t(d.text, ctx.lang)}</p>
             <div className="mt-7">

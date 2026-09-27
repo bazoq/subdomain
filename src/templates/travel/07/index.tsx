@@ -66,9 +66,9 @@ function Hero({ ctx }: TemplatePageProps) {
       {h.image ? <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-multiply" /> : null}
       <div className="pointer-events-none absolute start-1/2 top-8 size-40 -translate-x-1/2 rounded-full bg-t-accent shadow-[0_0_120px_40px_rgba(255,255,255,0.25)] rtl:translate-x-1/2 sm:size-56" aria-hidden="true" />
       <Container className="relative pb-40 pt-24 text-center lg:pt-32">
-        {h.eyebrow ? (
+        {t(h.eyebrow, lang) ? (
           <span className="inline-flex items-center gap-2 rounded-full bg-t-secondary/40 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.3em] backdrop-blur">
-            <Sunset className="size-4" /> {h.eyebrow}
+            <Sunset className="size-4" /> {t(h.eyebrow, lang)}
           </span>
         ) : null}
         <h1 className="font-heading mx-auto mt-6 max-w-4xl text-4xl leading-[1.1] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -161,7 +161,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-t-secondary via-t-primary/50 to-t-accent/10 opacity-90 transition group-hover:opacity-75" aria-hidden="true" />
                 <div className="absolute inset-x-0 bottom-0 p-5 text-t-primary-fg">
                   <p className="font-heading text-2xl">{t(it.name, ctx.lang)}</p>
-                  {it.note ? <p className="mt-1 text-sm text-t-accent">{it.note}</p> : null}
+                  {t(it.note, ctx.lang) ? <p className="mt-1 text-sm text-t-accent">{t(it.note, ctx.lang)}</p> : null}
                 </div>
               </SmartLink>
             </li>

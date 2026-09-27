@@ -96,7 +96,7 @@ export async function applyToJob(input: unknown): Promise<ActionResult<{ id: str
       company: job.company,
       location: job.location,
     });
-    revalidatePath("/admin/applications");
+    // No revalidation: admin lists are rendered per request and the visitor sees nothing cached that changed.
     return success(t(rs.applied, lang), { id: app.id });
   } catch (e) {
     return publicFailure(lang, e);
@@ -218,8 +218,7 @@ export async function updateApplicationStatus(id: string, status: string, notes?
     if (from !== s.data) {
       await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "application.status", entity: "Application", entityId: id, meta: { from, to: s.data } });
     }
-    revalidatePath("/admin/applications");
-    revalidatePath(`/admin/applications/${id}`);
+    revalidatePath("/", "layout");
     return success(from === s.data ? "Notes saved." : `Moved to ${s.data.toLowerCase()}.`);
   } catch (e) {
     return fail((e as Error).message);
@@ -239,7 +238,7 @@ export async function deleteApplication(id: string): Promise<ActionResult> {
       if (!stillUsed) await deleteTenantPrivateMedia(ctx.tenant.id, existing.cvMediaId);
     }
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "application.delete", entity: "Application", entityId: id });
-    revalidatePath("/admin/applications");
+    revalidatePath("/", "layout");
     return success("Application deleted.");
   } catch (e) {
     return fail((e as Error).message);

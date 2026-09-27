@@ -33,7 +33,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Property cards with large photos and minimal meta; areas as text list with counts.",
       layout: "Minimal, rounded-lg cards, green accent.",
     },
-    overrides: { hero: { eyebrow: "Apartments · Houses · Offices", title: { en: "Find a place you'll love to live", ur: "ایسا گھر تلاش کریں جہاں رہنا آپ کو پسند ہو" } } },
+    overrides: { hero: { eyebrow: { en: "Apartments · Houses · Offices", ur: "اپارٹمنٹ · گھر · دفاتر" }, title: { en: "Find a place you'll love to live", ur: "ایسا گھر تلاش کریں جہاں رہنا آپ کو پسند ہو" } } },
     demo: { name: "Urban Nest Realty", city: "Karachi" },
   },
   {
@@ -50,7 +50,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Areas as society cards with 'from Rs' notes; stats emphasised (ROI, plots sold); process for transfer.",
       layout: "Grid motifs, green/amber, data-forward.",
     },
-    overrides: { hero: { eyebrow: "Plots · Files · Investment", title: { en: "Invest in Pakistan's fastest-growing societies", ur: "پاکستان کی تیزی سے ترقی کرتی سوسائٹیوں میں سرمایہ کاری کریں" } } },
+    overrides: { hero: { eyebrow: { en: "Plots · Files · Investment", ur: "پلاٹ · فائلیں · سرمایہ کاری" }, title: { en: "Invest in Pakistan's fastest-growing societies", ur: "پاکستان کی تیزی سے ترقی کرتی سوسائٹیوں میں سرمایہ کاری کریں" } } },
     demo: { name: "Plot Point Advisors", city: "Islamabad" },
   },
 
@@ -101,7 +101,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Classes as a calm weekly list; plans as minimal cards; testimonials as quotes.",
       layout: "Calm, spacious, serif, sage.",
     },
-    overrides: { hero: { eyebrow: "Yoga · Pilates · Meditation", title: { en: "Move gently. Breathe deeply.", ur: "نرمی سے حرکت کریں۔ گہری سانس لیں۔" } } },
+    overrides: { hero: { eyebrow: { en: "Yoga · Pilates · Meditation", ur: "یوگا · پیلاٹیز · مراقبہ" }, title: { en: "Move gently. Breathe deeply.", ur: "نرمی سے حرکت کریں۔ گہری سانس لیں۔" } } },
     demo: { name: "Zen Studio", city: "Islamabad" },
   },
   {
@@ -134,7 +134,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Plans with 'Ladies only' framing; classes (Zumba, yoga, aerobics); transformations gallery.",
       layout: "Rounded, plum/blush, energetic.",
     },
-    overrides: { hero: { eyebrow: "Women-only gym", title: { en: "Your space. Your strength.", ur: "آپ کی جگہ۔ آپ کی طاقت۔" } } },
+    overrides: { hero: { eyebrow: { en: "Women-only gym", ur: "صرف خواتین کے لیے جم" }, title: { en: "Your space. Your strength.", ur: "آپ کی جگہ۔ آپ کی طاقت۔" } } },
     demo: { name: "Ladies Fit", city: "Lahore" },
   },
 
@@ -185,7 +185,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Practice areas with plain-language descriptions; FAQ prominent; team warm.",
       layout: "Rounded, warm, readable.",
     },
-    overrides: { hero: { eyebrow: "Family · Inheritance · Property", title: { en: "Legal help, explained in plain language", ur: "قانونی مدد، آسان زبان میں" } } },
+    overrides: { hero: { eyebrow: { en: "Family · Inheritance · Property", ur: "خاندانی · وراثت · جائیداد" }, title: { en: "Legal help, explained in plain language", ur: "قانونی مدد، آسان زبان میں" } } },
     demo: { name: "Family Counsel Associates", city: "Multan" },
   },
   {
@@ -202,7 +202,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Practice areas as table-like cards; process as compliance steps; brands/clients strip via features.",
       layout: "Formal grid, slate/teal.",
     },
-    overrides: { hero: { eyebrow: "Corporate · Tax · Compliance", title: { en: "Counsel that keeps your business compliant", ur: "قانونی مشاورت جو آپ کے کاروبار کو قواعد کے مطابق رکھے" } } },
+    overrides: { hero: { eyebrow: { en: "Corporate · Tax · Compliance", ur: "کارپوریٹ · ٹیکس · کمپلائنس" }, title: { en: "Counsel that keeps your business compliant", ur: "قانونی مشاورت جو آپ کے کاروبار کو قواعد کے مطابق رکھے" } } },
     demo: { name: "Corporate Counsel LLP", city: "Islamabad" },
   },
   {
@@ -235,7 +235,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "About block as credentials timeline; practice areas compact; testimonials.",
       layout: "Personal, clean, maroon accent.",
     },
-    overrides: { hero: { eyebrow: "Advocate High Court", title: { en: "Personal attention to every case", ur: "ہر مقدمے پر ذاتی توجہ" } }, team: { title: { en: "About the advocate", ur: "ایڈووکیٹ کے بارے میں" } } },
+    overrides: { hero: { eyebrow: { en: "Advocate High Court", ur: "ایڈووکیٹ ہائی کورٹ" }, title: { en: "Personal attention to every case", ur: "ہر مقدمے پر ذاتی توجہ" } }, team: { title: { en: "About the advocate", ur: "ایڈووکیٹ کے بارے میں" } } },
     demo: { name: "Adv. Ahmed Raza Chambers", city: "Faisalabad" },
   },
 
@@ -271,7 +271,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Portfolio gallery central; services as letterpress-style cards with embossed borders (CSS).",
       layout: "Paper textures, square corners, serif.",
     },
-    overrides: { hero: { eyebrow: "Wedding cards · Packaging · Stationery", title: { en: "Printed with craft and care", ur: "مہارت اور خیال سے چھپا ہوا" } } },
+    overrides: { hero: { eyebrow: { en: "Wedding cards · Packaging · Stationery", ur: "شادی کارڈ · پیکیجنگ · اسٹیشنری" }, title: { en: "Printed with craft and care", ur: "مہارت اور خیال سے چھپا ہوا" } } },
     features: ["Portfolio-central home page", "Letterpress-style embossed service cards", "Kraft & black craft palette"],
     demo: { name: "Paper & Ink Press", city: "Karachi" },
   },
@@ -306,7 +306,7 @@ export const serviceBlueprints: Blueprint[] = [
       signature: "Portfolio as wide landscape tiles; services with size/material notes; brands strip of clients.",
       layout: "Dark, wide, yellow accents.",
     },
-    overrides: { hero: { eyebrow: "Flex · Signboards · Vehicle branding", title: { en: "Big prints for big impressions", ur: "بڑے تاثر کے لیے بڑے پرنٹس" } } },
+    overrides: { hero: { eyebrow: { en: "Flex · Signboards · Vehicle branding", ur: "فلیکس · سائن بورڈ · وہیکل برانڈنگ" }, title: { en: "Big prints for big impressions", ur: "بڑے تاثر کے لیے بڑے پرنٹس" } } },
     features: ["Wide landscape portfolio tiles", "Size/material notes on services", "Client logo strip"],
     demo: { name: "Signage Studio", city: "Lahore" },
   },

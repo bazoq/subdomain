@@ -62,7 +62,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Container className="py-20 text-center sm:py-28">
         <div className="t-fade-up mx-auto max-w-3xl">
           <Leaf className="mx-auto size-7 text-t-primary" aria-hidden="true" />
-          {h.eyebrow ? <span className="mt-6 block text-xs font-medium uppercase tracking-[0.4em] text-t-muted-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="mt-6 block text-xs font-medium uppercase tracking-[0.4em] text-t-muted-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-6 text-4xl font-normal leading-[1.15] sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-9 flex flex-col items-center gap-4">
@@ -135,7 +135,7 @@ function Home({ ctx }: TemplatePageProps) {
               album={trans.album || "transformations"}
               variant="strip"
               id="transformations"
-              heading={{ eyebrow: trans.eyebrow, title: trans.title }}
+              heading={{ eyebrow: t(trans.eyebrow, ctx.lang), title: trans.title }}
               className={`bg-t-muted ${SERIF}`}
             />
           ) : null,

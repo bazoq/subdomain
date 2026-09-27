@@ -30,12 +30,13 @@ const TYPING_CSS = `
 `;
 
 /** Mono label like "// heading" used above every section. */
-function MonoHeading({ eyebrow, title, subtitle, lang, className }: { eyebrow?: string; title?: LocalizedString | string; subtitle?: LocalizedString | string; lang: "en" | "ur"; className?: string }) {
+function MonoHeading({ eyebrow, title, subtitle, lang, className }: { eyebrow?: LocalizedString | string; title?: LocalizedString | string; subtitle?: LocalizedString | string; lang: "en" | "ur"; className?: string }) {
   const ttl = t(title, lang);
-  if (!ttl && !eyebrow) return null;
+  const eb = t(eyebrow, lang);
+  if (!ttl && !eb) return null;
   return (
     <div className={cn("mb-10 max-w-2xl", className)}>
-      {eyebrow ? <p className="font-mono text-sm text-t-primary">{`// ${eyebrow.toLowerCase()}`}</p> : null}
+      {eb ? <p className="font-mono text-sm text-t-primary">{`// ${eb.toLowerCase()}`}</p> : null}
       {ttl ? <h2 className="font-heading mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{ttl}</h2> : null}
       {t(subtitle, lang) ? <p className="mt-3 text-t-muted-fg">{t(subtitle, lang)}</p> : null}
     </div>
@@ -72,7 +73,7 @@ function Hero({ ctx }: TemplatePageProps) {
             <span className="size-3 rounded-full bg-t-primary/60" aria-hidden="true" />
             <span className="size-3 rounded-full bg-t-accent/60" aria-hidden="true" />
             <span className="size-3 rounded-full bg-t-muted-fg/40" aria-hidden="true" />
-            <span className="ms-3 font-mono text-xs text-t-muted-fg">{h.eyebrow ? h.eyebrow.toLowerCase().replace(/\s+/g, "-") : "hero"}.tsx</span>
+            <span className="ms-3 font-mono text-xs text-t-muted-fg">{t(h.eyebrow, lang) ? t(h.eyebrow, lang).toLowerCase().replace(/\s+/g, "-") : "hero"}.tsx</span>
           </div>
           <div className="p-6 sm:p-10">
             <p className="font-mono text-sm text-t-muted-fg">

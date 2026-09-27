@@ -94,7 +94,7 @@ function Hero({ ctx }: TemplatePageProps) {
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-t from-t-dark via-t-dark/70 to-t-dark/30" aria-hidden="true" />
       <Container className="relative py-24 text-center lg:py-36">
-        {h.eyebrow ? <p className="text-xs font-bold uppercase tracking-[0.35em] text-t-accent">{h.eyebrow}</p> : null}
+        {t(h.eyebrow, lang) ? <p className="text-xs font-bold uppercase tracking-[0.35em] text-t-accent">{t(h.eyebrow, lang)}</p> : null}
         <GoldRule className="mx-auto mt-4 max-w-xs" />
         <h1 className="font-heading mx-auto mt-6 max-w-4xl text-4xl font-bold leading-[1.15] text-t-accent sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-t-dark-fg/80">{t(h.subtitle, lang)}</p>

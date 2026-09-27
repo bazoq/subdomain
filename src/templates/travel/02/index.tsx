@@ -85,7 +85,7 @@ async function Hero({ ctx }: TemplatePageProps) {
       <Img src={h.image} loading="eager" fetchPriority="high" alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Moon className="size-24 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-b from-t-dark/70 via-t-dark/60 to-t-dark" aria-hidden="true" />
       <Container className="relative py-24 text-center lg:py-32">
-        {h.eyebrow ? <span className="inline-block border-y border-t-accent/60 px-4 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{h.eyebrow}</span> : null}
+        {t(h.eyebrow, lang) ? <span className="inline-block border-y border-t-accent/60 px-4 py-1 text-xs font-bold uppercase tracking-[0.3em] text-t-accent">{t(h.eyebrow, lang)}</span> : null}
         <h1 className="font-heading mx-auto mt-6 max-w-4xl text-4xl font-bold leading-tight text-t-accent sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-t-dark-fg/85">{t(h.subtitle, lang)}</p>
         {/* tier chips */}
@@ -186,7 +186,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                 <Img src={it.image} alt={t(it.name, ctx.lang)} className="aspect-[4/3] w-full object-cover" />
                 <div className="px-2 pb-2 pt-3">
                   <p className="font-heading text-lg font-bold group-hover:text-t-primary">{t(it.name, ctx.lang)}</p>
-                  {it.note ? <p className="text-sm text-t-muted-fg">{it.note}</p> : null}
+                  {t(it.note, ctx.lang) ? <p className="text-sm text-t-muted-fg">{t(it.note, ctx.lang)}</p> : null}
                 </div>
               </SmartLink>
             </li>
@@ -205,7 +205,7 @@ function Home({ ctx }: TemplatePageProps) {
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
         umrah: () => <Umrah ctx={ctx} />,
-        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={fp.eyebrow} title={fp.title} className="bg-t-muted" /> : null),
+        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={t(fp.eyebrow, ctx.lang)} title={fp.title} className="bg-t-muted" /> : null),
         destinations: () => <Destinations ctx={ctx} />,
         process: () => <ProcessBlock ctx={ctx} variant="timeline" />,
         features: () => <FeaturesBlock ctx={ctx} variant="grid" columns={4} light />,

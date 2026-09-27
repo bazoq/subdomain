@@ -77,9 +77,9 @@ async function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="bg-t-bg py-14 sm:py-20">
       <Container className="text-center">
-        {h.eyebrow ? (
+        {t(h.eyebrow, lang) ? (
           <span className="inline-flex items-center gap-2 rounded-full bg-t-accent/30 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-t-fg">
-            <Sparkles className="size-4 text-t-primary" /> {h.eyebrow}
+            <Sparkles className="size-4 text-t-primary" /> {t(h.eyebrow, lang)}
           </span>
         ) : null}
         <h1 className={cn("font-heading mx-auto mt-6 max-w-3xl text-4xl font-bold leading-[1.1] text-t-fg sm:text-5xl lg:text-6xl", WAVY)}>{t(h.title, lang)}</h1>
@@ -199,7 +199,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center gap-8 rounded-[var(--t-radius)] border-2 border-dashed border-t-primary/40 bg-t-card p-4 lg:grid-cols-2 lg:p-6", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-4 sm:p-8">
-            {d.eyebrow ? <span className="t-eyebrow">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="t-eyebrow">{t(d.eyebrow, lang)}</span> : null}
             <h2 className={cn("font-heading mt-2 text-3xl font-bold sm:text-4xl", WAVY)}>{title}</h2>
             <p className="mt-5 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-8">

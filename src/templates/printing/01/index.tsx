@@ -93,9 +93,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-[var(--t-radius)] bg-t-primary/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-t-primary">
-              <Printer className="size-4" /> {h.eyebrow}
+              <Printer className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>

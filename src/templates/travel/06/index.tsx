@@ -63,9 +63,9 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="pointer-events-none absolute -end-16 bottom-0 size-56 rounded-full bg-t-accent/15" aria-hidden="true" />
       <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-accent/15 px-4 py-1.5 text-sm font-bold text-t-accent">
-              <Sun className="size-4" /> {h.eyebrow}
+              <Sun className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-extrabold leading-[1.05] text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -113,7 +113,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                   <Img src={it.image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                 </div>
                 <p className="font-heading mt-4 text-lg font-bold text-t-fg group-hover:text-t-primary">{t(it.name, ctx.lang)}</p>
-                {it.note ? <p className="text-xs font-semibold text-t-accent">{it.note}</p> : null}
+                {t(it.note, ctx.lang) ? <p className="text-xs font-semibold text-t-accent">{t(it.note, ctx.lang)}</p> : null}
               </SmartLink>
             </li>
           ))}
@@ -194,7 +194,7 @@ function Home({ ctx }: TemplatePageProps) {
     <>
       <Hero ctx={ctx} />
       {renderOrdered(ctx, {
-        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={fp.eyebrow} title={fp.title} className="bg-t-muted [&_article]:rounded-[calc(var(--t-radius)*1.5)]" /> : null),
+        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={t(fp.eyebrow, ctx.lang)} title={fp.title} className="bg-t-muted [&_article]:rounded-[calc(var(--t-radius)*1.5)]" /> : null),
         destinations: () => <Destinations ctx={ctx} />,
         umrah: () => <Umrah ctx={ctx} />,
         services: () => <ServicesBlock ctx={ctx} variant="icon" columns={3} className="bg-t-muted" />,

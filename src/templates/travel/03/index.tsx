@@ -64,9 +64,9 @@ async function Hero({ ctx }: TemplatePageProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-t-dark via-t-dark/40 to-t-dark/30" aria-hidden="true" />
       <Container className="relative pb-20 pt-40 lg:pb-28">
         <div className="max-w-4xl t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.25em] text-t-accent">
-              <MapPin className="size-4" /> {h.eyebrow}
+              <MapPin className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-4 text-5xl font-extrabold leading-[0.95] tracking-tight sm:text-6xl lg:text-8xl">{t(h.title, lang)}</h1>
@@ -158,7 +158,7 @@ function Destinations({ ctx }: TemplatePageProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-t-dark/90 to-transparent" aria-hidden="true" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-t-dark-fg">
               <p className="font-heading text-2xl font-bold">{t(it.name, ctx.lang)}</p>
-              {it.note ? <p className="mt-1 text-sm text-t-accent">{it.note}</p> : null}
+              {t(it.note, ctx.lang) ? <p className="mt-1 text-sm text-t-accent">{t(it.note, ctx.lang)}</p> : null}
             </div>
           </SmartLink>
         ))}

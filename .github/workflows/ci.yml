@@ -16,8 +16,9 @@ permissions:
 env:
   # Everything below is a dummy value. The build never opens a database connection (all tenant
   # pages are dynamic, the Prisma client connects lazily) but `src/config/env.ts` validates the
-  # shape of the environment at import time, and with NODE_ENV=production it also enforces the
-  # production rules (real-looking ROOT_DOMAIN, strong non-placeholder SESSION_SECRET).
+  # shape of the environment at import time. Its production rules (real ROOT_DOMAIN, strong
+  # SESSION_SECRET) are skipped during `next build` (NEXT_PHASE=phase-production-build) — the values
+  # here still satisfy them so the workflow keeps working if that gate ever changes.
   ROOT_DOMAIN: ci.siteforge.invalid
   NEXT_PUBLIC_ROOT_DOMAIN: ci.siteforge.invalid
   DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci

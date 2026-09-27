@@ -27,6 +27,9 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
 - **super-site** (`src/components/super-site/header.tsx:39`): `react-hooks/set-state-in-effect` ERROR — the only remaining eslint error in `src` after the wave; CI `npm run lint` is red until fixed (derive the value during render or move the setState into the event/subscription callback).
 - **tenant-site / super-site** (`src/app/global-error.tsx:43`): `// eslint-disable-next-line @next/next/no-html-link-for-pages` is now an *unused directive* warning because the rule is off globally (see eslint.config.mjs) — delete the comment line.
 - **all streams** (FYI): `@next/next/no-html-link-for-pages` was producing false positives for every internal `<a href>` (root cause: `src/app/(super)/(site)/[...rest]/page.tsx` makes the rule generate a catch-all regex). It is now OFF in `eslint.config.mjs`; keep using `<Link>` for internal navigation per CONVENTIONS — the rule is not there to catch you any more.
+- **templates-i18n** (BLOCKS `npm test` + `npm run typecheck` in the working tree, not at HEAD e09cd5a): the in-flight `eyebrow` migration from `text` → `localized` has changed the field definitions but 25 section `defaults` still hold plain strings (e.g. `sports-05/banner`, `pizza-05/hero`, `kitchen-01/hero`, `law-03,04,06`, `travel-02,03,07,08,10`, `recruiting-02,05,09`, `realestate-02,03`, `printing-02,04`, `shoes-02`, …). `tests/templates/registry.test.ts` → "defaults incomplete" ×25 (schema fills `{ en }` while defaults have the string) and `tsc` → `{ en; ur? }` not assignable to `ReactNode`/`string` in `blades/02`, `clothing/03`, `gifts/01,02`, `recruiting/09`, `travel/09,10` (set changes as files are saved). Fix = make each affected `defaults.eyebrow` a `{ en, ur }` object and wrap the remaining render sites in `t(…, lang)`. The test is unchanged since the green checkpoint and is doing its job — do not loosen it.
+- **admin-ux** (`src/components/admin/uploader.tsx:312`, warning only): `jsx-a11y/role-supports-aria-props` — `aria-invalid` on a `<button>`; move it to the input or drop it.
+- **data-super-w4** (FYI, handled here): `branding.hidePoweredBy` became a required field in `src/lib/tenant-settings.ts` (working tree); `tests/unit/theme.test.ts` now builds branding via `parseSettings` so future required branding fields will not break it again.
 
 ## Log
 
@@ -199,3 +202,42 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
   3 `src/server/site.ts#currentLang` honours `settings.languages.defaultLang` via `resolveLang`; 4 new suites url-safety /
   theme / site-seo / module-gate + proxy rewrite assertions for sitemap/robots/manifest; 5 `resolve.tsconfigPaths` (Vite 8.3.1);
   6 CI `prisma validate`; 7 gates.
+
+## [2026-09-27 21:05] [resume] state reconciled
+- DONE: verified HEAD e09cd5a against the wave-4 plan (`git diff cfc86f3`): landed = `db:seed` script (tsx + tsconfig.seed.json),
+  `.env.example` (SEED_*, DB_POOL_MAX, DB_LOG_QUERIES, CRON_SECRET, NEXT_PUBLIC_SITE_URL, DIRECT_URL comment), CI `prisma validate`,
+  `vitest.config.mts` → `resolve.tsconfigPaths` (plugin import removed), `src/server/site.ts#currentLang` via `resolveLang`,
+  new suites module-gate / site-lang / theme / url-safety + proxy sitemap/robots/manifest rewrite assertions.
+- FOUND: missing = `tests/unit/site-seo.test.ts`; env.ts runtime-scoping (NEXT_PHASE / VERCEL_ENV) not documented in DEPLOY /
+  CONVENTIONS and untested; `vite-tsconfig-paths` still in devDependencies though unused; currentLang callers not re-verified.
+- NEXT: site-seo suite, env.ts test, docs, drop the dead devDep, gates.
+
+## [2026-09-27 21:40] FINAL (wave 4) — follow-ups complete
+- DONE: `tests/unit/site-seo.test.ts` (31 tests: indexability, origins, module-derived public paths incl. /reserve gating,
+  sitemap static+detail entries / per-category queries / hostile slugs / DB-failure degradation with log capture / alias host,
+  robots + robotsTxt serialiser, sitemapXml escaping & clamping, manifest incl. unsafe favicon, describeTenant/defaultTitle,
+  tenantMetadata (index vs noindex, Urdu alternate, OG image), tenantPageMetadata, tenantOgImage negatives, LocalBusiness /
+  WebSite / Breadcrumb JSON-LD with validated contact data, jsonLdString `<` escaping, BUSINESS_TYPE coverage). Prisma mocked
+  per collection via `vi.mock("@/server/db")`; `setLogSink` captures the warning.
+- DONE: `tests/unit/env.test.ts` (11 tests) pins the new `src/config/env.ts` gate: shape rules everywhere; production rules only
+  when NODE_ENV=production AND NEXT_PHASE≠phase-production-build AND VERCEL_ENV ∈ {unset, production}; build phase and Vercel
+  preview/development skip them; weak-secret variants; R2 all-or-nothing + https-in-prod; no secret values echoed in the error.
+- DONE (docs, item 7): `docs/DEPLOY.md §0` "When the production rules apply" paragraph; `docs/CONVENTIONS.md` → Environment
+  variables (two layers, the `isProdEnv` gate, where new rules belong, do not read NEXT_PHASE/VERCEL_ENV elsewhere) and Tests
+  (env re-import pattern, native `resolve.tsconfigPaths`, per-collection Prisma stub pattern); `docs/OPERATIONS.md` secret-rotation
+  note corrected (boot of the production *deployment*, not the build); `.github/workflows/ci.yml` env comment corrected.
+- DONE: `npm uninstall vite-tsconfig-paths` (package.json + lock) — unused since vitest.config moved to `resolve.tsconfigPaths`.
+  `tests/unit/theme.test.ts` fixtures now go through `parseSettings` (another stream added required `branding.hidePoweredBy`).
+- VERIFIED (items 1-6): `db:seed` script, `.env.example` vars + DIRECT_URL comment, `currentLang` via `resolveLang` (all 11 callers
+  checked: layouts/not-found/manifest gate on `urduEnabled` first, module actions + public-form call it directly — all consistent),
+  url-safety/theme/module-gate/site-lang suites + proxy sitemap/robots/manifest rewrites, `resolve.tsconfigPaths` with no plugin
+  and `npx vitest run` printing no deprecation (only the Vitest fsModuleCache perf hint), CI `prisma validate` step present.
+- CHECKS: `npx eslint src tests` → 0 errors, 1 warning outside this stream (uploader.tsx, Handoffs). `npx vitest run` → 25 files /
+  352 tests; 327 pass, the 25 failures are all `tests/templates/registry.test.ts` catching the in-flight templates-i18n eyebrow
+  migration (Handoffs; my 3 touched suites + the other 21 are green). `npx tsc --noEmit` → 0 errors in tests/** and this
+  stream's files; remaining errors are in `src/templates/**` files that stream is saving right now (Handoffs).
+- REMAINING GAPS: same as the 13:05 FINAL (no DB integration / e2e tests, no coverage gate, CI unproven on GitHub, Sentry not
+  wired, no Dependabot) plus: the env test covers the gate but not `isVercel`-dependent proxy behaviour end to end; the registry
+  test stays red until templates-i18n finishes its defaults.
+- NEXT: none for this stream. Orchestrator: wait for templates-i18n to finish before committing (or commit tests/docs separately),
+  then run `npm run check`.

@@ -112,9 +112,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-muted">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-[var(--t-radius)] bg-t-accent/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-t-primary">
-              <Stamp className="size-3.5" /> {h.eyebrow}
+              <Stamp className="size-3.5" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-t-fg sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
@@ -266,7 +266,7 @@ function Destinations({ ctx }: TemplatePageProps) {
                 <Img src={it.image} alt="" className="size-16 shrink-0 rounded-[var(--t-radius)] object-cover" />
                 <span className="min-w-0">
                   <span className="font-heading block truncate font-bold group-hover:text-t-primary">{t(it.name, ctx.lang)}</span>
-                  {it.note ? <span className="block truncate text-xs text-t-muted-fg">{it.note}</span> : null}
+                  {t(it.note, ctx.lang) ? <span className="block truncate text-xs text-t-muted-fg">{t(it.note, ctx.lang)}</span> : null}
                 </span>
               </SmartLink>
             </li>
@@ -317,7 +317,7 @@ function Home({ ctx }: TemplatePageProps) {
       {renderOrdered(ctx, {
         services: () => <Services ctx={ctx} />,
         process: () => <StampProcess ctx={ctx} />,
-        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={fp.eyebrow} title={fp.title} /> : null),
+        featuredPackages: () => (fp ? <FeaturedPackages ctx={ctx} take={fp.count || 6} eyebrow={t(fp.eyebrow, ctx.lang)} title={fp.title} /> : null),
         destinations: () => <Destinations ctx={ctx} />,
         umrah: () => <Umrah ctx={ctx} />,
         features: () => <FeaturesBlock ctx={ctx} variant="list" className="bg-t-muted" />,

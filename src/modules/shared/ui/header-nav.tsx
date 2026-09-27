@@ -89,7 +89,7 @@ export function HeaderNav({
             it.children?.length ? (
               <div key={it.href} className="group relative">
                 <Link href={it.href} className={cn("inline-flex items-center gap-1 rounded-[var(--t-radius)] px-3 py-2 text-sm font-medium transition", dark ? "hover:bg-white/10" : "hover:bg-t-muted", isActive(it.href) && "text-t-primary")}>
-                  {it.label} <ChevronDown className="size-3.5" />
+                  {it.label} <ChevronDown className="size-3.5" aria-hidden="true" />
                 </Link>
                 <div className="invisible absolute start-0 top-full pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                   <ul className="t-card min-w-48 py-2 text-t-fg shadow-lg">

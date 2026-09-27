@@ -67,7 +67,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-bg">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
         <div className="t-fade-up">
-          {h.eyebrow ? <span className="inline-block rounded-full bg-t-accent px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-t-accent-fg">{h.eyebrow}</span> : null}
+          {t(h.eyebrow, lang) ? <span className="inline-block rounded-full bg-t-accent px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-t-accent-fg">{t(h.eyebrow, lang)}</span> : null}
           <h1 className="font-heading mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight text-t-secondary sm:text-5xl lg:text-6xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -160,9 +160,9 @@ function TeamKitsBanner({ ctx }: TemplatePageProps) {
         <div className={cn("relative grid items-center gap-8 overflow-hidden rounded-[2rem] bg-t-secondary p-8 text-t-secondary-fg sm:p-12 lg:grid-cols-[1.05fr_0.95fr]", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="absolute -end-16 -top-16 size-56 rounded-full bg-t-accent/25" aria-hidden="true" />
           <div className="relative">
-            {d.eyebrow ? (
+            {t(d.eyebrow, lang) ? (
               <span className="inline-flex items-center gap-2 rounded-full bg-t-accent px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-t-accent-fg">
-                <Users className="size-3.5" /> {d.eyebrow}
+                <Users className="size-3.5" /> {t(d.eyebrow, lang)}
               </span>
             ) : null}
             <h2 className="font-heading mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>

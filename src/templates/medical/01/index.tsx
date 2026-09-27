@@ -97,9 +97,9 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-muted">
       <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
         <div className="t-fade-up">
-          {h.eyebrow ? (
+          {t(h.eyebrow, lang) ? (
             <span className="inline-flex items-center gap-2 rounded-full bg-t-card px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-t-primary shadow-sm">
-              <BriefcaseMedical className="size-4" /> {h.eyebrow}
+              <BriefcaseMedical className="size-4" /> {t(h.eyebrow, lang)}
             </span>
           ) : null}
           <h1 className="font-heading mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-t-secondary sm:text-5xl">{t(h.title, lang)}</h1>
@@ -241,7 +241,7 @@ function Banner({ ctx }: TemplatePageProps) {
       <Container>
         <div className={cn("grid items-center overflow-hidden rounded-[var(--t-radius)] border border-t-border bg-t-card lg:grid-cols-2", d.align === "left" && "lg:[&>*:first-child]:order-2")}>
           <div className="p-8 sm:p-12">
-            {d.eyebrow ? <span className="t-eyebrow">{d.eyebrow}</span> : null}
+            {t(d.eyebrow, lang) ? <span className="t-eyebrow">{t(d.eyebrow, lang)}</span> : null}
             <h2 className="font-heading mt-2 text-3xl font-bold tracking-tight text-t-secondary sm:text-4xl">{title}</h2>
             <p className="mt-4 max-w-lg text-t-muted-fg">{t(d.text, lang)}</p>
             <div className="mt-7 flex items-center gap-3">
