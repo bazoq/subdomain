@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSiteContext } from "@/server/site";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t, type LocalizedString } from "@/lib/i18n";
 import { truncate } from "@/lib/utils";
@@ -12,6 +13,7 @@ type Params = Promise<{ slug: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "recruiting");
   const job = await getJob(ctx.tenant.id, slug);
   if (!job) return { title: ctx.tenant.name };
   const title = t(job.title as LocalizedString, ctx.lang);
@@ -25,6 +27,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function JobPage({ params }: { params: Params }) {
   const { slug } = await params;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "recruiting");
   const job = await getJob(ctx.tenant.id, slug);
   if (!job) notFound();
   return (

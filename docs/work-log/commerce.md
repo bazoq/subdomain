@@ -11,6 +11,8 @@ validation, restaurant modifiers/zones/hours/state machine, admin CRUD consisten
 UX states, cache invalidation. DB not reachable: reasoned from code only.
 
 ## Handoffs
+- [services-modules] `src/server/notify.ts` line 25 (`safeSubject`) has literal U+2028/U+2029 bytes (E2 80 A8 / E2 80 A9) inside the regex character class after `\u007f`. JS treats them as line terminators → `TS1161 Unterminated regular expression literal` (3 errors, whole build fails). Replace with the escapes `\u2028\u2029`. Found 18:20 while running tsc; not in commerce ownership, not touched.
+- [security] Commerce public actions now check `tc.tenant.status === "SUSPENDED"` inline (8 actions, after the honeypot, before rate limits/DB). `publicFormGuard` was not adopted because its honeypot branch returns `success` with no data and commerce clients need `{number:0, token:""}`; if the guard grows a `honeypotData` option we can switch.
 - [platform-dx / tenant-site] `formatDate` in `src/lib/utils.ts` formats in the server TZ (UTC on Vercel); admin pages and invoices show times 5h early for PK. Add `timeZone: "Asia/Karachi"` (owned pages cannot change the helper). Reservation admin page already works around it locally.
 - [platform-dx] `revalidatePath("/admin/orders")` etc. (pre-existing pattern everywhere) targets the public path while the route lives under `/_sites/[host]/…` via rewrite — please verify it invalidates the intended segment in Next 16 or switch the codebase to `revalidateTag`. Commerce relies on it for storefront stock badges after cancellations.
 - [data-layer] No schema change needed for this wave (tokens are HMAC-derived, idempotency uses the RateLimit table). Nice-to-have later: `Order.idempotencyKey String?` + `@@unique([tenantId, idempotencyKey])` and same on FoodOrder, which would let idempotency survive RateLimit cleanup and remove the lock rows.
@@ -135,3 +137,61 @@ UX states, cache invalidation. DB not reachable: reasoned from code only.
   WhatsApp link, absolute admin URLs (`https://<host>/admin/…`) and, for food, the scheduled time in PKT; prescription email likewise.
   Print pages reviewed: A4 invoice and 80mm ticket render the right fields (COD amount, variants/modifiers/notes) — no change needed.
   Pending/empty states reviewed across owned forms and admin lists — present.
+
+## [2026-09-27 18:05] [resume] state reconciled
+- Third agent on this stream. Tree clean at HEAD 47afb7f. Verified against code (not the log): fixes 1–11 + extras from the 14:05–14:14
+  entries are all present (`git diff 9a2d796 --stat` = 34 owned files; `hours.ts`, both `messages.ts`, `order-lookup.tsx`,
+  `idempotency.ts`, `order-token.ts` exist and are wired). Leftover grep for `?p=` / `phoneKey` / `isCartItem` / last-4 gating: none.
+  `npx tsc --noEmit` clean; `npx eslint` on every owned directory clean. STATUS row was stale (still said fix 1) — corrected.
+- REMAINING (from security-stream handoff): no public commerce action checks `tc.tenant.status === "SUSPENDED"` (the `(site)` layout renders
+  a suspended page, but server actions are callable directly, so a suspended store could still take orders/reservations/prescriptions).
+  Also: emails use raw `whatsappLink(phone)`; switch to `replyWhatsAppLink` from `src/server/notify.ts` (services-modules API) with a
+  pre-filled reply, and include the customer tracking link so staff can forward it.
+- NEXT: Fix 12 — SUSPENDED guard on all 8 public actions (placeOrder, validateCoupon, getOrderStatus, submitPrescription,
+  placeFoodOrder, getFoodOrderStatus, lookupFoodOrder, createReservation) + notify.ts WhatsApp API.
+
+## [2026-09-27 18:08] Fix 12 — SUSPENDED guard on public actions + notify.ts WhatsApp API — IN PROGRESS
+- Plan: `storeUnavailable` (EN+UR) in both message catalogs; `tc.tenant.status === "SUSPENDED"` → fail() in every public action, placed
+  after the honeypot (bots still get the fake success) and before any rate-limit/DB work. Not routing through `publicFormGuard`: its
+  honeypot path returns `success` without data, and commerce clients rely on `{number:0, token:""}`; the inline check is the same line.
+  Emails: `replyWhatsAppLink(phone, "Assalam o Alaikum …")` from `src/server/notify.ts` + customer tracking URL (`/order/N?t=`).
+
+## [2026-09-27 18:22] Fix 12 — DONE (SUSPENDED guard + notify.ts WhatsApp API)
+- DONE: `storeUnavailable` (EN+UR) added to `src/modules/ecommerce/messages.ts` and `src/modules/restaurant/messages.ts`.
+  `tc.tenant.status === "SUSPENDED"` → `fail(storeUnavailable)` in placeOrder, validateCoupon, getOrderStatus, submitPrescription
+  (`src/modules/ecommerce/actions.ts`) and placeFoodOrder, getFoodOrderStatus, lookupFoodOrder, createReservation
+  (`src/modules/restaurant/actions.ts`). Placed after the honeypot (bots still get the fake success) and before any rate-limit/DB call,
+  so a suspended store cannot take orders, reservations or prescriptions even when the action is invoked directly (the `(site)` layout
+  already renders the suspended page for normal navigation).
+- DONE: owner emails use `replyWhatsAppLink(phone, "Assalam o Alaikum <name>, this is <tenant> regarding …")` from `src/server/notify.ts`
+  (pre-filled reply, falls back to the bare phone when the number is unusable) instead of raw `whatsappLink(phone)`; `whatsappLink` import
+  dropped from both action files. Shop and food order emails now also carry the customer's tokenised tracking URL
+  (`https://<host>/order/N?t=…` / `/menu/order/N?t=…`) so staff can forward it on WhatsApp.
+- VERIFY: `npx eslint` on the 4 changed files clean. `npx tsc --noEmit`: 0 errors in any file except `src/server/notify.ts` (3 errors,
+  services-modules stream mid-edit — see Handoffs). tsc was fully clean at the start of this session before that edit landed.
+
+## [2026-09-27 18:25] Stream complete — summary, remaining risks, readiness score
+- FIXES SHIPPED (12): (1) HMAC order tokens on both public order pages + tracker/lookup flows; (2) idempotent placeOrder/placeFoodOrder
+  (client key per mounted checkout, RateLimit-table lock, retry-safe); (3) ecommerce order state machine with optimistic guard and
+  increment-only stock restore; (4) atomic coupon usedCount guard; (5) coupon expiry at Asia/Karachi end of day; (6) archive products
+  referenced by orders instead of hard delete; (7) restaurant hours checks for scheduled orders and reservations, reservation state
+  machine, concurrency guards on food-order/reservation status; (8) EN+UR messages everywhere public, CGNAT-aware per-IP limits plus
+  per-phone limits; (9) cart/order localStorage sanitised on read; (10) honeypot fake success handled by clients; (11) P2002 slug/code
+  races → friendly field errors; (12) SUSPENDED guard on all public actions + notify.ts WhatsApp reply links + tracking links in emails.
+- REMAINING RISKS (not fixable inside this boundary or needing runtime):
+  a. Nothing has run against a database this wave (DB unreachable) — all fixes are reasoned from code; the first deploy needs a smoke
+     pass: place order → token page → cancel in admin → stock badge; coupon maxUses under two tabs; kitchen board stale-status conflict.
+  b. Idempotency relies on `RateLimit` rows (24h windowEnd). A duplicate submit after purge or after a DB outage during `claim` can create
+     a second order. Schema follow-up logged for data-layer (`Order.idempotencyKey` unique).
+  c. `revalidatePath("/shop", "layout")` / admin paths may not invalidate the rewritten `/_sites/[host]/…` segment in Next 16 — storefront
+     stock badges could be stale until ISR/next request. Handed to platform-dx.
+  d. `formatDate` in `src/lib/utils.ts` uses server TZ → admin/invoice timestamps 5h early on Vercel (handoff, outside boundary).
+  e. Build currently red because of `src/server/notify.ts` U+2028 bytes (services-modules; one-line fix, see Handoffs).
+  f. No automated tests; the state machines and pricing are pure functions (types.ts, pricing.ts, hours.ts) and are the first candidates.
+  g. Order emails are best-effort (no RESEND_API_KEY → silent no-op); there is no in-app notification fallback for new orders beyond the
+     kitchen board polling, so an owner without email configured relies on the admin list.
+- READINESS SCORE: 78/100. Justification: money-path invariants are now server-enforced and concurrency-safe by construction (pricing
+  from DB, guarded stock, guarded coupons, idempotent submits, state machines with optimistic guards, tokenised public pages, suspended
+  and paused stores refuse orders, bilingual messages, PK-timezone-correct expiry/hours). Deductions: −10 no runtime verification against
+  a DB and no tests; −5 idempotency durability tied to RateLimit rows; −4 cache-invalidation path uncertainty (c); −3 admin timestamp TZ
+  and notification fallbacks (d, g). Would be 85+ after the smoke pass and the `idempotencyKey` column.

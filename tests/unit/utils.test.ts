@@ -30,7 +30,9 @@ describe("formatPKR", () => {
   });
   it("uses Lac / Crore in compact mode", () => {
     expect(formatPKR(100_000, { compact: true })).toBe("Rs 1 Lac");
-    expect(formatPKR(250_000, { compact: true })).toBe("Rs 2.50 Lac");
+    expect(formatPKR(250_000, { compact: true })).toBe("Rs 2.5 Lac"); // trailing zeros trimmed
+    expect(formatPKR(-150_000, { compact: true })).toBe("-Rs 1.5 Lac");
+    expect(formatPKR(250_000, { compact: true, lang: "ur" })).toBe("2.5 لاکھ روپے");
     expect(formatPKR(10_000_000, { compact: true })).toBe("Rs 1 Crore");
     expect(formatPKR(12_500_000, { compact: true })).toBe("Rs 1.25 Crore");
     expect(formatPKR(99_999, { compact: true })).toBe("Rs 99,999");

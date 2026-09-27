@@ -83,7 +83,7 @@ export const restaurantBlueprints: Blueprint[] = [
       layout: "Dark neon, bold type, ticker motion.",
       motion: "Marquee ticker; neon glow hover.",
     },
-    overrides: { hero: { eyebrow: "Open till 3 AM", title: { en: "Late night? Pizza night." } } },
+    overrides: { hero: { eyebrow: "Open till 3 AM", title: { en: "Late night? Pizza night.", ur: "رات دیر تک؟ پیزا نائٹ!" } } },
     demo: { name: "Midnight Slice", city: "Lahore" },
   },
   {
@@ -132,7 +132,7 @@ export const restaurantBlueprints: Blueprint[] = [
       signature: "Deals as truck-art style cards with bright borders; testimonials with Urdu-friendly type.",
       layout: "Vibrant colours, pattern borders, rounded cards.",
     },
-    overrides: { hero: { eyebrow: "Tikka · Tandoori · Malai Boti", title: { en: "Desi flavours on a pizza" } } },
+    overrides: { hero: { eyebrow: "Tikka · Tandoori · Malai Boti", title: { en: "Desi flavours on a pizza", ur: "پیزا پر دیسی ذائقے" } } },
     demo: { name: "Desi Tandoor Pizza", city: "Rawalpindi" },
   },
   {
@@ -165,7 +165,7 @@ export const restaurantBlueprints: Blueprint[] = [
       signature: "Deals as 'coupon' cards with scissors icon; process as bubbles.",
       layout: "Fully rounded, bright, fun; kids' party CTA.",
     },
-    overrides: { cta: { title: { en: "Kids' party at our place?" }, text: { en: "Pizza-making parties for birthdays. Book a slot, we handle the mess." }, cta: { label: { en: "Book a party" }, href: "/contact" } } },
+    overrides: { cta: { title: { en: "Kids' party at our place?", ur: "بچوں کی پارٹی ہمارے ہاں؟" }, text: { en: "Pizza-making parties for birthdays. Book a slot, we handle the mess.", ur: "سالگرہ کے لیے پیزا بنانے کی پارٹیاں۔ وقت بک کریں، صفائی ہم پر چھوڑ دیں۔" }, cta: { label: { en: "Book a party", ur: "پارٹی بک کریں" }, href: "/contact" } } },
     demo: { name: "Cheesy Cartoon Pizza", city: "Lahore" },
   },
 
@@ -232,7 +232,7 @@ export const restaurantBlueprints: Blueprint[] = [
       signature: "Custom cake section repurposed as 'Bulk & gift orders'; gallery in gold frames.",
       layout: "Festive maroon/gold, ornamental dividers.",
     },
-    overrides: { hero: { eyebrow: "Mithai · Cakes · Bakery", title: { en: "Sweetness for every celebration" } }, customCake: { title: { en: "Bulk orders for Eid, weddings & events" }, text: { en: "Mithai boxes, cake towers and dessert tables for 50 to 5,000 guests. Order 3 days in advance." }, cta: { label: { en: "Request bulk order" }, href: "/custom-cake" } } },
+    overrides: { hero: { eyebrow: "Mithai · Cakes · Bakery", title: { en: "Sweetness for every celebration", ur: "ہر خوشی کے لیے مٹھاس" } }, customCake: { title: { en: "Bulk orders for Eid, weddings & events", ur: "عید، شادیوں اور تقریبات کے لیے بلک آرڈرز" }, text: { en: "Mithai boxes, cake towers and dessert tables for 50 to 5,000 guests. Order 3 days in advance.", ur: "50 سے 5,000 مہمانوں کے لیے مٹھائی کے ڈبے، کیک ٹاورز اور ڈیزرٹ ٹیبلز۔ 3 دن پہلے آرڈر کریں۔" }, cta: { label: { en: "Request bulk order", ur: "بلک آرڈر کی درخواست" }, href: "/custom-cake" } } },
     demo: { name: "Mithai & More", city: "Multan" },
   },
   {

@@ -22,9 +22,17 @@ export function ApplyForm({ jobId, ctx, className }: { jobId: string; ctx: SiteC
   const [pending, setPending] = React.useState(false);
   const [done, setDone] = React.useState(false);
   const websiteRef = React.useRef<HTMLInputElement>(null);
+  const uid = React.useId();
+  const fid = (k: string) => `${uid}-${k}`;
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setValue((s) => ({ ...s, [k]: v }));
-  const err = (k: string) => (errors[k] ? <p className="mt-1 text-xs text-red-600">{errors[k]}</p> : null);
+  const err = (k: string) =>
+    errors[k] ? (
+      <p id={`${fid(k)}-err`} className="mt-1 text-xs text-red-600" role="alert">
+        {errors[k]}
+      </p>
+    ) : null;
+  const aria = (k: string) => ({ "aria-invalid": errors[k] ? true : undefined, "aria-describedby": errors[k] ? `${fid(k)}-err` : undefined });
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,38 +76,38 @@ export function ApplyForm({ jobId, ctx, className }: { jobId: string; ctx: SiteC
       ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="ap-name" className="mb-1 block text-sm font-medium">
+          <label htmlFor={fid("name")} className="mb-1 block text-sm font-medium">
             {t(rs.yourName, lang)} *
           </label>
-          <input id="ap-name" required autoComplete="name" value={value.name} onChange={(e) => set("name", e.target.value)} className="t-input" />
+          <input id={fid("name")} name="name" required autoComplete="name" maxLength={80} value={value.name} onChange={(e) => set("name", e.target.value)} className="t-input" {...aria("name")} />
           {err("name")}
         </div>
         <div>
-          <label htmlFor="ap-phone" className="mb-1 block text-sm font-medium">
+          <label htmlFor={fid("phone")} className="mb-1 block text-sm font-medium">
             {t(rs.yourPhone, lang)} *
           </label>
-          <input id="ap-phone" required inputMode="tel" autoComplete="tel" placeholder="03XX-XXXXXXX" value={value.phone} onChange={(e) => set("phone", e.target.value)} className="t-input" />
+          <input id={fid("phone")} name="phone" required inputMode="tel" autoComplete="tel" maxLength={20} placeholder="03XX-XXXXXXX" value={value.phone} onChange={(e) => set("phone", e.target.value)} className="t-input" {...aria("phone")} />
           {err("phone")}
         </div>
         <div>
-          <label htmlFor="ap-email" className="mb-1 block text-sm font-medium">
+          <label htmlFor={fid("email")} className="mb-1 block text-sm font-medium">
             {t(rs.yourEmail, lang)}
           </label>
-          <input id="ap-email" type="email" autoComplete="email" value={value.email} onChange={(e) => set("email", e.target.value)} className="t-input" />
+          <input id={fid("email")} name="email" type="email" autoComplete="email" maxLength={120} value={value.email} onChange={(e) => set("email", e.target.value)} className="t-input" {...aria("email")} />
           {err("email")}
         </div>
         <div>
-          <label htmlFor="ap-city" className="mb-1 block text-sm font-medium">
+          <label htmlFor={fid("city")} className="mb-1 block text-sm font-medium">
             {t(rs.yourCity, lang)}
           </label>
-          <input id="ap-city" autoComplete="address-level2" placeholder="Lahore, Karachi, Islamabad…" value={value.city} onChange={(e) => set("city", e.target.value)} className="t-input" />
+          <input id={fid("city")} name="city" autoComplete="address-level2" maxLength={80} placeholder="Lahore, Karachi, Islamabad…" value={value.city} onChange={(e) => set("city", e.target.value)} className="t-input" {...aria("city")} />
           {err("city")}
         </div>
         <div>
-          <label htmlFor="ap-exp" className="mb-1 block text-sm font-medium">
+          <label htmlFor={fid("experience")} className="mb-1 block text-sm font-medium">
             {t(rs.experience, lang)}
           </label>
-          <select id="ap-exp" value={value.experience} onChange={(e) => set("experience", e.target.value)} className="t-input">
+          <select id={fid("experience")} name="experience" value={value.experience} onChange={(e) => set("experience", e.target.value)} className="t-input" {...aria("experience")}>
             <option value="">{t(rs.selectExperience, lang)}</option>
             {EXPERIENCE_LEVELS.map((x) => (
               <option key={x} value={x}>
@@ -109,17 +117,19 @@ export function ApplyForm({ jobId, ctx, className }: { jobId: string; ctx: SiteC
           </select>
           {err("experience")}
         </div>
-        <div>
-          <span className="mb-1 block text-sm font-medium">{t(rs.uploadCv, lang)} *</span>
+        <div role="group" aria-labelledby={fid("cv-label")} aria-describedby={errors.cvMediaId ? `${fid("cvMediaId")}-err` : undefined}>
+          <span id={fid("cv-label")} className="mb-1 block text-sm font-medium">
+            {t(rs.uploadCv, lang)} *
+          </span>
           <FileField value={value.cvMediaId} onChange={(id) => set("cvMediaId", id)} folder={CV_FOLDER} accept={CV_ACCEPT} label={t(rs.uploadCv, lang)} />
           {err("cvMediaId")}
         </div>
       </div>
       <div>
-        <label htmlFor="ap-cover" className="mb-1 block text-sm font-medium">
+        <label htmlFor={fid("coverLetter")} className="mb-1 block text-sm font-medium">
           {t(rs.coverLetter, lang)}
         </label>
-        <textarea id="ap-cover" rows={4} maxLength={3000} value={value.coverLetter} onChange={(e) => set("coverLetter", e.target.value)} className="t-input" />
+        <textarea id={fid("coverLetter")} name="coverLetter" rows={4} maxLength={3000} value={value.coverLetter} onChange={(e) => set("coverLetter", e.target.value)} className="t-input" {...aria("coverLetter")} />
         {err("coverLetter")}
       </div>
       <button type="submit" disabled={pending} className="t-btn t-btn-primary w-full disabled:opacity-60 sm:w-auto">

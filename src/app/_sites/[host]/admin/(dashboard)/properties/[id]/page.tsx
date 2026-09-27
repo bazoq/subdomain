@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink, Inbox } from "lucide-react";
 import { requireTenantAdmin } from "@/server/auth/guards";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import { PageHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import type { LocalizedString } from "@/lib/i18n";
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const ctx = await requireTenantAdmin();
+  requireModulePage(ctx, "realestate");
   const [p, agents, inquiries] = await Promise.all([
     db.property.findFirst({ where: { id, tenantId: ctx.tenant.id } }),
     db.teamMember.findMany({ where: { tenantId: ctx.tenant.id, isActive: true }, orderBy: { sortOrder: "asc" }, select: { id: true, name: true, role: true } }),

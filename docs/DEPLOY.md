@@ -23,7 +23,9 @@ Environment variables (from `.env.example`):
 | `DIRECT_URL` | Supabase **direct / session** URL (port 5432) used by migrations and the seed. |
 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` | Cloudflare R2 (see step 3). |
 | `RESEND_API_KEY`, `NOTIFY_FROM_EMAIL` | Optional email notifications. |
-| `SEED_SUPER_USERNAME`, `SEED_SUPER_EMAIL`, `SEED_SUPER_PASSWORD` | Optional; used only by `npm run db:seed` for the first super admin. |
+| `SEED_SUPER_USERNAME`, `SEED_SUPER_EMAIL`, `SEED_SUPER_PASSWORD` | Optional; read only by `npx prisma db seed` for the first super admin (defaults `admin` / `admin@example.com` / generated + printed once). |
+| `SEED_DEMO_PASSWORD`, `SEED_DEMO_TEMPLATES`, `SEED_DEMO_TENANTS` | Optional, seed only: owner password for all demo sites (generated + printed once when unset); which templates get a demo site (`all` · `first` · comma list of template ids / category keys); `0` skips demo sites entirely. |
+| `DB_POOL_MAX`, `DB_LOG_QUERIES` | Optional, runtime: connections per server instance (default 3 on Vercel, 10 locally); `DB_LOG_QUERIES=1` prints every SQL query in development. |
 
 ---
 
@@ -39,20 +41,24 @@ Environment variables (from `.env.example`):
      ```
      postgresql://postgres.PROJECT:PASSWORD@aws-0-ap-south-1.pooler.supabase.com:5432/postgres
      ```
-   Why two URLs: the transaction pooler is what serverless functions must use (thousands of short-lived connections), but it does not support prepared statements or DDL reliably, so migrations and the seed use the direct/session URL. `prisma.config.ts` already picks `DIRECT_URL` for migrations.
+   Why two URLs: serverless functions open many short-lived connections, so the app must go through the transaction pooler (Supavisor in transaction mode). Migrations need DDL, advisory locks and session state that transaction pooling does not provide, so the Prisma CLI (`migrate`, `db seed`, `studio`) uses `DIRECT_URL` — `prisma.config.ts` picks it automatically and falls back to `DATABASE_URL`. The app itself (`src/server/db.ts`) connects with `DATABASE_URL` through the `@prisma/adapter-pg` driver adapter; the `?pgbouncer=true&connection_limit=1` suffix is harmless there (node-pg ignores unknown parameters) and the real per-instance pool size is `DB_POOL_MAX` (default 3 on Vercel). Keep the Supabase pool size (Project Settings → Database → Connection pooling) at its default or higher; the app never needs more than `DB_POOL_MAX × concurrent function instances` connections.
 3. If your password contains `@`, `#`, `/` or `%`, URL-encode it (`@` → `%40`).
 4. Apply the schema (run locally with `.env` filled in):
    ```bash
    npx prisma migrate deploy
+   npx prisma migrate status   # must print "Database schema is up to date!"
    ```
-   This applies `prisma/migrations/20260916000000_init` (45 tables). Never run `prisma migrate dev` or `db push` against production.
-5. Seed the platform:
+   This applies, in order, `20260916000000_init` (45 tables), `20260927130000_indexes_and_fks` (indexes for every list/sort query, FK indexes, `Property.agent` / `ClassSchedule.trainer` foreign keys) and `20260927182500_order_idempotency_key` (`Order.idempotencyKey` / `FoodOrder.idempotencyKey`). All migrations are additive and safe to run on a database that already has data. Never run `prisma migrate dev`, `db push` or `migrate reset` against production.
+5. Seed the platform (idempotent — safe to re-run at any time):
    ```bash
-   SEED_SUPER_USERNAME=admin SEED_SUPER_EMAIL=you@yourdomain.pk SEED_SUPER_PASSWORD='StrongPass123' npm run db:seed
+   SEED_SUPER_USERNAME=admin SEED_SUPER_EMAIL=you@yourdomain.pk SEED_SUPER_PASSWORD='StrongPass123' npx prisma db seed
    ```
-   (On Windows PowerShell set them with `$env:SEED_SUPER_PASSWORD='StrongPass123'` first.) Without `SEED_SUPER_PASSWORD` a random password is generated and printed **once**.
-   The seed also creates a `TemplateSetting` row per template and one demo website per template (`demo-<templateId>.yourdomain.pk`, owner login `demo` / `demo1234`) with realistic sample data. It is idempotent; run it again after adding templates (`npm run gen:templates` first).
-6. Optional hardening in Supabase: disable the public Data API (Settings → API) since the app talks to Postgres directly, and enable daily backups (Pro plan).
+   (On Windows PowerShell set them with `$env:SEED_SUPER_PASSWORD='StrongPass123'` first.) Use `npx prisma db seed`, not `tsx prisma/seed.ts` directly: the seed reuses the app's own password hashing, which needs the `tsconfig.seed.json` shim that `prisma.config.ts` passes to `tsx`.
+   What it does:
+   - **Super admin** — upserts `SEED_SUPER_USERNAME` with `SEED_SUPER_EMAIL`. Without `SEED_SUPER_PASSWORD` a random password is generated and printed **once** on first creation; on later runs the password is only changed when `SEED_SUPER_PASSWORD` is set (handy for a reset). Passwords must pass the app's policy (8+ chars, letters and digits, not a common password).
+   - **Template settings** — one `TemplateSetting` row per registered template (new templates enabled, first six featured).
+   - **Demo websites** — one per template: `demo-<templateId>.yourdomain.pk`, owner username `demo`, password from `SEED_DEMO_PASSWORD` or generated + printed once. Each demo gets the template's sections, Pakistani sample data for every module of its category (products/variants/coupons, menu/modifiers/delivery zones, jobs, tours, properties, membership plans, practice areas, print services …) and a week of inbound activity (leads, orders, food orders, reservations, applications, bookings, legal pages). Set `SEED_DEMO_TEMPLATES=first` for one demo per category (16 sites instead of 84), a comma list such as `pizza-01,law` for a subset, or `SEED_DEMO_TENANTS=0` for none. Re-running refreshes settings/owner password but never duplicates content (every table is skipped when the tenant already has rows).
+6. Optional hardening in Supabase: disable the public Data API (Settings → API) since the app talks to Postgres directly, and enable daily backups / PITR (Pro plan).
 
 ---
 
@@ -125,12 +131,13 @@ Preview deployments (`*.vercel.app`) render the super website only; tenant hosts
 - `npm run dev` → `http://localhost:3000` (super site), `http://localhost:3000/super` (super admin).
 - Tenant sites use `*.localhost`, which Chrome, Edge and Firefox resolve to `127.0.0.1` automatically — no hosts-file edits: `http://demo-pizza-01.localhost:3000`, admin at `http://demo-pizza-01.localhost:3000/admin`.
 - Safari does not resolve `*.localhost`; use Chrome for tenant testing or add entries to `/etc/hosts`.
+- Database in development: `npx prisma migrate dev` (dev database only) applies migrations and regenerates the client; `SEED_DEMO_TEMPLATES=first npx prisma db seed` gives one demo site per category in well under a minute; `DB_LOG_QUERIES=1 npm run dev` prints every SQL query; `npx prisma studio` opens a table browser on `DIRECT_URL`. The client is generated into `src/generated/prisma` by `npm install` (`postinstall`) — run `npx prisma generate` after pulling a schema change.
 
 ---
 
 ## 5. First super admin login
 
-1. Open `https://yourdomain.pk/super/login` and sign in with the seeded username/password.
+1. Open `https://yourdomain.pk/super/login` and sign in with the seeded username/password (demo websites: `https://demo-<templateId>.yourdomain.pk/admin`, user `demo`, password from the seed output or `SEED_DEMO_PASSWORD`).
 2. Immediately go to **Super users → Change my password**.
 3. Add a second SUPERADMIN (Super users → Add) so you are never locked out. Login lockout is 5 failed attempts / 15 minutes.
 
@@ -160,8 +167,14 @@ Preview deployments (`*.vercel.app`) render the super website only; tenant hosts
 
 ## 8. Ongoing operations
 
-- **Adding templates**: add folders under `src/templates/<category>/<nn>/`, run `npm run gen:templates`, commit `src/templates/metas.ts`, deploy, then run `npm run db:seed` to create the new demo sites.
-- **Schema changes**: `npx prisma migrate dev --name <change>` locally (against a dev database), commit the migration, and `npx prisma migrate deploy` (or let CI do it) before the new build goes live.
+- **Adding templates**: add folders under `src/templates/<category>/<nn>/`, run `npm run gen:templates`, commit `src/templates/metas.ts`, deploy, then run `npx prisma db seed` to create the new demo sites (existing demos are left alone).
+- **Schema changes** (Prisma 7 — the datasource URL lives in `prisma.config.ts`, not in `schema.prisma`):
+  1. Edit `prisma/schema.prisma`, then `npx prisma migrate dev --name <change>` against a **dev** database; this writes `prisma/migrations/<timestamp>_<change>/migration.sql` and regenerates the client. Read the SQL: prefer additive changes (nullable columns, new indexes); for anything destructive add a data guard/backfill above the generated statements (see `20260927130000_indexes_and_fks/migration.sql`).
+  2. Without a reachable database you can still produce and check a migration: `npx prisma migrate diff --from-schema <previous schema.prisma> --to-schema prisma/schema.prisma --script`, and confirm all migrations add up to the schema with `npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --shadow-database-url <dev url>` (empty output = no drift). `npx prisma validate` must stay clean.
+  3. Commit the schema, migration and regenerated `src/generated/prisma`. Deploy with `npx prisma migrate deploy` (CI or locally with production `DIRECT_URL`) **before** the new build goes live; migrations run in a transaction, and `CREATE INDEX` on large tables should become `CONCURRENTLY` in a separate, non-transactional migration once tables have millions of rows.
+- **Connections**: each Vercel function instance holds at most `DB_POOL_MAX` (default 3) connections to the transaction pooler. If Supabase reports "too many clients", lower `DB_POOL_MAX` or raise the pooler's pool size — do not switch `DATABASE_URL` to the direct port.
+- **Content cache**: public tenant pages read their sections from Next's data cache (tag `tenant-content:<tenantId>`, 60 s TTL). Tenant-admin saves expire the tag immediately; anything else that edits `SiteSection` outside the app (a SQL fix, a re-seed) is visible within 60 s.
+- **Rate-limit / idempotency rows**: the `RateLimit` table is self-cleaning via `windowEnd` (checkout idempotency locks live there for 24 h). It needs no manual maintenance.
 - **Backups**: enable Supabase PITR/daily backups; R2 objects are not versioned — consider a periodic `rclone` copy for critical customers.
 - **Monitoring**: Vercel logs + the **Audit log** page in super admin (every super and tenant admin mutation, with actor and IP).
 

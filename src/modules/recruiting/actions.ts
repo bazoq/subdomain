@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db, json } from "@/server/db";
 import { requireTenantAdminAction } from "@/server/auth/guards";
+import { hasModule, moduleUnavailable } from "@/modules/shared/module-gate";
 import { audit } from "@/server/audit";
 import { notifyNewLead } from "@/server/notify";
 import { slugify } from "@/lib/utils";
@@ -31,6 +32,7 @@ export async function applyToJob(input: unknown): Promise<ActionResult<{ id: str
   const guard = await publicFormGuard({ bucket: "apply", honeypot: d.website, limit: 5, windowSec: 3600 });
   if (!guard.ok) return guard.result;
   const { tc, lang, ip } = guard;
+  if (!hasModule(tc, "recruiting")) return fail(t(publicMessages.unavailable, lang));
 
   try {
     const phone = normalizeContactPhone(d.phone);
@@ -117,6 +119,7 @@ async function uniqueSlug(tenantId: string, base: string, excludeId: string | nu
 export async function upsertJob(id: string | null, input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "recruiting")) return moduleUnavailable();
     const parsed = jobSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const v = parsed.data;
@@ -160,6 +163,7 @@ export async function upsertJob(id: string | null, input: unknown): Promise<Acti
 export async function deleteJob(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "recruiting")) return moduleUnavailable();
     const { count } = await db.job.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "job.delete", entity: "Job", entityId: id });
@@ -173,6 +177,7 @@ export async function deleteJob(id: string): Promise<ActionResult> {
 export async function toggleJob(id: string, field: "isActive" | "isFeatured", value: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "recruiting")) return moduleUnavailable();
     if (field !== "isActive" && field !== "isFeatured") return fail("Invalid field.");
     if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.job.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });
@@ -196,6 +201,7 @@ export async function toggleJob(id: string, field: "isActive" | "isFeatured", va
 export async function updateApplicationStatus(id: string, status: string, notes?: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "recruiting")) return moduleUnavailable();
     const s = applicationStatusSchema.safeParse(status);
     if (!s.success) return fail("Invalid status.");
     const existing = await db.application.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { status: true } });
@@ -224,6 +230,7 @@ export async function updateApplicationStatus(id: string, status: string, notes?
 export async function deleteApplication(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "recruiting")) return moduleUnavailable();
     const existing = await db.application.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { cvMediaId: true } });
     if (!existing) return fail("Not found.");
     await db.application.delete({ where: { id } });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarCheck, ExternalLink } from "lucide-react";
 import { requireTenantAdmin } from "@/server/auth/guards";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import { PageHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import type { LocalizedString } from "@/lib/i18n";
 export default async function EditPackagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const ctx = await requireTenantAdmin();
+  requireModulePage(ctx, "travel");
   const pkg = await db.travelPackage.findFirst({ where: { id, tenantId: ctx.tenant.id }, include: { _count: { select: { bookings: true } } } });
   if (!pkg) notFound();
 

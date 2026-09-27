@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteContext } from "@/server/site";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
 import { getProperties } from "@/modules/realestate/queries";
@@ -14,6 +15,7 @@ const num = (v: string) => {
 
 export async function generateMetadata(): Promise<Metadata> {
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "realestate");
   return {
     title: `${t(rs.properties, ctx.lang)} · ${ctx.tenant.name}`,
     description: `Houses, flats, plots and commercial property for sale and rent — browse verified listings from ${ctx.tenant.name}.`,
@@ -23,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PropertiesPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "realestate");
   const current = {
     purpose: str(sp.purpose).toUpperCase(),
     type: str(sp.type).toUpperCase(),

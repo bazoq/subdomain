@@ -83,7 +83,7 @@ async function Hero({ ctx }: TemplatePageProps) {
                 key={job.id}
                 href={`/jobs/${job.slug}`}
                 className={cn(
-                  "t-fade-up absolute w-80 rounded-3xl bg-t-card p-5 text-t-fg shadow-2xl ring-1 ring-black/5 transition hover:-translate-y-1",
+                  "t-fade-up absolute w-80 rounded-3xl bg-t-card p-5 text-t-fg shadow-2xl ring-1 ring-t-fg/5 transition hover:-translate-y-1",
                   i === 0 && "top-0 end-8 rotate-2",
                   i === 1 && "top-36 start-0 -rotate-2",
                   i === 2 && "bottom-0 end-0 rotate-1",
@@ -224,7 +224,7 @@ function EmployersCta({ ctx }: TemplatePageProps) {
               <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-accent rounded-full" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
             </div>
           </div>
-          {d.image ? <Img src={d.image} alt="" className="h-full min-h-56 w-full object-cover" /> : <div className="hidden bg-white/5 lg:block" />}
+          {d.image ? <Img src={d.image} alt="" className="h-full min-h-56 w-full object-cover" /> : <div className="hidden bg-t-primary-fg/5 lg:block" />}
         </div>
       </Container>
     </section>

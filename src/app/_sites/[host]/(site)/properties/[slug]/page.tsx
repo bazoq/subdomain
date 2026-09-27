@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSiteContext } from "@/server/site";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t, type LocalizedString } from "@/lib/i18n";
 import { truncate } from "@/lib/utils";
@@ -12,6 +13,7 @@ type Params = Promise<{ slug: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "realestate");
   const p = await getProperty(ctx.tenant.id, slug);
   if (!p) return { title: ctx.tenant.name };
   const title = t(p.title as LocalizedString, ctx.lang);
@@ -26,6 +28,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function PropertyPage({ params }: { params: Params }) {
   const { slug } = await params;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "realestate");
   const p = await getProperty(ctx.tenant.id, slug);
   if (!p) notFound();
   return (

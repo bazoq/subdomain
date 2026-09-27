@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db, json } from "@/server/db";
 import { requireTenantAdminAction } from "@/server/auth/guards";
+import { hasModule, moduleUnavailable } from "@/modules/shared/module-gate";
 import { audit } from "@/server/audit";
 import { localizedString } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
@@ -26,6 +27,7 @@ export type PlanInput = z.infer<typeof planSchema>;
 export async function upsertPlan(id: string | null, input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "gym")) return moduleUnavailable();
     const parsed = planSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const d = parsed.data;
@@ -57,6 +59,7 @@ export async function upsertPlan(id: string | null, input: unknown): Promise<Act
 export async function deletePlan(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "gym")) return moduleUnavailable();
     const { count } = await db.membershipPlan.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "plan.delete", entity: "MembershipPlan", entityId: id });
@@ -70,6 +73,7 @@ export async function deletePlan(id: string): Promise<ActionResult> {
 export async function togglePlan(id: string, field: "isActive" | "isPopular", value: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "gym")) return moduleUnavailable();
     if (field !== "isActive" && field !== "isPopular") return fail("Invalid field.");
     if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.membershipPlan.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });
@@ -108,6 +112,7 @@ function overlaps(aStart: string, aEnd: string, bStart: string, bEnd: string): b
 export async function upsertClass(id: string | null, input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "gym")) return moduleUnavailable();
     const parsed = classSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const d = parsed.data;
@@ -157,6 +162,7 @@ export async function upsertClass(id: string | null, input: unknown): Promise<Ac
 export async function deleteClass(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "gym")) return moduleUnavailable();
     const { count } = await db.classSchedule.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "class.delete", entity: "ClassSchedule", entityId: id });
@@ -170,6 +176,7 @@ export async function deleteClass(id: string): Promise<ActionResult> {
 export async function toggleClass(id: string, isActive: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "gym")) return moduleUnavailable();
     if (typeof isActive !== "boolean") return fail("Invalid value.");
     if (isActive) {
       // Re-activating must not create a trainer double-booking.

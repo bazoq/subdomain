@@ -3,19 +3,34 @@ import { env } from "@/config/env";
 import { brand } from "@/config/brand";
 import type { TenantContext } from "@/server/tenant";
 import { formatPKR, normalizePkPhone, whatsappLink } from "@/lib/utils";
+import { errorFields, log } from "@/lib/log";
 
 /**
  * Best-effort notifications to the tenant owner.
  *  - Email via the Resend HTTP API (no SDK). Silently a no-op without RESEND_API_KEY.
  *  - WhatsApp deep links (wa.me) for the owner's number so staff can reply in one tap.
  * Nothing in this module ever throws into a user-facing flow: every entry point
- * resolves to `false` on failure and logs to the server console.
+ * resolves to `false` on failure and emits a structured log line.
  */
 
 const EMAIL_TIMEOUT_MS = 8_000;
+const SUBJECT_MAX = 200;
+
+/**
+ * Subjects contain visitor-controlled text (names, package titles). Collapse CR/LF and other
+ * control characters so a crafted name cannot inject extra headers or break the subject line.
+ */
+export function safeSubject(subject: string): string {
+  return subject
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .replace(/\s+/g, " ") // \s also covers U+2028/U+2029 line separators
+    .trim()
+    .slice(0, SUBJECT_MAX);
+}
 
 export async function sendEmail(to: string, subject: string, text: string, html?: string): Promise<boolean> {
   if (!env.RESEND_API_KEY || !to || !isEmail(to)) return false;
+  const cleanSubject = safeSubject(subject) || "(no subject)";
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -23,16 +38,16 @@ export async function sendEmail(to: string, subject: string, text: string, html?
       body: JSON.stringify({
         from: env.NOTIFY_FROM_EMAIL ?? `${brand.name} <no-reply@${env.ROOT_DOMAIN}>`,
         to: [to],
-        subject: subject.slice(0, 200),
+        subject: cleanSubject,
         text,
         html: html ?? textToHtml(text),
       }),
       signal: AbortSignal.timeout(EMAIL_TIMEOUT_MS),
     });
-    if (!res.ok) console.error("notify: resend responded", res.status);
+    if (!res.ok) log.warn("notify.email_rejected", { status: res.status, subject: cleanSubject.slice(0, 60) });
     return res.ok;
   } catch (err) {
-    console.error("notify: email failed", err);
+    log.error("notify.email_failed", errorFields(err));
     return false;
   }
 }
@@ -44,7 +59,7 @@ export async function notifyTenant(tc: TenantContext, msg: { subject: string; te
     if (!to) return false;
     return await sendEmail(to, `[${tc.tenant.name}] ${msg.subject}`, msg.text, msg.html);
   } catch (err) {
-    console.error("notify: notifyTenant failed", err);
+    log.error("notify.tenant_failed", { tenantId: tc.tenant.id, ...errorFields(err) });
     return false;
   }
 }
@@ -162,7 +177,7 @@ export async function notifyNewLead(tc: TenantContext, n: LeadNotification): Pro
     const built = buildNotification(tc, n);
     return await notifyTenant(tc, { subject: built.subject, text: built.text });
   } catch (err) {
-    console.error("notify: notifyNewLead failed", err);
+    log.error("notify.new_lead_failed", { tenantId: tc.tenant.id, kind: n.kind, ...errorFields(err) });
     return false;
   }
 }

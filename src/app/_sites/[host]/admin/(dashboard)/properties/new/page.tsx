@@ -1,4 +1,5 @@
 import { requireTenantAdmin } from "@/server/auth/guards";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import { PageHeader } from "@/components/ui/card";
 import { PropertyForm } from "@/components/admin/realestate/property-form";
@@ -6,6 +7,7 @@ import type { LocalizedString } from "@/lib/i18n";
 
 export default async function NewPropertyPage() {
   const ctx = await requireTenantAdmin();
+  requireModulePage(ctx, "realestate");
   const agents = await db.teamMember.findMany({ where: { tenantId: ctx.tenant.id, isActive: true }, orderBy: { sortOrder: "asc" }, select: { id: true, name: true, role: true } });
   return (
     <>

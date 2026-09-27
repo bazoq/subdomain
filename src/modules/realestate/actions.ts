@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db, json } from "@/server/db";
 import { requireTenantAdminAction } from "@/server/auth/guards";
+import { hasModule, moduleUnavailable } from "@/modules/shared/module-gate";
 import { audit } from "@/server/audit";
 import { slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
@@ -25,6 +26,7 @@ async function uniqueSlug(tenantId: string, base: string, excludeId: string | nu
 export async function upsertProperty(id: string | null, input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "realestate")) return moduleUnavailable();
     const parsed = propertySchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const v = parsed.data;
@@ -77,6 +79,7 @@ export async function upsertProperty(id: string | null, input: unknown): Promise
 export async function deleteProperty(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "realestate")) return moduleUnavailable();
     const { count } = await db.property.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "property.delete", entity: "Property", entityId: id });
@@ -90,6 +93,7 @@ export async function deleteProperty(id: string): Promise<ActionResult> {
 export async function toggleProperty(id: string, field: "isActive" | "isFeatured", value: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "realestate")) return moduleUnavailable();
     if (field !== "isActive" && field !== "isFeatured") return fail("Invalid field.");
     if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.property.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });

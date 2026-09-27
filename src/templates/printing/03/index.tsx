@@ -97,7 +97,7 @@ function Hero({ ctx }: TemplatePageProps) {
               <Zap className="size-4" /> {h.eyebrow}
             </span>
           ) : null}
-          <h1 className="font-heading mt-5 text-5xl font-bold uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
+          <h1 className="font-heading mt-5 break-words text-5xl font-bold uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-xl text-lg leading-8 text-t-dark-fg/75">{t(h.subtitle, lang)}</p>
           <div className="mt-7 flex flex-wrap gap-3">
             <CtaButton value={primary} ctx={ctx} className="t-btn t-btn-primary text-base font-bold uppercase tracking-wide" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />

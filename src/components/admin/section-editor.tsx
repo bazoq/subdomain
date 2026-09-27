@@ -94,6 +94,7 @@ export function SectionEditor({
   description,
   fields,
   initial,
+  defaults,
   urduEnabled,
 }: {
   sectionKey: string;
@@ -101,6 +102,8 @@ export function SectionEditor({
   description?: string;
   fields: FieldDef[];
   initial: Value;
+  /** template defaults, shown after "Reset to default" without a reload */
+  defaults?: Value;
   urduEnabled: boolean;
 }) {
   const [value, setValue] = React.useState<Value>(initial);
@@ -166,11 +169,20 @@ export function SectionEditor({
       confirmLabel: "Reset section",
     });
     if (!ok) return;
-    const res = await resetSection(sectionKey);
+    setSaving(true);
+    let res: Awaited<ReturnType<typeof resetSection>>;
+    try {
+      res = await resetSection(sectionKey);
+    } catch (e) {
+      res = { ok: false, message: (e as Error).message || "Could not reset. Check your connection and try again." };
+    }
+    setSaving(false);
     if (res.ok) {
       toast.push("success", res.message ?? "Reset");
+      if (defaults) setValue(defaults);
       setDirty(false);
       setErrors({});
+      setAttempt(0);
       router.refresh();
     } else toast.push("error", res.message);
   }
@@ -475,6 +487,7 @@ function FieldControl({
 /* ---------- repeater ---------- */
 
 let seq = 0;
+const NO_KEYS: string[] = [];
 const newKey = () => `r${Date.now().toString(36)}${(seq++).toString(36)}`;
 
 function RepeaterField({
@@ -497,7 +510,12 @@ function RepeaterField({
   err?: string;
 }) {
   // stable React keys that follow items through add/remove/move (index keys would remount rows and lose focus)
-  const [keys, setKeys] = React.useState<string[]>(() => items.map(newKey));
+  const [keyState, setKeyState] = React.useState<{ items: Value[]; keys: string[] }>(() => ({ items, keys: items.map(newKey) }));
+  // keys are only trusted for the exact items array they were computed for (or one we produced
+  // ourselves in add/move/remove); an external replacement (reset to defaults) re-seeds them
+  // (falls back to stable index keys until the next add/move/remove re-seeds them)
+  const keys = keyState.items === items || keyState.keys.length === items.length ? keyState.keys : NO_KEYS;
+  const setKeys = (next: string[], forItems: Value[]) => setKeyState({ items: forItems, keys: next });
   const [lastAdded, setLastAdded] = React.useState<string | null>(null);
   const keyAt = (i: number) => keys[i] ?? `i${i}`;
   const listId = React.useId();
@@ -506,9 +524,10 @@ function RepeaterField({
   function add() {
     if (atMax) return;
     const k = newKey();
-    setKeys([...items.map((_, i) => keyAt(i)), k]);
+    const nextItems = [...items, Object.fromEntries(f.fields.map((sf) => [sf.key, emptyFor(sf)]))];
+    setKeys([...items.map((_, i) => keyAt(i)), k], nextItems);
     setLastAdded(k);
-    onChange([...items, Object.fromEntries(f.fields.map((sf) => [sf.key, emptyFor(sf)]))]);
+    onChange(nextItems);
   }
   function move(i: number, dir: -1 | 1) {
     const j = i + dir;
@@ -517,12 +536,16 @@ function RepeaterField({
     [nextItems[i], nextItems[j]] = [nextItems[j], nextItems[i]];
     const nextKeys = items.map((_, k) => keyAt(k));
     [nextKeys[i], nextKeys[j]] = [nextKeys[j], nextKeys[i]];
-    setKeys(nextKeys);
+    setKeys(nextKeys, nextItems);
     onChange(nextItems);
   }
   function remove(i: number) {
-    setKeys(items.map((_, k) => keyAt(k)).filter((_, k) => k !== i));
-    onChange(items.filter((_, k) => k !== i));
+    const nextItems = items.filter((_, k) => k !== i);
+    setKeys(
+      items.map((_, k) => keyAt(k)).filter((_, k) => k !== i),
+      nextItems,
+    );
+    onChange(nextItems);
   }
 
   return (

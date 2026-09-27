@@ -58,3 +58,22 @@ Everything else → `## Handoffs` at the bottom. Never `git commit`. DB not reac
 
 ## [2026-09-27 15:51] IN PROGRESS: section editor + sections list
 - New `src/components/admin/shared/media-picker.tsx` (provider + dialog + button; data supplied by owning pages via `listTenantMedia`).
+
+## [2026-09-27 18:05] [resume] state reconciled
+- Verified `git diff 9a2d796` for owned files. Section editor (586 lines changed) already has: `validateFields` (client zod, friendly messages, dotted paths), inline `error` on every Field, `focusFirstInvalid`, beforeunload while dirty, `useConfirm` reset, `MediaPickerButton` on image/images fields, repeater with stable keys/move/remove aria-labels, auto-open items with errors, RTL `dir="rtl" lang="ur"` on Urdu inputs. Sections list has aria-labelled buttons, sr-only live region, preview link, focus retention after move. `content/[key]/page.tsx` wraps editor in `MediaPickerProvider` (PUBLIC-only rows).
+- FOUND: `media-picker.tsx` eslint error (setState in effect) + useMemo deps warning. FOUND: after "Reset to default" the editor keeps the old `value` state (router.refresh does not reset `useState(initial)`), so the form shows stale content until reload.
+- tsc: clean. eslint on owned files: 1 error, 1 warning (media-picker).
+- NEXT: fix media-picker, reset-state bug, then settings → users → media → activity → dashboard → loading/error.
+
+## [2026-09-27 18:06] IN PROGRESS: section editor + sections list (finish)
+- media-picker: move dialog state into an inner component mounted only while open (no effect); derive folders without useMemo.
+- section-editor: `defaults` prop; reset → `setValue(defaults)`; repeater keys re-seeded when item count changes externally.
+
+## [2026-09-27 18:20] DONE: section editor + sections list
+- DONE: `src/components/admin/shared/media-picker.tsx` — dialog state moved into `PickerBody`, mounted only while open (eslint set-state-in-effect error and useMemo warning gone; state resets on close by unmount).
+- DONE: `src/components/admin/section-editor.tsx` — new `defaults` prop; "Reset to default" now shows the template defaults immediately (`setValue(defaults)`), disables the bar while resetting, catches thrown action errors; repeater keys are tied to the items array they were computed for and fall back to stable index keys when the list is replaced externally (previously stale keys after reset).
+- DONE: `content/[key]/page.tsx` passes `defaults={def.defaults}`.
+- NOTE: `npx tsc` currently fails only in `src/server/notify.ts` (unterminated regex — another stream mid-edit, not mine). All owned files typecheck; eslint clean on changed files.
+- NEXT: settings form (tablist, PK phone/email/colour/URL client validation with inline errors, beforeunload, Urdu RTL, focus first invalid).
+
+## [2026-09-27 18:21] IN PROGRESS: settings form

@@ -67,7 +67,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
         cta={{ label: { en: "Submit your CV", ur: "اپنا سی وی جمع کریں" }, href: "/jobs" }}
         rightSlot={
           wa ? (
-            <SmartLink href="whatsapp" ctx={ctx} className="inline-flex size-10 items-center justify-center rounded-[var(--t-radius)] border border-t-accent/50 text-t-accent hover:bg-white/10" aria-label={t(ui.whatsapp, ctx.lang)}>
+            <SmartLink href="whatsapp" ctx={ctx} className="inline-flex size-10 items-center justify-center rounded-[var(--t-radius)] border border-t-accent/50 text-t-accent hover:bg-t-primary-fg/10" aria-label={t(ui.whatsapp, ctx.lang)}>
               <MessageCircle className="size-5" />
             </SmartLink>
           ) : null
@@ -105,7 +105,7 @@ function Hero({ ctx }: TemplatePageProps) {
         <ul className="mt-12 flex flex-wrap justify-center gap-3" aria-label={lang === "ur" ? "ممالک" : "Countries"}>
           {COUNTRIES.map((c) => (
             <li key={c.name}>
-              <Link href={jobsHref({ country: c.name })} className="inline-flex items-center gap-2 rounded-[var(--t-radius)] border border-t-accent/40 bg-white/5 px-4 py-2 text-sm font-semibold backdrop-blur transition hover:border-t-accent hover:bg-t-accent hover:text-t-accent-fg">
+              <Link href={jobsHref({ country: c.name })} className="inline-flex items-center gap-2 rounded-[var(--t-radius)] border border-t-accent/40 bg-t-dark-fg/5 px-4 py-2 text-sm font-semibold backdrop-blur transition hover:border-t-accent hover:bg-t-accent hover:text-t-accent-fg">
                 <span aria-hidden="true">{c.flag}</span> {lang === "ur" ? c.ur : c.name}
               </Link>
             </li>

@@ -80,3 +80,19 @@
 - NEXT: forms a11y (#8) then module 404s (#9).
 
 ## [2026-09-27 15:41] IN PROGRESS: forms a11y (#8) + module 404s (#9)
+- (previous agent cut off here; see resume entry below)
+
+## [2026-09-27 18:05] [resume] state reconciled
+- VERIFIED: working tree clean at HEAD 47afb7f; `npx tsc --noEmit` clean; `git diff 9a2d796 --stat` on owned paths matches log entries #1-#7 (validation/public-form/media helpers, notify rewrite, leads/recruiting/travel/realestate/gym/shared actions, status forms, blog publishedAt gate).
+- FOUND (still open): eslint `no-console` warnings in `src/modules/shared/public-form.ts` (2), `src/modules/shared/media.ts` (1), `src/server/notify.ts` (4) — must use `log` from `src/lib/log.ts`.
+- FOUND (#8 partially done by previous agent): contact-form, quote-form-client, inquiry-form, employer-request-form, booking-form, trial-form-client already have labels/aria. Remaining: `recruiting/ui/apply-form.tsx` (errors lack role/aria-describedby, static ids), `law/ui/consultation-form-client.tsx` (aria-label-only selects, unlabeled practice-area input, no field errors), `gym/ui/bmi-calculator.tsx` (labels wrap inputs — ok).
+- FOUND (#9): `/jobs`, `/jobs/[slug]`, `/employers`, `/packages`, `/packages/[slug]`, `/properties`, `/properties/[slug]` do not gate on `ctx.category.modules` (pattern used by classes/plans/join/quote/consultation: `if (!ctx.category.modules.includes("gym")) notFound()`); admin `applications`, `jobs`, `packages`, `bookings`, `properties` pages likewise (gym admin pages already gate).
+- HANDOFFS RECEIVED (security): (a) users-actions revokeSessions adoption, (b) notify subject CR/LF strip, (c) passwordPolicy with username.
+- NEXT: eslint console -> log; notify CRLF; users-actions revokeSessions + username policy; then #8 (apply-form, consultation-form-client), #9 (public + admin module gates), final verification.
+
+## [2026-09-27 18:10] IN PROGRESS: structured logging + security handoffs (a)(b)(c)
+- Plan: `console.*` -> `log` (src/lib/log.ts) in public-form.ts, media.ts, notify.ts; notify `sendEmail` strips CR/LF + control chars from subject (covers every caller incl. commerce; API unchanged); users-actions: `revokeSessions` after role change / deactivation / password reset, self password change revokes all then re-issues the current session via `createSession`; `passwordPolicy(pw, { username })` everywhere.
+
+## [2026-09-27 18:25] IN PROGRESS: forms a11y (#8) + module 404s (#9)
+- Plan #8: `recruiting/ui/apply-form.tsx` useId ids, role=alert field errors, aria-invalid/aria-describedby, maxLengths, CV field described by its error; `law/ui/consultation-form-client.tsx` real `<label htmlFor>` for practice-area select/input and case-type select (no aria-label-only controls).
+- Plan #9: new `src/modules/shared/module-gate.ts` (`hasModule`, `requireModulePage`, `moduleUnavailable`); public pages jobs, jobs/[slug], employers (recruiting), packages, packages/[slug] (travel), properties, properties/[slug] (realestate) 404 when the category lacks the module (page + generateMetadata); admin pages applications(+[id]), jobs(+new,[id]), packages(+new,[id]), bookings, properties(+new,[id]) likewise; admin + public actions in recruiting/travel/realestate return `moduleUnavailable()` / bilingual `unavailable` for foreign categories.

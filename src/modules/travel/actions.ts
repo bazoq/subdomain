@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db, json } from "@/server/db";
 import { requireTenantAdminAction } from "@/server/auth/guards";
+import { hasModule, moduleUnavailable } from "@/modules/shared/module-gate";
 import { audit } from "@/server/audit";
 import { notifyNewLead } from "@/server/notify";
 import { slugify } from "@/lib/utils";
@@ -31,6 +32,7 @@ export async function createBooking(input: unknown): Promise<ActionResult<{ id: 
   const guard = await publicFormGuard({ bucket: "booking", honeypot: d.website, limit: 5, windowSec: 3600 });
   if (!guard.ok) return guard.result;
   const { tc, lang } = guard;
+  if (!hasModule(tc, "travel")) return fail(t(publicMessages.unavailable, lang));
 
   try {
     const phone = normalizeContactPhone(d.phone);
@@ -105,6 +107,7 @@ async function uniqueSlug(tenantId: string, base: string, excludeId: string | nu
 export async function upsertPackage(id: string | null, input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "travel")) return moduleUnavailable();
     const parsed = packageSchema.safeParse(input);
     if (!parsed.success) return fromZod(parsed.error);
     const v = parsed.data;
@@ -148,6 +151,7 @@ export async function upsertPackage(id: string | null, input: unknown): Promise<
 export async function deletePackage(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "travel")) return moduleUnavailable();
     const { count } = await db.travelPackage.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "package.delete", entity: "TravelPackage", entityId: id });
@@ -161,6 +165,7 @@ export async function deletePackage(id: string): Promise<ActionResult> {
 export async function togglePackage(id: string, field: "isActive" | "isFeatured", value: boolean): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "travel")) return moduleUnavailable();
     if (field !== "isActive" && field !== "isFeatured") return fail("Invalid field.");
     if (typeof value !== "boolean") return fail("Invalid value.");
     const { count } = await db.travelPackage.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { [field]: value } });
@@ -180,6 +185,7 @@ export async function togglePackage(id: string, field: "isActive" | "isFeatured"
 export async function updateBookingStatus(id: string, status: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "travel")) return moduleUnavailable();
     const s = bookingStatusSchema.safeParse(status);
     if (!s.success) return fail("Invalid status.");
     const existing = await db.booking.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { status: true } });
@@ -201,6 +207,7 @@ export async function updateBookingStatus(id: string, status: string): Promise<A
 export async function deleteBooking(id: string): Promise<ActionResult> {
   try {
     const ctx = await requireTenantAdminAction();
+    if (!hasModule(ctx, "travel")) return moduleUnavailable();
     const { count } = await db.booking.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "booking.delete", entity: "Booking", entityId: id });

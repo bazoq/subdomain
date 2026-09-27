@@ -12,11 +12,11 @@ import { requireTenant, currentLang } from "@/server/site";
 import { requireTenantAdminAction } from "@/server/auth/guards";
 import { clientIp, rateLimit } from "@/server/rate-limit";
 import { audit } from "@/server/audit";
-import { notifyTenant } from "@/server/notify";
+import { notifyTenant, replyWhatsAppLink } from "@/server/notify";
 import { isOpenNow } from "@/templates/ui";
 import { parseSettings, tenantSettingsSchema } from "@/lib/tenant-settings";
 import { localizedString, t } from "@/lib/i18n";
-import { formatPKR, normalizePkPhone, slugify, whatsappLink } from "@/lib/utils";
+import { formatPKR, normalizePkPhone, slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 import { errorFields, log } from "@/lib/log";
 import { orderToken, verifyOrderToken } from "@/modules/ecommerce/order-token";
@@ -111,6 +111,8 @@ export async function placeFoodOrder(input: unknown): Promise<ActionResult<Place
   const placed = (number: number, phone: string): PlacedFoodOrder => ({ number, token: orderToken("food", tid, number), phoneLast4: phone.slice(-4) });
   // honeypot filled → bot. Pretend success (number 0, no token) so nothing is created and nothing is learnt.
   if (d.website) return success(rm("orderReceived", lang), { number: 0, token: "", phoneLast4: "" });
+  // suspended by the platform: the site layout shows a notice, but the action is callable directly, so refuse here too
+  if (tc.tenant.status === "SUSPENDED") return fail(rm("storeUnavailable", lang));
 
   const ip = await clientIp();
   // CGNAT: many customers share one mobile-network IP, so the per-IP limit is generous; abuse is caught per phone.
@@ -282,7 +284,8 @@ export async function placeFoodOrder(input: unknown): Promise<ActionResult<Place
       subject: `New ${d.type.replace("_", " ").toLowerCase()} order #${created.number} — ${formatPKR(total)} (${d.name})`,
       text: [
         `${d.name} · ${phone}`,
-        `WhatsApp customer: ${whatsappLink(phone)}`,
+        `Reply on WhatsApp: ${replyWhatsAppLink(phone, `Assalam o Alaikum ${d.name}, this is ${tc.tenant.name} regarding your order #${created.number}.`) ?? phone}`,
+        `Tracking link for the customer: https://${tc.host}/menu/order/${created.number}?t=${orderToken("food", tid, created.number)}`,
         `${d.type.replace("_", " ")}${area ? ` · ${area}` : ""}${d.tableNumber ? ` · Table ${d.tableNumber}` : ""}`,
         d.address ? d.address : "",
         scheduledFor ? `SCHEDULED for ${pkTime(scheduledFor)} (PKT)` : `Estimated ${estimatedMins} min`,
@@ -318,6 +321,7 @@ export async function getFoodOrderStatus(
   const tc = await requireTenant();
   const lang = await currentLang();
   const n = Number(number);
+  if (tc.tenant.status === "SUSPENDED") return fail(rm("storeUnavailable", lang));
   if (!Number.isInteger(n) || n <= 0 || !verifyOrderToken("food", tc.tenant.id, n, token)) return fail(rm("invalidOrder", lang));
   const ip = await clientIp();
   const rl = await rateLimit({ bucket: `foodstatus:${ip}`, limit: 120, windowSec: 600, tenantId: tc.tenant.id });
@@ -336,6 +340,7 @@ export async function lookupFoodOrder(number: unknown, phone: unknown): Promise<
   const lang = await currentLang();
   const n = parseInt(String(number ?? "").replace(/\D/g, ""), 10);
   const p = typeof phone === "string" ? normalizePkPhone(phone) : null;
+  if (tc.tenant.status === "SUSPENDED") return fail(rm("storeUnavailable", lang));
   if (!Number.isFinite(n) || n <= 0) return fail(rm("enterOrderNumber", lang), { number: rm("enterOrderNumber", lang) });
   if (!p) return fail(rm("enterPhoneUsed", lang), { phone: rm("invalidPhone", lang) });
   const ip = await clientIp();
@@ -367,6 +372,7 @@ export async function createReservation(input: unknown): Promise<ActionResult<{ 
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
   if (d.website) return success(rm("thankYou", lang), { id: "" });
+  if (tc.tenant.status === "SUSPENDED") return fail(rm("storeUnavailable", lang));
 
   const ip = await clientIp();
   const rl = await rateLimit({ bucket: `reservation:${ip}`, limit: 10, windowSec: 600, tenantId: tc.tenant.id });
@@ -399,7 +405,7 @@ export async function createReservation(input: unknown): Promise<ActionResult<{ 
   });
   notifyTenant(tc, {
     subject: `Table reservation request — ${d.name}, ${d.guests} guest${d.guests === 1 ? "" : "s"} on ${d.date} ${d.time}`,
-    text: [`${d.name} · ${phone}`, `WhatsApp customer: ${whatsappLink(phone)}`, `${d.date} at ${d.time} · ${d.guests} guest${d.guests === 1 ? "" : "s"}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/reservations`]
+    text: [`${d.name} · ${phone}`, `Reply on WhatsApp: ${replyWhatsAppLink(phone, `Assalam o Alaikum ${d.name}, this is ${tc.tenant.name} regarding your table reservation for ${d.date} at ${d.time}.`) ?? phone}`, `${d.date} at ${d.time} · ${d.guests} guest${d.guests === 1 ? "" : "s"}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/reservations`]
       .filter((l) => l !== "")
       .join("\n"),
   }).catch(() => undefined);

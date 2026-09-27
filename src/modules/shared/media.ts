@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@/server/db";
 import { deleteObject, keyBelongsTo } from "@/server/storage/r2";
+import { errorFields, log } from "@/lib/log";
 
 /**
  * Remove a PRIVATE upload (CV, prescription, quote file) that belongs to `tenantId`.
@@ -19,7 +20,7 @@ export async function deleteTenantPrivateMedia(tenantId: string, mediaId: string
     ]);
     return true;
   } catch (err) {
-    console.error("deleteTenantPrivateMedia failed", err);
+    log.error("media.delete_private_failed", { tenantId, mediaId, ...errorFields(err) });
     return false;
   }
 }

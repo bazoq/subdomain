@@ -130,7 +130,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <Container className="relative grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">
         <div className="t-fade-up">
           {h.eyebrow ? <span className="inline-block bg-t-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-[0.25em] text-t-primary">{h.eyebrow}</span> : null}
-          <h1 className="font-heading mt-5 text-5xl font-medium uppercase leading-[0.92] tracking-tight text-t-secondary sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
+          <h1 className="font-heading mt-5 break-words text-5xl font-medium uppercase leading-[0.92] tracking-tight text-t-secondary sm:text-6xl lg:text-7xl">{t(h.title, lang)}</h1>
           <p className="mt-5 max-w-md text-base leading-7 text-t-muted-fg sm:text-lg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary px-7 font-semibold uppercase tracking-wide" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />

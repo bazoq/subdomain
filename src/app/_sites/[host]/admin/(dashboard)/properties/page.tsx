@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Building2, Plus, Star } from "lucide-react";
 import { requireTenantAdmin } from "@/server/auth/guards";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import type { Prisma } from "@/generated/prisma/client";
 import { PageHeader, EmptyState } from "@/components/ui/card";
@@ -20,6 +21,7 @@ const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?
 
 export default async function PropertiesAdminPage({ searchParams }: { searchParams: SearchParams }) {
   const ctx = await requireTenantAdmin();
+  requireModulePage(ctx, "realestate");
   const sp = await searchParams;
   const q = str(sp.q);
   const purpose = str(sp.purpose);

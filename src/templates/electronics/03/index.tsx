@@ -45,7 +45,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
                   <Phone className="size-4 text-t-primary" aria-hidden="true" />
                   <span className="leading-tight">
                     <span className="block text-[10px] uppercase tracking-wide text-t-muted-fg">{t(ui.callNow, ctx.lang)}</span>
-                    <span className="font-heading block text-sm font-bold">{phone}</span>
+                    <span dir="ltr" className="font-heading block text-sm font-bold">{phone}</span>
                   </span>
                 </a>
               ) : null}
@@ -193,7 +193,7 @@ function SolarBanner({ ctx }: TemplatePageProps) {
               <CtaButton value={d.cta} ctx={ctx} className="t-btn t-btn-accent font-bold" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />
               {phone ? (
                 <a href={`tel:${phone}`} className="t-btn t-btn-outline border-t-secondary-fg/40 text-t-secondary-fg hover:bg-t-secondary-fg/10">
-                  <Phone className="size-4" /> {phone}
+                  <Phone className="size-4" aria-hidden="true" /> <span dir="ltr">{phone}</span>
                 </a>
               ) : null}
             </div>

@@ -83,3 +83,37 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
 - FOUND: `npx tsc --noEmit` currently fails on `src/templates/ui/index.tsx` (imports `karachiNow`, `safeImageSrc`,
   `safeLinkHref` from `@/lib/utils` and `ui.skipToContent` — another stream's in-flight edit, not this stream).
 - NEXT: next.config.ts (typedRoutes trial), .env.example, README, DEPLOY, OPERATIONS, CONVENTIONS.
+
+## [2026-09-27 12:05] [resume] state reconciled
+- DONE: verified HEAD 47afb7f against the intended wave-1 edits. APPLIED: `next.config.ts` (typedRoutes:false with trial
+  rationale, R2 `remotePatterns` from `R2_PUBLIC_URL`, serverExternalPackages note), `eslint.config.mjs` project rules,
+  CI workflow, `vercel.json` (no crons yet), `.nvmrc`, `.editorconfig`, package scripts/engines, 12 suites. NOT APPLIED
+  (the three patch edits that failed without Python): `.env.example` (still missing `SEED_SUPER_*`, `CRON_SECRET`,
+  `LOG_LEVEL`, `DB_*`, `SENTRY_DSN`, `NEXT_PUBLIC_SITE_URL`), `README.md` (still create-next-app boilerplate),
+  `docs/OPERATIONS.md` (does not exist). Current checks: `npx tsc --noEmit` clean; `npx eslint src tests` → 1 error in
+  admin-ux's `src/components/admin/shared/media-picker.tsx` (react-hooks/set-state-in-effect, not this stream) + 10
+  `no-console` warnings in other streams' files; `npx vitest run` → 186/187, 1 failure in `tests/unit/utils.test.ts`
+  (`formatPKR` compact now trims trailing zeros → "Rs 2.5 Lac"; test expectation stale, source behaviour is fine).
+- FOUND: handoffs routed here from security (proxy VERCEL=1 stub — already done in wave 1; pure-helper tests; CRON_SECRET +
+  vercel cron + SESSION_SECRET rotation note; health route metadata gating) and commerce (revalidatePath under the
+  `/_sites/[host]` rewrite; `formatDate` TZ — already pins Asia/Karachi in current `src/lib/utils.ts`, so resolved).
+- NEXT: fix utils test; tests for pure helpers (proxy done; add redirect, audit.redactMeta, password, r2.safeFilename,
+  api-auth.assertSameOrigin, ecommerce order-token, restaurant hours); health route gating; vercel.json crons; .env.example;
+  README; DEPLOY (Vercel/cron/env); OPERATIONS; CONVENTIONS (log, publicFormGuard, notify, work-log, revalidate finding).
+
+## [2026-09-27 12:10] IN PROGRESS: pure-helper unit tests (security + commerce handoffs) + stale formatPKR expectation
+- Plan: fix `tests/unit/utils.test.ts` (2.5 Lac); new suites `redirect`, `audit-redact`, `password`, `r2-filename`,
+  `api-auth`, `order-token`, `restaurant-hours` under tests/unit (DB modules mocked with vi.mock; no DB).
+- DONE: `tests/unit/utils.test.ts` expectation updated (compact PKR trims trailing zeros; added negative + Urdu cases).
+  New suites (75 tests, all green): `tests/unit/redirect.test.ts` (safeRedirectPath: scheme-relative/backslash/%2F/%5C,
+  control chars, credentials, prefix, dot segments, length), `tests/unit/audit-redact.test.ts` (redactMeta: key
+  patterns, depth/array/string/size bounds, cycles, Date/bigint), `tests/unit/password.test.ts` (policy, denylist,
+  username rule, generatePassword alphabet/bias/length, bcrypt round-trip, DUMMY_HASH), `tests/unit/r2-filename.test.ts`
+  (safeFilename: path traversal, header injection, RFC 5987, length cap, Urdu), `tests/unit/api-auth.test.ts`
+  (assertSameOrigin: Origin/Referer/Sec-Fetch-Site matrix, x-request-host precedence), `tests/unit/order-token.test.ts`
+  (HMAC token determinism, domain separation, malformed input), `tests/unit/restaurant-hours.test.ts` (PK time zone,
+  overnight windows, open==close all-day, pkDateTime). DB-backed modules mocked via `vi.mock` (audit → db + rate-limit;
+  api-auth → session + tenant). The x-forwarded-host `VERCEL=1` stub was already in place from wave 1.
+- NEXT: health route gating (CRON_SECRET), vercel.json crons, .env.example.
+
+## [2026-09-27 12:20] IN PROGRESS: health route metadata gating + vercel cron + .env.example

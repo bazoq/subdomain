@@ -34,6 +34,8 @@ export interface PageMetadataInput {
   publishedTime?: string;
   modifiedTime?: string;
   noIndex?: boolean;
+  /** Use the title verbatim (skip the "%s | Brand" template) — for the home page. */
+  absoluteTitle?: boolean;
 }
 
 /** Standard metadata for a public page: canonical, OG and Twitter that all agree. */
@@ -41,7 +43,7 @@ export function pageMetadata(input: PageMetadataInput): Metadata {
   const image = input.image || OG_IMAGE_PATH;
   const alt = input.imageAlt ?? input.title;
   return {
-    title: input.title,
+    title: input.absoluteTitle ? { absolute: input.title } : input.title,
     description: input.description,
     alternates: { canonical: input.path },
     openGraph: {
@@ -253,4 +255,15 @@ export function itemListJsonLd(name: string, items: { name: string; path: string
 export function readingTime(text: string): { minutes: number; words: number } {
   const words = (text ?? "").trim().split(/\s+/).filter(Boolean).length;
   return { minutes: Math.max(1, Math.round(words / 200)), words };
+}
+
+/**
+ * True when the text is mostly Arabic-script (Urdu) — used to switch a blog post to RTL + Nastaliq.
+ * Counts letters only, so punctuation and digits do not skew the ratio.
+ */
+export function isMostlyUrdu(text: string): boolean {
+  const letters = (text ?? "").match(/\p{L}/gu);
+  if (!letters || letters.length < 10) return false;
+  const arabic = letters.filter((ch) => /[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/.test(ch)).length;
+  return arabic / letters.length > 0.5;
 }

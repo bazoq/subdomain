@@ -13,8 +13,8 @@ import { requireTenant, currentLang } from "@/server/site";
 import { requireTenantAdminAction } from "@/server/auth/guards";
 import { clientIp, rateLimit } from "@/server/rate-limit";
 import { audit } from "@/server/audit";
-import { notifyTenant } from "@/server/notify";
-import { formatPKR, normalizePkPhone, whatsappLink } from "@/lib/utils";
+import { notifyTenant, replyWhatsAppLink } from "@/server/notify";
+import { formatPKR, normalizePkPhone } from "@/lib/utils";
 import { t, ui, type Lang } from "@/lib/i18n";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 import { errorFields, log } from "@/lib/log";
@@ -151,6 +151,8 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
   const placed = (number: number, phone: string): PlacedOrder => ({ number, label: orderLabel(commerce.orderPrefix, number), token: orderToken("shop", tid, number), phoneLast4: phoneLast4(phone) });
   // honeypot filled → bot. Pretend success (number 0, no token) so the bot learns nothing; the client goes back to /shop.
   if (d.website) return success(t(ui.orderPlaced, lang), { number: 0, label: "", token: "", phoneLast4: "" });
+  // suspended by the platform: the storefront layout shows a notice, but the action is callable directly, so refuse here too
+  if (tc.tenant.status === "SUSPENDED") return fail(m("storeUnavailable", lang));
 
   const ip = await clientIp();
   // Pakistani mobile networks put whole neighbourhoods behind one CGNAT address, so the per-IP limit is generous
@@ -307,7 +309,8 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
       text: [
         `${d.name} · ${phone}${d.email ? ` · ${d.email}` : ""}`,
         `${d.address}, ${d.city}`,
-        `WhatsApp customer: ${whatsappLink(phone)}`,
+        `Reply on WhatsApp: ${replyWhatsAppLink(phone, `Assalam o Alaikum ${d.name}, this is ${tc.tenant.name} regarding your order ${result.label}.`) ?? phone}`,
+        `Tracking link for the customer: https://${tc.host}/order/${number}?t=${result.token}`,
         "",
         ...lines.map((l) => `${l.qty} × ${l.name}${l.variantName ? ` (${l.variantName})` : ""} — ${formatPKR(l.unitPrice * l.qty)}`),
         "",
@@ -336,6 +339,7 @@ export async function validateCoupon(code: unknown, subtotal: unknown): Promise<
   const lang = await currentLang();
   const c = typeof code === "string" ? code.trim().slice(0, 40) : "";
   const s = typeof subtotal === "number" && Number.isFinite(subtotal) ? Math.max(0, Math.floor(subtotal)) : 0;
+  if (tc.tenant.status === "SUSPENDED") return fail(m("storeUnavailable", lang));
   if (!c) return fail(m("enterCoupon", lang));
   const ip = await clientIp();
   const rl = await rateLimit({ bucket: `coupon:${ip}`, limit: 30, windowSec: 600, tenantId: tc.tenant.id });
@@ -354,6 +358,7 @@ export async function getOrderStatus(number: unknown, phone: unknown): Promise<A
   const lang = await currentLang();
   const n = parseInt(String(number ?? "").replace(/\D/g, ""), 10);
   const p = typeof phone === "string" ? normalizePkPhone(phone) : null;
+  if (tc.tenant.status === "SUSPENDED") return fail(m("storeUnavailable", lang));
   if (!Number.isFinite(n) || n <= 0) return fail(m("enterOrderNumber", lang), { number: m("enterOrderNumber", lang) });
   if (!p) return fail(m("enterPhoneUsed", lang), { phone: m("invalidPhone", lang) });
   const ip = await clientIp();
@@ -373,6 +378,7 @@ export async function submitPrescription(input: unknown): Promise<ActionResult> 
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
   if (d.website) return success(t(ui.thankYou, lang));
+  if (tc.tenant.status === "SUSPENDED") return fail(m("storeUnavailable", lang));
   const ip = await clientIp();
   const rl = await rateLimit({ bucket: `form:prescription:${ip}`, limit: 10, windowSec: 600, tenantId: tc.tenant.id });
   if (!rl.ok) return fail(m("tooManyRequests", lang));
@@ -390,7 +396,7 @@ export async function submitPrescription(input: unknown): Promise<ActionResult> 
   });
   notifyTenant(tc, {
     subject: `New prescription from ${d.name}`,
-    text: [`${d.name} · ${phone}`, `WhatsApp customer: ${whatsappLink(phone)}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/prescriptions (id ${rx.id})`].filter((l) => l !== "").join("\n"),
+    text: [`${d.name} · ${phone}`, `Reply on WhatsApp: ${replyWhatsAppLink(phone, `Assalam o Alaikum ${d.name}, this is ${tc.tenant.name} regarding your prescription.`) ?? phone}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/prescriptions (id ${rx.id})`].filter((l) => l !== "").join("\n"),
   }).catch(() => undefined);
   revalidatePath("/admin/prescriptions");
   return success(t(ui.thankYou, lang));

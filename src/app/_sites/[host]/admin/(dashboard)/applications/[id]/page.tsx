@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Download, Mail, MessageCircle, Phone, Trash2 } from "lucide-react";
 import { requireTenantAdmin } from "@/server/auth/guards";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import { PageHeader, Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import type { LocalizedString } from "@/lib/i18n";
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const ctx = await requireTenantAdmin();
+  requireModulePage(ctx, "recruiting");
   const a = await db.application.findFirst({ where: { id, tenantId: ctx.tenant.id }, include: { job: { select: { id: true, title: true, slug: true, company: true, location: true } } } });
   if (!a) notFound();
   const jobTitle = a.job ? (a.job.title as LocalizedString).en : ((a.data as { jobTitle?: string } | null)?.jobTitle ?? "Job removed");

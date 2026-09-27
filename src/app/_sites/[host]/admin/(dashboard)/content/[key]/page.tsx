@@ -38,6 +38,7 @@ export default async function EditSectionPage({ params }: { params: Promise<{ ke
           description={def.description}
           fields={def.fields}
           initial={state[def.key]?.data ?? (def.defaults as Record<string, unknown>)}
+          defaults={def.defaults as Record<string, unknown>}
           urduEnabled={ctx.settings.languages.urduEnabled}
         />
       </MediaPickerProvider>

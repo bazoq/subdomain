@@ -4,6 +4,7 @@ import { clientIp, rateLimit } from "@/server/rate-limit";
 import type { TenantContext } from "@/server/tenant";
 import { ls, t, ui, type Lang } from "@/lib/i18n";
 import { fail, success, type ActionResult } from "@/lib/action-result";
+import { errorFields, log } from "@/lib/log";
 
 /**
  * Common guard for every public (visitor) server action:
@@ -44,9 +45,9 @@ export async function publicFormGuard(opts: {
   let rl: { ok: boolean };
   try {
     rl = await rateLimit({ bucket: `${opts.bucket}:${ip}`, limit: opts.limit ?? 5, windowSec: opts.windowSec ?? 600, tenantId: tc.tenant.id });
-  } catch {
+  } catch (err) {
     // the limiter must never take the form down; fail open but log
-    console.error("rateLimit unavailable for", opts.bucket);
+    log.error("public_form.ratelimit_unavailable", { bucket: opts.bucket, tenantId: tc.tenant.id, ...errorFields(err) });
     rl = { ok: true };
   }
   if (!rl.ok) return { ok: false, result: fail(t(publicMessages.tooMany, lang)) };
@@ -55,6 +56,6 @@ export async function publicFormGuard(opts: {
 
 /** Wrap an unexpected error into a bilingual, non-leaking failure. */
 export function publicFailure(lang: Lang, err: unknown): ActionResult<never> {
-  console.error("public form action failed", err);
+  log.error("public_form.failed", errorFields(err));
   return fail(t(publicMessages.serverError, lang));
 }

@@ -34,6 +34,7 @@ export const checkoutMessages = {
   orderNotFound: ls("No order found with these details.", "ان تفصیلات سے کوئی آرڈر نہیں ملا۔"),
   tooManyRequests: ls("Too many attempts. Please try again later.", "بہت زیادہ کوششیں۔ بعد میں دوبارہ کوشش کریں۔"),
   notAvailable: ls("This feature is not available on this store.", "یہ سہولت اس اسٹور پر دستیاب نہیں۔"),
+  storeUnavailable: ls("This store is currently unavailable. Please try again later.", "یہ اسٹور فی الحال دستیاب نہیں۔ براہ کرم بعد میں دوبارہ کوشش کریں۔"),
 } as const;
 
 export type CheckoutMessageKey = keyof typeof checkoutMessages;

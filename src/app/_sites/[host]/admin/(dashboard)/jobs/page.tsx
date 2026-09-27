@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Briefcase, Plus, Star } from "lucide-react";
 import { requireTenantAdmin } from "@/server/auth/guards";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { db } from "@/server/db";
 import type { Prisma } from "@/generated/prisma/client";
 import { PageHeader, EmptyState } from "@/components/ui/card";
@@ -19,6 +20,7 @@ const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?
 
 export default async function JobsAdminPage({ searchParams }: { searchParams: SearchParams }) {
   const ctx = await requireTenantAdmin();
+  requireModulePage(ctx, "recruiting");
   const sp = await searchParams;
   const q = str(sp.q);
   const status = str(sp.status); // "" | active | inactive | expired

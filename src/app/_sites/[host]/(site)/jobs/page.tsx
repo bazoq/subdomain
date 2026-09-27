@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteContext } from "@/server/site";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
 import { getJobs } from "@/modules/recruiting/queries";
@@ -13,6 +14,7 @@ function str(v: string | string[] | undefined): string {
 
 export async function generateMetadata(): Promise<Metadata> {
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "recruiting");
   return {
     title: `${t(rs.jobs, ctx.lang)} · ${ctx.tenant.name}`,
     description: `Current job openings in Pakistan and overseas from ${ctx.tenant.name}. Apply online with your CV.`,
@@ -22,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "recruiting");
   const filters = { q: str(sp.q), location: str(sp.location), type: str(sp.type), country: str(sp.country), department: str(sp.department) };
   const page = Math.max(1, Number.parseInt(str(sp.page) || "1", 10) || 1);
   const result = await getJobs(ctx.tenant.id, { ...filters, page });

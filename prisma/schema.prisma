@@ -476,6 +476,7 @@ model Order {
   prescriptionId String?
   ageConfirmed   Boolean     @default(false)
   ip             String?
+  idempotencyKey String? // client-generated per checkout; a retried placeOrder returns the original order
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
@@ -485,6 +486,7 @@ model Order {
   prescription Prescription? @relation(fields: [prescriptionId], references: [id], onDelete: SetNull)
 
   @@unique([tenantId, number])
+  @@unique([tenantId, idempotencyKey])
   @@index([tenantId, status, createdAt])
   @@index([tenantId, createdAt])
   @@index([tenantId, customerPhone])
@@ -674,35 +676,37 @@ model MenuItemModifierGroup {
 }
 
 model FoodOrder {
-  id            String          @id @default(cuid())
-  tenantId      String
-  number        Int
-  customerId    String?
-  type          FoodOrderType   @default(DELIVERY)
-  customerName  String
-  customerPhone String
-  address       String?
-  area          String?
-  tableNumber   String?
-  notes         String?
-  subtotal      Int
-  deliveryFee   Int             @default(0)
-  discount      Int             @default(0)
-  total         Int
-  paymentMethod String          @default("COD")
-  status        FoodOrderStatus @default(NEW)
-  timeline      Json            @default("[]")
-  scheduledFor  DateTime?
-  estimatedMins Int?
-  ip            String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id             String          @id @default(cuid())
+  tenantId       String
+  number         Int
+  customerId     String?
+  type           FoodOrderType   @default(DELIVERY)
+  customerName   String
+  customerPhone  String
+  address        String?
+  area           String?
+  tableNumber    String?
+  notes          String?
+  subtotal       Int
+  deliveryFee    Int             @default(0)
+  discount       Int             @default(0)
+  total          Int
+  paymentMethod  String          @default("COD")
+  status         FoodOrderStatus @default(NEW)
+  timeline       Json            @default("[]")
+  scheduledFor   DateTime?
+  estimatedMins  Int?
+  ip             String?
+  idempotencyKey String? // client-generated per checkout; a retried placeFoodOrder returns the original order
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   customer Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
   items    FoodOrderItem[]
 
   @@unique([tenantId, number])
+  @@unique([tenantId, idempotencyKey])
   @@index([tenantId, status, createdAt])
   @@index([tenantId, createdAt])
   @@index([tenantId, customerPhone])

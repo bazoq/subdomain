@@ -3,7 +3,8 @@
 import { z } from "zod";
 import { db } from "@/server/db";
 import { requireRole, requireTenantAdminAction } from "@/server/auth/guards";
-import { generatePassword, hashPassword, passwordPolicy, verifyPassword } from "@/server/auth/password";
+import { generatePassword, hashPassword, PASSWORD_MAX, passwordPolicy, verifyPassword } from "@/server/auth/password";
+import { createSession, revokeSessions } from "@/server/auth/session";
 import { audit } from "@/server/audit";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 
@@ -21,7 +22,7 @@ const createSchema = z.object({
   email: z.string().trim().email("Invalid email").max(120).optional().or(z.literal("")),
   role: z.enum(["ADMIN", "STAFF"]),
   /** blank => generated */
-  password: z.string().max(100).optional().or(z.literal("")),
+  password: z.string().max(PASSWORD_MAX).optional().or(z.literal("")),
 });
 export type CreateUserInput = z.infer<typeof createSchema>;
 
@@ -38,7 +39,7 @@ export async function createTenantUser(input: unknown): Promise<ActionResult<{ i
     if (!parsed.success) return fromZod(parsed.error);
     const d = parsed.data;
     const password = d.password || generatePassword(12);
-    const policy = passwordPolicy(password);
+    const policy = passwordPolicy(password, { username: d.username });
     if (policy) return fail(policy, { password: policy });
     const clash = await db.tenantUser.findFirst({ where: { tenantId: ctx.tenant.id, username: d.username }, select: { id: true } });
     if (clash) return fail("Username already taken.", { username: "Already taken" });
@@ -61,9 +62,13 @@ export async function updateTenantUserRole(id: string, role: string): Promise<Ac
     const target = await db.tenantUser.findFirst({ where: { id, tenantId: ctx.tenant.id } });
     if (!target) return fail("Not found.");
     if (target.role === "OWNER") return fail("The owner role cannot be changed.");
+    if (target.role === r.data) return success("Role unchanged.");
     await db.tenantUser.update({ where: { id }, data: { role: r.data } });
-    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "user.role", entity: "TenantUser", entityId: id, meta: { role: r.data } });
-    return success("Role updated.");
+    // Permissions are read from the session's user row on every request, but cached server
+    // components may still hold the old role: force a fresh login so the new role applies everywhere.
+    const revoked = await revokeSessions({ tenantUserId: id });
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "user.role", entity: "TenantUser", entityId: id, meta: { from: target.role, to: r.data, sessionsRevoked: revoked } });
+    return success("Role updated. The user will need to sign in again.");
   } catch (e) {
     return fail((e as Error).message);
   }
@@ -81,8 +86,8 @@ export async function setTenantUserActive(id: string, isActive: boolean): Promis
       if (owners <= 1) return fail("Cannot deactivate the last owner.");
     }
     await db.tenantUser.update({ where: { id }, data: { isActive, ...(isActive ? { failedLogins: 0, lockedUntil: null } : {}) } });
-    if (!isActive) await db.session.deleteMany({ where: { tenantUserId: id, tenantId: ctx.tenant.id } });
-    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: isActive ? "user.activate" : "user.deactivate", entity: "TenantUser", entityId: id });
+    const revoked = isActive ? 0 : await revokeSessions({ tenantUserId: id });
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: isActive ? "user.activate" : "user.deactivate", entity: "TenantUser", entityId: id, meta: isActive ? undefined : { sessionsRevoked: revoked } });
     return success(isActive ? "User activated." : "User deactivated.");
   } catch (e) {
     return fail((e as Error).message);
@@ -115,12 +120,15 @@ export async function resetTenantUserPassword(id: string, newPassword?: string):
     requireRole(ctx.user, ["OWNER"]);
     const target = await db.tenantUser.findFirst({ where: { id, tenantId: ctx.tenant.id } });
     if (!target) return fail("Not found.");
+    if (typeof newPassword === "string" && newPassword.length > PASSWORD_MAX) return fail(`Password must be at most ${PASSWORD_MAX} characters.`);
     const password = (newPassword ?? "").trim() || generatePassword(12);
-    const policy = passwordPolicy(password);
+    const policy = passwordPolicy(password, { username: target.username });
     if (policy) return fail(policy);
     await db.tenantUser.update({ where: { id }, data: { passwordHash: await hashPassword(password), failedLogins: 0, lockedUntil: null } });
-    await db.session.deleteMany({ where: { tenantUserId: id, tenantId: ctx.tenant.id } });
-    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "user.password_reset", entity: "TenantUser", entityId: id });
+    // Every existing session of that user (including the resetting owner's own, if self-reset) is invalidated.
+    const revoked = await revokeSessions({ tenantUserId: id });
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "user.password_reset", entity: "TenantUser", entityId: id, meta: { sessionsRevoked: revoked } });
+    if (id === ctx.user.id) await createSession({ kind: "TENANT", tenantUserId: ctx.user.id, tenantId: ctx.tenant.id });
     return success("Password reset. Share it now – it will not be shown again.", { password });
   } catch (e) {
     return fail((e as Error).message);
@@ -128,9 +136,9 @@ export async function resetTenantUserPassword(id: string, newPassword?: string):
 }
 
 const changeSchema = z.object({
-  current: z.string().min(1, "Enter your current password"),
-  password: z.string().min(1, "Enter a new password"),
-  confirm: z.string(),
+  current: z.string().min(1, "Enter your current password").max(PASSWORD_MAX),
+  password: z.string().min(1, "Enter a new password").max(PASSWORD_MAX, `Password must be at most ${PASSWORD_MAX} characters`),
+  confirm: z.string().max(PASSWORD_MAX),
 });
 
 /** Any signed-in user changes their own password (form action). */
@@ -141,13 +149,17 @@ export async function changeOwnPassword(_prev: ActionResult, fd: FormData): Prom
     if (!parsed.success) return fromZod(parsed.error);
     const { current, password, confirm } = parsed.data;
     if (password !== confirm) return fail("Passwords do not match.", { confirm: "Passwords do not match" });
-    const policy = passwordPolicy(password);
+    const policy = passwordPolicy(password, { username: ctx.user.username });
     if (policy) return fail(policy, { password: policy });
     const ok = await verifyPassword(current, ctx.user.passwordHash);
     if (!ok) return fail("Current password is incorrect.", { current: "Incorrect password" });
+    if (await verifyPassword(password, ctx.user.passwordHash)) return fail("Choose a password you have not used before.", { password: "Same as current password" });
     await db.tenantUser.update({ where: { id: ctx.user.id }, data: { passwordHash: await hashPassword(password) } });
-    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "user.password_change", entity: "TenantUser", entityId: ctx.user.id });
-    return success("Password changed.");
+    // Kill every other device's session, then re-issue a fresh one for this browser so the user stays signed in.
+    const revoked = await revokeSessions({ tenantUserId: ctx.user.id });
+    await createSession({ kind: "TENANT", tenantUserId: ctx.user.id, tenantId: ctx.tenant.id });
+    await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "user.password_change", entity: "TenantUser", entityId: ctx.user.id, meta: { otherSessionsRevoked: Math.max(0, revoked - 1) } });
+    return success("Password changed. Other devices have been signed out.");
   } catch (e) {
     return fail((e as Error).message);
   }

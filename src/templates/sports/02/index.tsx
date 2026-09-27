@@ -71,7 +71,7 @@ function Hero({ ctx }: TemplatePageProps) {
               <Flame className="size-4" /> {h.eyebrow}
             </span>
           ) : null}
-          <h1 className="font-heading mt-6 text-5xl uppercase leading-[0.9] tracking-tight text-t-secondary sm:text-6xl lg:text-8xl">{t(h.title, lang)}</h1>
+          <h1 className="font-heading mt-6 break-words text-5xl uppercase leading-[0.9] tracking-tight text-t-secondary sm:text-6xl lg:text-8xl">{t(h.title, lang)}</h1>
           <p className="mt-6 max-w-xl text-lg leading-8 text-t-muted-fg">{t(h.subtitle, lang)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <CtaButton value={h.primaryCta} ctx={ctx} className="t-btn t-btn-primary rounded-none uppercase tracking-wider" icon={<ArrowRight className="size-4 rtl:rotate-180" />} />

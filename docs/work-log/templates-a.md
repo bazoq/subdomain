@@ -67,3 +67,13 @@ electronics 01-03 · medical 01-03 · sports 01-05.
   on all 35 owned blueprints.
 
 ## [2026-09-27 03:56] Batch C IN PROGRESS: catalog Urdu overrides + template-specific features
+- (agent cut off by tooling error: tw-check import error + eslint native crash while running concurrently with other
+  agents; rerun tools one at a time.)
+
+## [2026-09-27 18:05] [resume] state reconciled (git diff 9a2d796 --stat: 39 owned files changed, HEAD 47afb7f)
+- VERIFIED in tree (Batch C, previous agent): Urdu added to every `{ en }`-only override in owned blueprints —
+  shoes-02 hero title, gifts-01 collections title + 4 occasion items (title/subtitle), gifts-02 banner (title/text/cta),
+  sports-05 banner (title/text/cta), electronics-03 banner (title/text/cta), printing-02 + printing-04 hero titles.
+  Template-specific `features` (3-4 bullets each) present on all 35 owned blueprints (31 in ecommerce.ts + printing-01..04).
+- NEXT: confirm eyebrow field type (plain string vs LocalizedStrings), tsc/eslint one at a time → Batch C DONE →
+  final sweep (360px, h1, landmarks, alt, RTL, defensive defaults, PKR formatter, i18n) → summary + score.

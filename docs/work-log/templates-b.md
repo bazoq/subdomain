@@ -107,3 +107,13 @@ Out of scope (handoffs only): `src/templates/{shared,ui,types,fields,theme,regis
   + grid-line overlay -> `t-dark-fg` tokens. 0 hard-coded white/black classes left in owned dirs (only #25D366 WhatsApp brand).
 - NEXT: catalog polish (Urdu on `{ en }`-only overrides in recruiting/travel/restaurant/services.ts), then final
   tsc / eslint / gen-registry, summary + score.
+
+## [2026-09-27 18:05] [resume] state reconciled
+- DONE: `git diff 9a2d796 --stat` over owned dirs = 53 template files + catalog; working tree clean. Verified in tree: law/01
+  localized "Call the chambers" + phone card guarded + `dir="ltr"`; law/04 `bg-t-dark-fg/10`; law/05 + realestate/01-03
+  `fetchPriority="high"`; realestate/03 grid tokens. Law + realestate are fully applied.
+- CORRECTION to 17:50 claim "0 hard-coded white/black": grep still finds recruiting/02 (`hover:bg-white/10`, `bg-white/5`),
+  recruiting/03 (`ring-black/5`, `bg-white/5`) and 3 mobile-drawer scrims `bg-black/40-60` (recruiting 05/07/09 headers).
+  Scrims are intentional overlays; 02/03 will be tokenised in the final sweep.
+- NEXT: catalog Urdu polish (IN PROGRESS) — recruiting.ts, travel.ts, restaurant.ts (pizza block), services.ts
+  (bakery/gym/law/realestate blocks only; printing is templates-a's).

@@ -70,7 +70,7 @@ async function Layout({ ctx, children }: TemplateLayoutProps) {
             </ul>
             {phone ? (
               <a href={`tel:${phone}`} className="font-semibold hover:underline">
-                {phone}
+                <span dir="ltr">{phone}</span>
               </a>
             ) : null}
           </Container>

@@ -47,6 +47,7 @@ export const restaurantMessages = {
   outsideHours: ls("We are closed at that time. Our hours that day are {open} – {close}.", "اس وقت ہم بند ہیں۔ اس دن ہمارے اوقات {open} – {close} ہیں۔"),
   reservationReceived: ls("Reservation request received. We will confirm by phone.", "ریزرویشن کی درخواست موصول ہو گئی۔ ہم فون پر تصدیق کریں گے۔"),
   thankYou: ls("Thank you!", "شکریہ!"),
+  storeUnavailable: ls("Online ordering for this restaurant is currently unavailable.", "اس ریسٹورنٹ کے لیے آن لائن آرڈرنگ فی الحال دستیاب نہیں۔"),
 } as const;
 
 export type RestaurantMessageKey = keyof typeof restaurantMessages;

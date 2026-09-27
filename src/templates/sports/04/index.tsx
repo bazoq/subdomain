@@ -44,7 +44,7 @@ function Layout({ ctx, children }: TemplateLayoutProps) {
               ) : null}
               {phone ? (
                 <a href={`tel:${phone}`} className="flex items-center gap-1.5 hover:text-t-primary">
-                  <Phone className="size-3.5 text-t-primary" aria-hidden="true" /> {phone}
+                  <Phone className="size-3.5 text-t-primary" aria-hidden="true" /> <span dir="ltr">{phone}</span>
                 </a>
               ) : null}
             </Container>

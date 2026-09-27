@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteContext } from "@/server/site";
+import { requireModulePage } from "@/modules/shared/module-gate";
 import { Container } from "@/templates/ui";
 import { t } from "@/lib/i18n";
 import { getDestinations, getPackages } from "@/modules/travel/queries";
@@ -10,6 +11,7 @@ const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?
 
 export async function generateMetadata(): Promise<Metadata> {
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "travel");
   return {
     title: `${t(ts.packages, ctx.lang)} · ${ctx.tenant.name}`,
     description: `Umrah, Hajj, northern-areas tours and international holiday packages from ${ctx.tenant.name}. Book online or on WhatsApp.`,
@@ -19,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PackagesPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const ctx = await getSiteContext();
+  requireModulePage(ctx, "travel");
   const filters = { kind: str(sp.kind).toUpperCase(), destination: str(sp.destination), q: str(sp.q) };
   const page = Math.max(1, Number.parseInt(str(sp.page) || "1", 10) || 1);
   const [result, destinations] = await Promise.all([getPackages(ctx.tenant.id, { ...filters, page }), getDestinations(ctx.tenant.id)]);

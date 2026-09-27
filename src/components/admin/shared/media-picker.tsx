@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export type PickerMedia = { id: string; url: string; alt: string | null; folder: string; mime: string; size: number };
 
 const Ctx = React.createContext<PickerMedia[] | null>(null);
+const EMPTY: PickerMedia[] = [];
 
 /**
  * Makes the tenant's recent public images available to any nested `<MediaPickerButton>`
@@ -31,15 +32,7 @@ function fmtBytes(n: number) {
   return `${n} B`;
 }
 
-export function MediaPickerDialog({
-  open,
-  onClose,
-  onPick,
-  multiple = false,
-  max = 12,
-  title = "Choose from media library",
-  exclude = [],
-}: {
+type DialogProps = {
   open: boolean;
   onClose: () => void;
   onPick: (urls: string[]) => void;
@@ -48,22 +41,26 @@ export function MediaPickerDialog({
   title?: string;
   /** URLs already in use (shown as such, not selectable) */
   exclude?: string[];
-}) {
-  const items = React.useContext(Ctx) ?? [];
+};
+
+/**
+ * Picker dialog. The search / folder / selection state lives in `PickerBody`, which is only
+ * mounted while the dialog is open, so it resets naturally on close (no effects needed).
+ */
+export function MediaPickerDialog(props: DialogProps) {
+  if (!props.open) return null;
+  return <PickerBody {...props} />;
+}
+
+function PickerBody({ onClose, onPick, multiple = false, max = 12, title = "Choose from media library", exclude = [] }: DialogProps) {
+  const items = React.useContext(Ctx) ?? EMPTY;
   const [q, setQ] = React.useState("");
   const [folder, setFolder] = React.useState<string>("all");
   const [selected, setSelected] = React.useState<string[]>([]);
   const searchRef = React.useRef<HTMLInputElement>(null);
   const listId = React.useId();
 
-  React.useEffect(() => {
-    if (!open) {
-      setSelected([]);
-      setQ("");
-    }
-  }, [open]);
-
-  const folders = React.useMemo(() => Array.from(new Set(items.map((m) => m.folder))).sort(), [items]);
+  const folders = Array.from(new Set(items.map((m) => m.folder))).sort();
   const needle = q.trim().toLowerCase();
   const visible = items.filter((m) => (folder === "all" || m.folder === folder) && (!needle || (m.alt ?? "").toLowerCase().includes(needle) || m.folder.includes(needle) || m.url.toLowerCase().includes(needle)));
 
@@ -78,7 +75,7 @@ export function MediaPickerDialog({
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={onClose}
       title={title}
       description={multiple ? `Select up to ${max} image${max === 1 ? "" : "s"}.` : "Tap an image to use it."}
