@@ -62,7 +62,7 @@ export default async function SuperUsersPage() {
               </TD>
               <TD className="text-xs text-slate-500">{u.lastLoginAt ? formatDate(u.lastLoginAt, true) : "never"}</TD>
               <TD>
-                <SuperUserRowActions id={u.id} username={u.username} isActive={u.isActive} isSelf={u.id === me.id} canManage={canManage} />
+                <SuperUserRowActions id={u.id} username={u.username} role={u.role} isActive={u.isActive} isSelf={u.id === me.id} canManage={canManage} />
               </TD>
             </TR>
           ))}

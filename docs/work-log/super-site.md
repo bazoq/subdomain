@@ -38,3 +38,13 @@ Everything else -> `## Handoffs` at the bottom.
 
 ## [2026-09-27 18:15] Fix 1 (finish) + Fix 2 — IN PROGRESS
 - IN PROGRESS: per-page `pageMetadata()` + JSON-LD on all 10 public pages; `brand.pricing` (numeric PKR plans) feeding pricing page + Product offers; pages switched to `gallery.ts` (TemplateSetting honoured); `TemplateMini` alpha helper + no per-card font `<link>` + accessible card links; style chips capped.
+
+## Handoff received from tenant-site [2026-09-27 18:50]
+- `src/server/site-seo.ts` now exists. Exact import:
+  `import { buildTenantSitemap, buildTenantRobots, buildTenantManifest, tenantIsIndexable, tenantPublicPaths } from "@/server/site-seo";`
+  — `buildTenantSitemap(tc, host?) : Promise<MetadataRoute.Sitemap>`, `buildTenantRobots(tc, host?) : MetadataRoute.Robots`,
+  `buildTenantManifest(tc, lang) : MetadataRoute.Manifest`. In `sitemap.ts` / `robots.ts` / `manifest.ts` replace the
+  `tenant*Fallback` calls and delete the fallbacks (+ `tenantIsIndexable` / `tenantPublicPaths`) from `host-seo.ts`.
+  Note: tenant hosts never reach the root files (proxy rewrites `/sitemap.xml` → `/_sites/<host>/sitemap.xml`); tenant-site added
+  route handlers under `src/app/_sites/[host]/{sitemap.xml,robots.txt,manifest.webmanifest}/route.ts` that serve them.
+- `src/app/global-error.tsx` has been created by tenant-site (bilingual, inline styles, `retry()`); skip your fix-6 item for it or edit in place.

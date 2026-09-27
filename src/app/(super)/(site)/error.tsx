@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { log } from "@/lib/log";
 import { brand } from "@/config/brand";
 
 /**
@@ -11,7 +12,7 @@ import { brand } from "@/config/brand";
 export default function SiteError({ error, retry, reset }: { error: Error & { digest?: string }; retry?: () => void; reset?: () => void }) {
   React.useEffect(() => {
     // Surfaced to the browser console only; the server side is logged by Next/instrumentation.
-    console.error("[super-site] page error", error.digest ?? error.message);
+    log.error("super-site.pageError", { digest: error.digest, message: error.message });
   }, [error]);
   const again = retry ?? reset;
   return (

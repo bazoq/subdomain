@@ -93,3 +93,12 @@ Everything else → `## Handoffs` at the bottom. Never `git commit`. DB not reac
 - NEXT: media library (search, alt editing, delete via dialog with usage warning, load-more via server action, PUBLIC-only URLs).
 
 ## [2026-09-27 19:01] IN PROGRESS: media library
+
+## [2026-09-27 19:30] DONE: media library
+- DONE: new `admin/(dashboard)/media/actions.ts` (server actions, tenant-scoped, PUBLIC+confirmed+url-not-null only): `listMedia({folder,q,cursor})` (search alt/folder, keyset paging, 60/page), `updateMediaAlt(id, alt)` (≤200 chars, audited `media.alt`), `deleteMediaAction(id)` (reuses `deleteMedia`, audited `media.delete`).
+- DONE: `src/components/admin/shared/media-library.tsx` — folder chips are `aria-pressed` buttons (URL kept via replaceState), debounced search, "Load more" appends via the action (no page navigation), stale responses ignored; each tile opens a details dialog (preview, alt-text form that submits on Enter, selectable/copyable address, delete through `ConfirmDialog` with explicit broken-image warning — `window.confirm` removed); upload progress "n of m", non-image files rejected client-side, grid refreshes + `router.refresh()` for counts/quota; storage bar is a `meter`; tiles show "No description" nudges; live-region status.
+- DONE: `media/page.tsx` — first page comes from the same `listMedia` action (rows with null url never reach the client); folder counts/quota unchanged.
+- NOTE: no usage index exists for media, so delete is "usage-safe" through messaging only. HANDOFF (data-layer): a `Media.usedIn` lookup (sections JSON / products / menu items) would let the UI block or warn precisely.
+- NEXT: activity (date/actor filters, readable meta), dashboard (today KPIs, checklist, quick actions), loading/error files.
+
+## [2026-09-27 19:31] IN PROGRESS: activity + dashboard + loading/error

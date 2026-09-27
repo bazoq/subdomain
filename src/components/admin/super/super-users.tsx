@@ -10,7 +10,7 @@ import { Field, Input, Select, Help } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { ActionButton } from "@/components/admin/action-button";
 import { PasswordInput, CredentialReveal, generateClientPassword, PASSWORD_MIN } from "@/components/admin/super/password-utils";
-import { changeOwnPassword, createSuperUser, resetSuperUserPassword, toggleSuperUser, type CreateSuperUserInput } from "@/server/super/users-actions";
+import { changeOwnPassword, createSuperUser, resetSuperUserPassword, setSuperUserRole, toggleSuperUser, type CreateSuperUserInput } from "@/server/super/users-actions";
 import { idle, type ActionResult } from "@/lib/action-result";
 
 const empty: CreateSuperUserInput = { name: "", username: "", email: "", password: "", role: "EDITOR" };
@@ -104,10 +104,11 @@ export function AddSuperUserButton() {
   );
 }
 
-export function SuperUserRowActions({ id, username, isActive, isSelf, canManage }: { id: string; username: string; isActive: boolean; isSelf: boolean; canManage: boolean }) {
+export function SuperUserRowActions({ id, username, role, isActive, isSelf, canManage }: { id: string; username: string; role: "SUPERADMIN" | "EDITOR"; isActive: boolean; isSelf: boolean; canManage: boolean }) {
   const [reveal, setReveal] = React.useState<string | null>(null);
   const toast = useToast();
   if (!canManage) return null;
+  const nextRole = role === "SUPERADMIN" ? "EDITOR" : "SUPERADMIN";
 
   async function reset() {
     if (!window.confirm(`Generate a new password for ${username}?`)) return;
@@ -136,9 +137,19 @@ export function SuperUserRowActions({ id, username, isActive, isSelf, canManage 
         <KeyRound /> Reset password
       </Button>
       {!isSelf ? (
-        <ActionButton size="sm" variant="ghost" action={() => toggleSuperUser(id, !isActive)}>
-          {isActive ? "Deactivate" : "Activate"}
-        </ActionButton>
+        <>
+          <ActionButton
+            size="sm"
+            variant="ghost"
+            confirm={`Change ${username} to ${nextRole}? They will be signed out and must sign in again.`}
+            action={() => setSuperUserRole(id, nextRole)}
+          >
+            {nextRole === "EDITOR" ? "Make editor" : "Make super admin"}
+          </ActionButton>
+          <ActionButton size="sm" variant="ghost" confirm={isActive ? `Deactivate ${username}? Their sessions will be signed out.` : undefined} action={() => toggleSuperUser(id, !isActive)}>
+            {isActive ? "Deactivate" : "Activate"}
+          </ActionButton>
+        </>
       ) : null}
     </div>
   );

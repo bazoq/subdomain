@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { log } from "@/lib/log";
 import { Button } from "@/components/ui/button";
 
 /** Error boundary for super-admin pages (inside the AdminShell). */
 export default function SuperAdminError({ error, retry, reset }: { error: Error & { digest?: string }; retry?: () => void; reset?: () => void }) {
   React.useEffect(() => {
-    console.error("[super-admin] page error", error.digest ?? error.message);
+    log.error("super-admin.pageError", { digest: error.digest, message: error.message });
   }, [error]);
   const again = retry ?? reset;
   return (

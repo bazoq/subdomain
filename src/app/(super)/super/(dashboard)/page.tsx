@@ -8,8 +8,11 @@ import { TEMPLATES } from "@/templates/registry";
 import { CATEGORIES, getCategory } from "@/lib/categories";
 import { formatDate } from "@/lib/utils";
 
-export default async function SuperDashboard() {
-  await requireSuper();
+export const metadata = { title: "Overview" };
+
+export default async function SuperDashboard({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
+  const me = await requireSuper();
+  const { denied } = await searchParams;
   const since = new Date();
   since.setDate(since.getDate() - 30);
   const [tenants, active, demo, leads, ordersMonth, foodMonth, recentTenants, recentLeads, byCategory] = await Promise.all([
@@ -26,7 +29,12 @@ export default async function SuperDashboard() {
 
   return (
     <>
-      <PageHeader title="Platform overview" description="Everything happening across your websites." />
+      <PageHeader title="Platform overview" description={me.role === "SUPERADMIN" ? "Everything happening across your websites." : `Signed in as ${me.role}: you can manage blog posts and leads.`} />
+      {denied ? (
+        <p role="alert" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          That page is only available to a SUPERADMIN. Ask a platform administrator if you need access.
+        </p>
+      ) : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Customer websites" value={tenants} hint={`${active} active`} icon={<Globe />} tone="info" />
         <StatCard label="Templates" value={TEMPLATES.length} hint={`${demo} demo sites`} icon={<LayoutTemplate />} />

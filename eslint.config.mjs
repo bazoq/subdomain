@@ -26,6 +26,12 @@ const eslintConfig = defineConfig([
       eqeqeq: ["warn", "smart"],
       "no-var": "error",
       "@typescript-eslint/consistent-type-imports": ["warn", { prefer: "type-imports", fixStyle: "inline-type-imports", disallowTypeAnnotations: false }],
+      // OFF on purpose: the rule builds one regex per app route and turns the root-level catch-all
+      // `src/app/(super)/(site)/[...rest]/page.tsx` into a pattern that matches EVERY internal href, so every
+      // <a href="/..."> in the repo is reported. Tenant-host URLs also never correspond to route files (they are
+      // rewritten to /_sites/[host]/...). The convention (use <Link> for internal navigation) is documented in
+      // docs/CONVENTIONS.md and enforced in review instead.
+      "@next/next/no-html-link-for-pages": "off",
     },
   },
   {

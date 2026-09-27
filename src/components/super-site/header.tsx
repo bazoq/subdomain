@@ -21,9 +21,12 @@ const links = [
  * /admin, and the platform owner's /super/login stays in the footer.
  */
 export function SuperHeader() {
-  const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const pathname = usePathname();
+  // The menu is "open" only for the path it was opened on, so any navigation closes it without an effect.
+  const [openedAt, setOpenedAt] = React.useState<string | null>(null);
+  const open = openedAt === pathname;
+  const setOpen = React.useCallback((v: boolean | ((prev: boolean) => boolean)) => setOpenedAt((prev) => ((typeof v === "function" ? v(prev === pathname) : v) ? pathname : null)), [pathname]);
   const menuId = React.useId();
   const toggleRef = React.useRef<HTMLButtonElement>(null);
 
@@ -33,11 +36,6 @@ export function SuperHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Close the mobile menu whenever the route changes.
-  React.useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -49,7 +47,7 @@ export function SuperHeader() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, setOpen]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 

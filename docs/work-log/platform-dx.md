@@ -136,3 +136,22 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
 - NEXT: README quick start, docs/DEPLOY.md (Vercel/env/cron/health, non-DB), docs/OPERATIONS.md, docs/CONVENTIONS.md.
 
 ## [2026-09-27 12:30] IN PROGRESS: README + DEPLOY (non-DB) + OPERATIONS + CONVENTIONS
+- DONE: `README.md` rewritten (what/where, local quick start with seeded URLs, scripts table, repo layout, quality gates,
+  doc index). `docs/OPERATIONS.md` created (health contract public vs authorised, JSON logs + drains + Sentry hook-up,
+  cron tasks + verification, secret-rotation table with blast radius, deploy/rollback, incident playbook, backups,
+  routine checklist). `docs/DEPLOY.md` non-DB sections: Node 22, env-table rows for SESSION_SECRET rotation,
+  NEXT_PUBLIC_SITE_URL, CRON_SECRET, LOG_LEVEL, SENTRY_DSN; Vercel §3 steps 1-2 (Node 22.x, bom1, fresh secrets,
+  redeploy-after-env-change), new steps 7 (cron + health + log drain) and 8 (CI + "only deploy if checks pass"),
+  preview-DB warning; §4 quality gates; §8 monitoring/runbook links. `docs/CONVENTIONS.md`: work-log protocol,
+  caching rule rewritten, new *Caching & revalidation* (the verified rewrite finding + rules table), public forms →
+  `publicFormGuard`/`publicFailure` recipe, new *Notifications*, *Logging*, *Environment variables*, *Tests* sections,
+  error-wrapping rule, code-style updates (`npm run check`, type imports, formatDate TZ, Link vs <a>).
+  Handoffs written (revalidatePath finding → data-layer/commerce with recommended pattern; formatDate already fixed;
+  media-picker lint error → admin-ux; super-site tsc error; no-console leftovers; .gitattributes decision).
+- FOUND: `npx eslint src tests` now shows 16 `@next/next/no-html-link-for-pages` errors across other streams' files.
+  Root-caused in the rule itself: `getUrlFromAppDirectory` turns a root-level dynamic page into the regex
+  `^\/((?!.+?\..+?).*?)$`, which matches EVERY internal href — false positives, and tenant-host URLs never
+  correspond to route files anyway. Fix belongs in `eslint.config.mjs` (mine).
+- NEXT: disable that rule with rationale, re-run the three gates, final entry + score.
+
+## [2026-09-27 12:50] IN PROGRESS: eslint no-html-link-for-pages false positives + final gates

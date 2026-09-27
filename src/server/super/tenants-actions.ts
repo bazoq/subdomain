@@ -68,6 +68,24 @@ function superAudit(user: SuperUser, input: { tenantId?: string | null; action: 
   return audit({ actorKind: "SUPER", actorId: user.id, actorName: user.name, ...input });
 }
 
+/**
+ * Every tenant mutation (create, status, domains, template, users, delete) is SUPERADMIN-only.
+ * EDITORs manage blog posts and leads; they must not be able to suspend or delete a customer's website.
+ */
+async function requireTenantManager(): Promise<SuperUser> {
+  const user = await requireSuperAction();
+  requireSuperRole(user, ["SUPERADMIN"]);
+  return user;
+}
+
+/** Suspending a website must also end every admin session on it, so nobody keeps working in a suspended admin. */
+async function onSuspended(tenantId: string, previous: string | undefined, next: string) {
+  if (next !== "SUSPENDED" || previous === "SUSPENDED") return 0;
+  const revoked = await revokeSessions({ tenantId });
+  log.info("tenant.suspended", { tenantId, revoked });
+  return revoked;
+}
+
 function resolveHostname(entry: HostnameEntry): { ok: true; hostname: string } | { ok: false; error: string } {
   if (entry.kind === "subdomain") {
     const r = validateSubdomain(entry.value);
@@ -170,9 +188,10 @@ export async function updateTenantBasics(id: string, input: unknown): Promise<Ac
       where: { id },
       data: { name: parsed.data.name, status: parsed.data.status, isDemo: parsed.data.isDemo, settings: json(settings) },
     });
-    await superAudit(user, { tenantId: id, action: "tenant.update", entity: "Tenant", entityId: id, meta: { status: parsed.data.status } });
+    const revoked = await onSuspended(id, tenant.status, parsed.data.status);
+    await superAudit(user, { tenantId: id, action: "tenant.update", entity: "Tenant", entityId: id, meta: { status: parsed.data.status, ...(revoked ? { revokedSessions: revoked } : {}) } });
     revalidatePath("/", "layout");
-    return success("Website updated.");
+    return success(revoked ? `Website updated and suspended; ${revoked} admin session(s) signed out.` : "Website updated.");
   } catch (e) {
     return fail((e as Error).message);
   }
@@ -182,11 +201,13 @@ export async function setTenantStatus(id: string, status: "DRAFT" | "ACTIVE" | "
   try {
     const user = await requireTenantManager();
     if (!["DRAFT", "ACTIVE", "SUSPENDED"].includes(status)) return fail("Invalid status.");
-    const { count } = await db.tenant.updateMany({ where: { id }, data: { status } });
-    if (!count) return fail("Website not found.");
-    await superAudit(user, { tenantId: id, action: `tenant.status.${status.toLowerCase()}`, entity: "Tenant", entityId: id });
+    const tenant = await db.tenant.findUnique({ where: { id }, select: { status: true } });
+    if (!tenant) return fail("Website not found.");
+    await db.tenant.update({ where: { id }, data: { status } });
+    const revoked = await onSuspended(id, tenant.status, status);
+    await superAudit(user, { tenantId: id, action: `tenant.status.${status.toLowerCase()}`, entity: "Tenant", entityId: id, meta: { from: tenant.status, ...(revoked ? { revokedSessions: revoked } : {}) } });
     revalidatePath("/", "layout");
-    return success(`Website is now ${status.toLowerCase()}.`);
+    return success(revoked ? `Website suspended; ${revoked} admin session(s) signed out.` : `Website is now ${status.toLowerCase()}.`);
   } catch (e) {
     return fail((e as Error).message);
   }
@@ -313,10 +334,10 @@ export async function addTenantUser(tenantId: string, input: unknown): Promise<A
 export async function resetTenantUserPassword(tenantId: string, userId: string, password: string): Promise<ActionResult> {
   try {
     const user = await requireTenantManager();
-    const pw = passwordPolicy(password ?? "");
-    if (pw) return fail(pw);
     const target = await db.tenantUser.findFirst({ where: { id: userId, tenantId } });
     if (!target) return fail("User not found.");
+    const pw = passwordPolicy(password ?? "", { username: target.username });
+    if (pw) return fail(pw);
     await db.$transaction([
       db.tenantUser.update({ where: { id: userId }, data: { passwordHash: await hashPassword(password), failedLogins: 0, lockedUntil: null } }),
       db.session.deleteMany({ where: { tenantUserId: userId } }),

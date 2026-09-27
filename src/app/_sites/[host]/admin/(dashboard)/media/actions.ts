@@ -13,7 +13,8 @@ import { fail, success, type ActionResult } from "@/lib/action-result";
  */
 
 export type MediaRow = { id: string; url: string; mime: string; size: number; folder: string; alt: string | null; createdAt: string };
-export const MEDIA_PAGE = 60;
+// "use server" modules may only export async functions; the page size is mirrored in media-library.tsx
+const MEDIA_PAGE = 60;
 
 const idSchema = z.string().regex(/^[a-z0-9]{1,64}$/i);
 const listSchema = z.object({

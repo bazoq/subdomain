@@ -124,6 +124,7 @@ Never call `revalidatePath` with a browser-visible tenant path (`/admin/...`, `/
 ## Code style
 
 - Server Components by default; `"use client"` only where state/effects are needed.
+- Internal navigation uses `<Link>` from `next/link` (works on tenant hosts through the rewrite). Plain `<a>` only for cross-host links, `mailto:`/`tel:`/`wa.me`, file downloads, and inside `global-error.tsx` (the router may be unavailable there). The `@next/next/no-html-link-for-pages` lint rule is switched off because a root-level dynamic route makes it flag every internal href — the convention still stands; reviewers enforce it.
 - Small, typed helpers; no `any`. Reuse `cn`, `slugify`, `formatPKR`, `formatDate` (pins `Asia/Karachi` — do not format dates with bare `toLocale*` calls).
 - Type-only imports use `import type` / inline `type` specifiers (lint rule); `const` over `let`; `===` (`eqeqeq smart`).
 - Run `npm run check` (`eslint` + `tsc --noEmit` + `vitest run`) and fix everything in your files before finishing. Do not run `next build` locally — CI does it on every push.
