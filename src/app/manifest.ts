@@ -1,31 +1,20 @@
 import type { MetadataRoute } from "next";
 import { brand } from "@/config/brand";
-import { getTemplateMeta } from "@/templates/registry";
+import { resolveLang } from "@/lib/i18n";
 import { resolveSeoHost } from "@/server/super/host-seo";
+import { buildTenantManifest } from "@/server/site-seo";
 
 /**
- * Host-aware web app manifest. The platform gets its own branding; a tenant host gets the tenant's
- * name and template colours so "Add to home screen" on a customer's site looks like their brand.
+ * Host-aware web app manifest. The platform gets its own branding; a tenant host (should the proxy ever
+ * stop rewriting `/manifest.webmanifest` to the tenant tree) gets the tenant's name and colours from the
+ * shared builder in `src/server/site-seo.ts`.
  */
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const resolved = await resolveSeoHost();
 
   if (resolved.kind === "tenant") {
     const { tc } = resolved;
-    const meta = getTemplateMeta(tc.tenant.templateId);
-    const primary = tc.settings.branding.primaryColor || meta?.theme.colors.primary || brand.colors.primary;
-    const favicon = tc.settings.branding.faviconUrl;
-    return {
-      name: tc.tenant.name,
-      short_name: tc.tenant.name.slice(0, 12),
-      description: tc.settings.seo.description || `${tc.tenant.name} — ${tc.category.name}`,
-      start_url: "/",
-      display: "standalone",
-      background_color: meta?.theme.colors.bg ?? "#ffffff",
-      theme_color: primary,
-      lang: tc.settings.languages.urduEnabled ? "ur" : "en",
-      icons: favicon ? [{ src: favicon, sizes: "any" }] : [],
-    };
+    return buildTenantManifest(tc, resolveLang(null, tc.settings.languages));
   }
 
   return {

@@ -24,6 +24,10 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
 - **orchestrator**: `.gitattributes` (`* text=auto eol=lf`) was deliberately NOT added — it would renormalise every CRLF file in the next commit. Decide once, in a dedicated commit. `.editorconfig` already asks editors for LF.
 - **security** (FYI, no action): `/api/health` now gates build/DB detail behind `Authorization: Bearer <CRON_SECRET>` as requested; public body is `{status,time}`.
 
+- **super-site** (`src/components/super-site/header.tsx:39`): `react-hooks/set-state-in-effect` ERROR — the only remaining eslint error in `src` after the wave; CI `npm run lint` is red until fixed (derive the value during render or move the setState into the event/subscription callback).
+- **tenant-site / super-site** (`src/app/global-error.tsx:43`): `// eslint-disable-next-line @next/next/no-html-link-for-pages` is now an *unused directive* warning because the rule is off globally (see eslint.config.mjs) — delete the comment line.
+- **all streams** (FYI): `@next/next/no-html-link-for-pages` was producing false positives for every internal `<a href>` (root cause: `src/app/(super)/(site)/[...rest]/page.tsx` makes the rule generate a catch-all regex). It is now OFF in `eslint.config.mjs`; keep using `<Link>` for internal navigation per CONVENTIONS — the rule is not there to catch you any more.
+
 ## Log
 
 ## [2026-09-27 03:00] Audit / baseline
@@ -155,3 +159,35 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
 - NEXT: disable that rule with rationale, re-run the three gates, final entry + score.
 
 ## [2026-09-27 12:50] IN PROGRESS: eslint no-html-link-for-pages false positives + final gates
+- DONE: `eslint.config.mjs` — `@next/next/no-html-link-for-pages` OFF with the root-cause comment (catch-all regex from
+  `(super)/(site)/[...rest]`); `docs/CONVENTIONS.md` code style now states the <Link> vs <a> convention explicitly.
+  (A node-based patch first corrupted the file via the dollar-quote token in `String.replace`; rewritten in full and verified.)
+- CHECKS (final): `npx tsc --noEmit` clean · `npx vitest run` 19 files / 252 tests green (was 12 / 187 at resume) ·
+  `npx eslint src tests` → 0 problems in this stream's files; 1 error left in the repo (`src/components/super-site/header.tsx:39`,
+  super-site's in-flight file) + 1 unused-directive warning (`src/app/global-error.tsx:43`) — both in Handoffs.
+
+## [2026-09-27 13:05] FINAL — platform-dx stream complete
+- ADDED this wave: 7 new unit suites (+82 tests) for every pure security/commerce helper handed over; health route
+  hardened (public `{status,time}`, detail behind Bearer CRON_SECRET) with 7 tests; Vercel cron wired (`vercel.json`);
+  complete `.env.example`; README replaced; `docs/OPERATIONS.md` runbook; DEPLOY.md Vercel/env/cron/CI/health steps;
+  CONVENTIONS.md: work-log protocol, logging, publicFormGuard, notifications, env vars, tests, caching & revalidation
+  (verified Next 16 finding: `revalidatePath("/admin/…")` is a no-op under the `/_sites/[host]` rewrite — recommended
+  pattern documented and handed to data-layer/commerce); eslint false-positive rule disabled with rationale.
+  Wave 1 (already at HEAD): vitest 5 + config + 12 suites, CI workflow (Node 20/22 + build), package scripts/engines,
+  `.nvmrc`, `.editorconfig`, ESLint project rules, `src/lib/log.ts`, `src/instrumentation.ts`, gen-registry pure API,
+  next.config (typedRoutes trial → off with rationale, R2 remotePatterns from env, serverExternalPackages not needed).
+- REMAINING GAPS (not blockers): no integration tests against a real Postgres (DB unreachable in this environment — the
+  Prisma-backed paths are covered only through mocks); no e2e/browser tests (Playwright) for the tenant admin flows;
+  coverage is reported but no threshold is enforced; CI has never run on GitHub yet (workflow untested remotely; local
+  `next build` verified once, then OOM under 6 concurrent agents — re-run on a quiet machine); Sentry/OTel not installed
+  (hook points ready); no Dependabot/Renovate config; `.gitattributes` LF policy deferred to the orchestrator; typedRoutes
+  off until template `href` props are typed as `Route`; `no-console` is `warn` not `error` until the last 3 call sites
+  migrate; CI lint is red until super-site fixes `header.tsx:39`.
+- ENGINEERING-INFRA READINESS: **78/100**. Solid foundation: deterministic test runner with 252 DB-free tests covering
+  routing, auth helpers, tokens, redaction, filenames, CSRF, rate limiting, i18n, registry, health; a CI pipeline with
+  registry-freshness, lint, typecheck, tests, build; validated env with production rules; structured logging +
+  request-error hook; health/cron endpoints; operator docs (DEPLOY, OPERATIONS) and engineering docs (CONVENTIONS,
+  README) that match the code. Deductions: -8 no DB-backed integration or e2e tests, -5 CI unproven on GitHub and no
+  coverage gate, -4 no error-tracking SaaS wired, -3 dependency-update automation + LF policy + typedRoutes still open,
+  -2 lint not yet at zero repo-wide.
+- NEXT: none for this stream (done). Orchestrator: commit; route the Handoffs above (super-site header.tsx is the CI blocker).

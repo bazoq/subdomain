@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/config/site";
-import { resolveSeoHost, tenantRobotsFallback } from "@/server/super/host-seo";
+import { resolveSeoHost } from "@/server/super/host-seo";
+import { buildTenantRobots } from "@/server/site-seo";
 
 /**
  * Host-aware robots.txt: the platform site, a tenant site, or "disallow everything" for hosts we
@@ -8,7 +9,7 @@ import { resolveSeoHost, tenantRobotsFallback } from "@/server/super/host-seo";
  */
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const resolved = await resolveSeoHost();
-  if (resolved.kind === "tenant") return tenantRobotsFallback(resolved.tc, resolved.host);
+  if (resolved.kind === "tenant") return buildTenantRobots(resolved.tc, resolved.host);
   if (resolved.kind === "unknown") return { rules: { userAgent: "*", disallow: "/" } };
 
   // Vercel preview deployments must never be indexed as duplicates of the real site.

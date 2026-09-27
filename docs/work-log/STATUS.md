@@ -13,4 +13,4 @@ Baseline (2026-09-27): `tsc` clean, `eslint src` clean, 84 templates, no tests, 
 | templates-a | templates-a.md | done | 2026-09-27 18:30 | done — 35 templates hardened; score 88/100; see templates-a.md Handoffs (eyebrow localisation, pack Urdu, notify.ts + components/site tsc) |
 | templates-b | templates-b.md | done | 2026-09-27 18:40 | done - 49 templates + catalog Urdu; see templates-b.md summary (score 86) + Handoffs (packs eyebrow/note localized, notify.ts tsc error) |
 | admin-ux | admin-ux.md | in-progress | 2026-09-27 19:31 | editor/settings/users/media DONE; activity + dashboard + loading/error in progress |
-| platform-dx | platform-dx.md | in-progress | 2026-09-27 12:30 | tests (+82) + health gating + cron + .env.example done; IN PROGRESS: README/DEPLOY/OPERATIONS/CONVENTIONS |
+| platform-dx | platform-dx.md | done | 2026-09-27 13:05 | done — 252 tests, health gating, cron, env/docs, eslint fix; see platform-dx.md Handoffs (header.tsx lint error blocks CI; revalidatePath pattern → data-layer/commerce) |

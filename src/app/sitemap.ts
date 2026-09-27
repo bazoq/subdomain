@@ -3,7 +3,8 @@ import { db } from "@/server/db";
 import { absoluteUrl } from "@/config/site";
 import { CATEGORIES } from "@/lib/categories";
 import { getGalleryTemplates } from "@/server/super/gallery";
-import { resolveSeoHost, tenantSitemapFallback } from "@/server/super/host-seo";
+import { resolveSeoHost } from "@/server/super/host-seo";
+import { buildTenantSitemap } from "@/server/site-seo";
 
 /**
  * Host-aware sitemap. This file answers for whichever host the request arrived on:
@@ -14,7 +15,7 @@ import { resolveSeoHost, tenantSitemapFallback } from "@/server/super/host-seo";
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const resolved = await resolveSeoHost();
-  if (resolved.kind === "tenant") return tenantSitemapFallback(resolved.tc, resolved.host);
+  if (resolved.kind === "tenant") return buildTenantSitemap(resolved.tc, resolved.host);
   if (resolved.kind === "unknown") return [];
   return platformSitemap();
 }
