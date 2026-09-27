@@ -102,3 +102,39 @@ Everything else → `## Handoffs` at the bottom. Never `git commit`. DB not reac
 - NEXT: activity (date/actor filters, readable meta), dashboard (today KPIs, checklist, quick actions), loading/error files.
 
 ## [2026-09-27 19:31] IN PROGRESS: activity + dashboard + loading/error
+
+## [2026-09-27 20:05] DONE: activity + dashboard + loading/error
+- DONE: `activity/page.tsx` — filters: search, type (human names), person (`actorName` groupBy), from/to dates (Pakistan midnight, inclusive end); `humanAction()` turns `section.save` into "Page section saved" (code kept as a mono badge + item id); meta rendered as a `<dl>` of key/value chips (long values clipped with full text in `title`), responsive table, result count live region, distinct "nothing matches" empty state with Clear.
+- DONE: `(dashboard)/page.tsx` — "Today (Pakistan time)" KPI row (orders/sales/applications/bookings/messages since PKT midnight, computed with `Intl` in `Asia/Karachi`), setup checklist with progress bar (logo, phone+WhatsApp, sections edited, first product/menu item/job/package/listing/service by module, opening hours, SEO title+description) hidden once complete, quick-action chips per module + sections/blog/media/settings/view site, PKT greeting, hints on pending/low-stock cards, links focus-visible. Read paths use the same Prisma count/aggregate calls the page already used (no module exposes stats helpers — see Handoffs).
+- DONE: `(dashboard)/loading.tsx` (generic header+stats+table skeleton), `(dashboard)/error.tsx` (client boundary: generic copy, digest reference, Try again (`retry`, falls back to `reset`), Go to dashboard), tailored `loading.tsx` for `content/`, `content/[key]/`, `media/`, `settings/`, and `login/error.tsx`.
+- eslint: 0 errors, 0 warnings across all owned files; tsc: clean for owned files (remaining project errors are in `src/server/notify.ts` and `src/app/(super)/(site)/**`, other streams mid-edit).
+- NOTE: the orchestrator committed mid-stream; the last two `error.tsx` edits (console.error removed) are uncommitted.
+
+## [2026-09-27 20:10] FINAL: summary, remaining risks, readiness score
+### Fixes this stream (all waves)
+- UI kit: accessible Dialog (focus trap/restore, Esc, labelled), `ConfirmDialog`/`useConfirm`, toast live regions (single announcement), `Field` auto-wiring of id/aria-describedby/aria-invalid, `Switch` role, `PasswordInput`/`PasswordStrength`/`passwordPolicyMessage` (10+ chars mirror), `Skeleton*`, `Alert`, responsive `Table`, `Pagination` nav.
+- Shell: skip link, aria-current, drawer as dialog with focus trap, breadcrumbs/title bar, EN|اردو preview, sign-out label, 40px targets.
+- Section editor: client zod validation with inline per-field errors, server `fieldErrors` mapped to fields, focus first invalid, beforeunload, media picker for image/images fields (PUBLIC files only), repeater stable keys/aria/reorder, Urdu RTL inputs, reset shows defaults immediately.
+- Sections list: labelled buttons, live region, preview link, focus retention.
+- Settings: tablist semantics + keyboard, PK phone/email/colour/URL/GA/Pixel/int validation, beforeunload, unsaved sections preserved after save.
+- Users: policy mirror, strength meter, Enter submits dialogs, consequences in confirm dialogs, last-owner/self explanations.
+- Media: search, alt editing, load-more/delete via server actions, delete warning, no private URLs.
+- Activity: filters + readable actions/meta. Dashboard: today KPIs, checklist, quick actions. loading/error boundaries.
+### Remaining risks (not fixable inside this stream's boundary)
+1. Server-side validation is permissive where the client is strict: `tenantSettingsSchema` accepts any string for phones/emails/URLs (server falls back to the raw phone when `normalizePkPhone` fails) and `passwordPolicy` is called without `{ username }` in users-actions. A client bypass can still store bad data. → data-layer / security handoffs below.
+2. No media usage index: deleting an image that a section/product still references leaves a broken image (UI warns, cannot block).
+3. Locked accounts (`lockedUntil`) have no "Unlock now" action for the owner; only Activate on deactivated users clears the lock.
+4. `ImageField`/`ImagesField` (uploader.tsx, not owned) still use `title`-only icon buttons and have no alt-text prompt at upload time.
+5. The section editor validates with `fieldsSchema` on the client; templates with very large repeaters (50 items × nested) may feel slow on low-end phones (not measured; DB unreachable so no end-to-end run).
+6. Nothing here was exercised against a live DB or in a browser — verified by tsc/eslint and code reading only. Recommend a manual pass on a phone (drawer, sticky save bars, media dialog) before launch.
+### Admin readiness score: 78 / 100
+- +: every owned screen now has inline validation, accessible dialogs (no `window.confirm`), keyboard/screen-reader semantics, loading and error states, Urdu RTL handling and PK-specific validation; server actions remain tenant-scoped and audited.
+- −: server schemas do not yet enforce what the UI enforces (−8), no browser/DB verification possible in this environment (−8), media usage/unlock gaps and uploader a11y outside boundary (−6).
+
+## Handoffs
+- security / users-actions: pass `{ username }` to `passwordPolicy` in `createTenantUser`, `resetTenantUserPassword` (target user's username) and `changeOwnPassword` (ctx.user.username); UI already mirrors this.
+- data-layer / settings: `tenantSettingsSchema` should validate `contact.phone/phone2/whatsapp` and `notifications.whatsappTo` with `normalizePkPhone` (reject instead of falling back to raw), `contact.email`/`notifications.emailTo` as email, `social.*`/`announcement.link` as safe URLs, `branding.*Color` as hex, `seo.title` ≤70 / `seo.description` ≤170.
+- data-layer / media: add a usage lookup (sections JSON, products, menu items, posts) so the media library can block or precisely warn before delete.
+- users-actions: an owner-facing "Unlock now" action (clear `lockedUntil`/`failedLogins`) for locked-but-active users.
+- uploader.tsx (owner: whichever stream holds `src/components/admin/uploader.tsx`): give Replace/Remove buttons `aria-label`s and 40px targets; optionally prompt for alt text on upload.
+- revokeSessions adoption for password reset/deactivate remains with security (already listed there).

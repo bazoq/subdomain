@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -10,9 +9,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
  * plus the error digest so support can find it in the logs; never leaks stack traces or SQL.
  */
 export default function AdminError({ error, retry, reset }: { error: Error & { digest?: string }; retry?: () => void; reset?: () => void }) {
-  React.useEffect(() => {
-    console.error(error);
-  }, [error]);
   const again = retry ?? reset;
   return (
     <div role="alert" className="mx-auto mt-10 max-w-lg rounded-xl border border-red-200 bg-white p-6 text-center shadow-sm">

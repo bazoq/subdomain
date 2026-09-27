@@ -1,14 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /** Error boundary for the sign-in page: keeps the message generic and offers a retry. */
 export default function LoginError({ error, retry, reset }: { error: Error & { digest?: string }; retry?: () => void; reset?: () => void }) {
-  React.useEffect(() => {
-    console.error(error);
-  }, [error]);
   const again = retry ?? reset;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
