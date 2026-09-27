@@ -7,6 +7,7 @@ import { requireSuperAction, requireSuperRole } from "@/server/auth/guards";
 import { hashPassword, passwordPolicy, PASSWORD_MAX, PASSWORD_MIN } from "@/server/auth/password";
 import { revokeSessions } from "@/server/auth/session";
 import { audit } from "@/server/audit";
+import { revalidateTenantContent } from "@/server/content/cache";
 import { deleteObject } from "@/server/storage/r2";
 import { r2Configured } from "@/config/env";
 import { ROOT_DOMAIN } from "@/config/site";
@@ -160,6 +161,8 @@ export async function createTenant(input: unknown): Promise<ActionResult<{ id: s
       return t;
     });
 
+    // The section rows were written outside src/server/content/actions.ts: expire the tenant's content cache now.
+    revalidateTenantContent(tenant.id);
     await superAudit(user, { tenantId: tenant.id, action: "tenant.create", entity: "Tenant", entityId: tenant.id, meta: { slug, templateId: meta.id, hostnames } });
     revalidatePath("/super/tenants");
     return success("Website created.", { id: tenant.id });
@@ -289,6 +292,8 @@ export async function changeTemplate(tenantId: string, templateId: string): Prom
       await tx.tenant.update({ where: { id: tenantId }, data: { templateId: meta.id } });
       return migrateTenantSections(tx, tenantId, meta.id);
     });
+    // migrateTenantSections rewrote SiteSection rows: the public site must not serve the old template's sections.
+    revalidateTenantContent(tenantId);
     await superAudit(user, { tenantId, action: "tenant.template", entity: "Tenant", entityId: tenantId, meta: { from: tenant.templateId, to: meta.id, ...result } });
     revalidatePath("/", "layout");
     return success(`Template changed to ${meta.name}. Kept ${result.kept}, added ${result.added}, removed ${result.removed} section(s).`);
@@ -392,6 +397,8 @@ export async function deleteTenant(id: string, confirmName: string): Promise<Act
       }
     }
     await db.tenant.delete({ where: { id } });
+    // Sections cascaded away with the tenant; drop the cached copy so a re-created host never sees stale rows.
+    revalidateTenantContent(id);
     await superAudit(user, { tenantId: null, action: "tenant.delete", entity: "Tenant", entityId: id, meta: { slug: tenant.slug, name: tenant.name, objectsDeleted } });
     revalidatePath("/super/tenants");
     return success(`"${tenant.name}" was deleted.`);

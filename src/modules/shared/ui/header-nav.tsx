@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Languages, Menu, X } from "lucide-react";
+import { t, ui } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export type HeaderNavItem = { label: string; href: string; children?: { label: string; href: string }[] };
@@ -83,7 +84,7 @@ export function HeaderNav({
           )}
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label={t(ui.mainNavigation, lang)}>
           {items.map((it) =>
             it.children?.length ? (
               <div key={it.href} className="group relative">
@@ -117,7 +118,7 @@ export function HeaderNav({
 
         <div className="flex items-center gap-2">
           {urduEnabled ? (
-            <a href={langHref} className={cn("hidden items-center gap-1 rounded-[var(--t-radius)] px-2.5 py-2 text-sm font-medium sm:inline-flex", dark ? "hover:bg-white/10" : "hover:bg-t-muted")} title="Switch language">
+            <a href={langHref} className={cn("hidden items-center gap-1 rounded-[var(--t-radius)] px-2.5 py-2 text-sm font-medium sm:inline-flex", dark ? "hover:bg-white/10" : "hover:bg-t-muted")} title={t(ui.switchLanguage, lang)} hrefLang={other} lang={other}>
               <Languages className="size-4" /> {other === "ur" ? "اردو" : "English"}
             </a>
           ) : null}
@@ -137,7 +138,7 @@ export function HeaderNav({
             type="button"
             onClick={() => setOpen(true)}
             className={cn("inline-flex size-10 items-center justify-center rounded-[var(--t-radius)] lg:hidden", dark ? "hover:bg-white/10" : "hover:bg-t-muted")}
-            aria-label="Open menu"
+            aria-label={t(ui.openMenu, lang)}
             aria-expanded={open}
             aria-controls="mobile-nav"
           >
@@ -149,14 +150,14 @@ export function HeaderNav({
       {/* mobile drawer */}
       <div id="mobile-nav" className={cn("fixed inset-0 z-[60] lg:hidden", open ? "" : "pointer-events-none")} aria-hidden={!open}>
         <div className={cn("absolute inset-0 bg-black/50 transition-opacity", open ? "opacity-100" : "opacity-0")} onClick={() => setOpen(false)} />
-        <div className={cn("absolute inset-y-0 end-0 flex w-[85%] max-w-sm flex-col bg-t-bg text-t-fg shadow-2xl transition-transform", open ? "translate-x-0" : "translate-x-full rtl:-translate-x-full")} role="dialog" aria-modal="true" aria-label="Menu">
+        <div className={cn("absolute inset-y-0 end-0 flex w-[85%] max-w-sm flex-col bg-t-bg text-t-fg shadow-2xl transition-transform", open ? "translate-x-0" : "translate-x-full rtl:-translate-x-full")} role="dialog" aria-modal="true" aria-label={t(ui.menu, lang)}>
           <div className="flex items-center justify-between border-b border-t-border px-4 py-3">
             <span className="font-heading text-lg font-bold">{brand.name}</span>
-            <button type="button" onClick={() => setOpen(false)} className="rounded-[var(--t-radius)] p-2 hover:bg-t-muted" aria-label="Close menu">
+            <button type="button" onClick={() => setOpen(false)} className="rounded-[var(--t-radius)] p-2 hover:bg-t-muted" aria-label={t(ui.closeMenu, lang)}>
               <X className="size-6" />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label="Mobile">
+          <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label={t(ui.mainNavigation, lang)}>
             {items.map((it) => (
               <div key={it.href}>
                 <Link href={it.href} className={cn("block rounded-[var(--t-radius)] px-3 py-3 text-base font-medium hover:bg-t-muted", isActive(it.href) && "text-t-primary")}>
@@ -170,7 +171,7 @@ export function HeaderNav({
               </div>
             ))}
             {urduEnabled ? (
-              <a href={langHref} className="mt-2 flex items-center gap-2 rounded-[var(--t-radius)] px-3 py-3 text-base font-medium hover:bg-t-muted">
+              <a href={langHref} className="mt-2 flex items-center gap-2 rounded-[var(--t-radius)] px-3 py-3 text-base font-medium hover:bg-t-muted" title={t(ui.switchLanguage, lang)} hrefLang={other} lang={other}>
                 <Languages className="size-5" /> {other === "ur" ? "اردو" : "English"}
               </a>
             ) : null}

@@ -29,6 +29,7 @@ export const checkoutMessages = {
   enterCoupon: ls("Enter a coupon code.", "کوپن کوڈ درج کریں۔"),
   couponApplied: ls("Coupon {code} applied.", "کوپن {code} لگ گیا۔"),
   duplicateInFlight: ls("Your order is already being placed. Please wait a moment.", "آپ کا آرڈر پہلے ہی دیا جا رہا ہے۔ ایک لمحہ انتظار کریں۔"),
+  alreadySubmitted: ls("An order from this checkout was already placed. Use Track order with your phone number to see it.", "اس چیک آؤٹ سے آرڈر پہلے ہی دیا جا چکا ہے۔ اپنا فون نمبر استعمال کر کے آرڈر ٹریک کریں۔"),
   enterOrderNumber: ls("Enter a valid order number.", "درست آرڈر نمبر درج کریں۔"),
   enterPhoneUsed: ls("Enter the mobile number used at checkout.", "چیک آؤٹ پر استعمال شدہ موبائل نمبر درج کریں۔"),
   orderNotFound: ls("No order found with these details.", "ان تفصیلات سے کوئی آرڈر نہیں ملا۔"),

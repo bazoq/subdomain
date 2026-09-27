@@ -333,6 +333,8 @@ model SuperLead {
   business  String?
   category  String?
   message   String?
+  /// Page / template code the lead came from (e.g. "home", "template:901"); informational, set by the public form.
+  source    String?
   status    LeadStatus @default(NEW)
   createdAt DateTime   @default(now())
 

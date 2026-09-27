@@ -139,3 +139,9 @@
   7. `user-forms.tsx` still says min 8 client-side until admin-ux updates it (server rejects correctly).
 - READINESS SCORE: **84/100**. Server-side validation, tenant isolation, state machines, sanitisation, module gating and accessibility of public forms are production-grade and consistent across the six service modules. Deductions: no automated tests for the new logic (-6), notification path without retry (-3), duplicate/rate limits are heuristic (-3), pending cross-stream items (renderer allow-list, client min-length) (-4).
 - NEXT: none for this stream (done). Orchestrator: commit `src/components/admin/uploader.tsx` + docs; route the Handoffs above.
+
+## Wave 4 follow-ups
+
+## [2026-09-27 20:05] IN PROGRESS: wave-4 handoffs (users-actions unlock, logging check, footer/nav/carousel a11y, uploader, revalidation, metadata + JSON-LD)
+- VERIFIED at start (HEAD cfc86f3): `passwordPolicy(pw, { username })` already passed in createTenantUser / resetTenantUserPassword (target) / changeOwnPassword (ctx.user.username) — handoff #1a is a no-op; `src/modules/shared/media.ts` + `public-form.ts` already use `log` (no `console.*` in any owned path) — handoff #2 is a no-op.
+- Plan: (1) `unlockTenantUser` owner-only action + trivial "Unlock" ActionButton in users/page.tsx (admin-ux page, one-line, noted below); (3) `PoweredBy` in site-footer, localized nav aria-labels, carousel/gallery `lang` prop + aria-live + localized controls; (4) uploader aria-labels + 40px targets + optional alt-text; (5) drop `/admin/…` revalidatePath in recruiting/travel/leads; (6) `tenantPageMetadata` + `<JsonLd>` on all 22 owned `(site)` pages via new `src/modules/shared/jsonld.ts`.

@@ -1,0 +1,51 @@
+
+> siteforge@0.1.0 build
+> npm run gen:templates && prisma generate && next build
+
+
+> siteforge@0.1.0 gen:templates
+> node scripts/gen-registry.mjs
+
+Registry generated with 84 templates.
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.10.0) to .\src\generated\prisma in 1.49s
+
+▲ Next.js 16.3.5 (Turbopack)
+- Environments: .env
+✓ Running next.config.ts took 117ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 18.4s
+  Running TypeScript ...
+  Finished TypeScript in 62s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/147) ...
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+Error occurred prerendering page "/opengraph-image-1wpscl". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: Expected <div> to have explicit "display: flex", "display: contents", or "display: none" if it has more than one child node.
+    at rr.next (<anonymous>)
+Export encountered an error on /(super)/opengraph-image-1wpscl/route: /opengraph-image-1wpscl, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null
+BUILD_EXIT=1

@@ -85,9 +85,9 @@ export async function submitSuperLead(input: unknown): Promise<ActionResult<{ id
     if (!rl.ok) return fail("Too many submissions. Please try again in a few minutes.");
 
     const category = d.category && getCategory(d.category) ? d.category : null;
-    // SuperLead has no `source` column yet; keep the page/template reference with the message so sales can see it.
-    const source = d.source ? d.source.replace(/[^\w:/.-]/g, "") : "";
-    const message = [d.message || "", source ? `(via ${source})` : ""].filter(Boolean).join("\n") || null;
+    // Page / template reference from the client (e.g. "home", "template:901"): stored in its own column
+    // (`SuperLead.source`, migration 20260927200000) after stripping anything that is not a plain token.
+    const source = d.source ? d.source.replace(/[^\w:/.-]/g, "").slice(0, 80) : "";
     const row = await db.superLead.create({
       data: {
         name: d.name,
@@ -95,7 +95,8 @@ export async function submitSuperLead(input: unknown): Promise<ActionResult<{ id
         email: d.email || null,
         business: d.business || null,
         category,
-        message,
+        message: d.message || null,
+        source: source || null,
       },
     });
     log.info("superlead.created", { id: row.id, category, source: source || undefined });

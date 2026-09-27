@@ -7,7 +7,7 @@
  */
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db, json } from "@/server/db";
+import { db, isUniqueViolation, json } from "@/server/db";
 import { requireTenant, currentLang } from "@/server/site";
 import { requireTenantAdminAction } from "@/server/auth/guards";
 import { clientIp, rateLimit } from "@/server/rate-limit";
@@ -20,7 +20,8 @@ import { formatPKR, normalizePkPhone, slugify } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 import { errorFields, log } from "@/lib/log";
 import { orderToken, verifyOrderToken } from "@/modules/ecommerce/order-token";
-import { claimIdempotency, completeIdempotency, releaseIdempotency } from "@/modules/ecommerce/idempotency";
+import { findOrderByIdempotencyKey } from "@/modules/ecommerce/idempotency";
+import { hasModule } from "@/modules/shared/module-gate";
 import { itemInclude, toMenuItemDto } from "./queries";
 import { toFoodOrderDto } from "./serialize";
 import { hoursForDate, isOpenAt, pkDateTime, pkParts } from "./hours";
@@ -84,10 +85,6 @@ interface PricedLine {
   note: string | null;
 }
 
-function isUniqueViolation(e: unknown): boolean {
-  return typeof e === "object" && e !== null && "code" in e && (e as { code?: string }).code === "P2002";
-}
-
 class OrderError extends Error {
   constructor(
     message: string,
@@ -104,6 +101,7 @@ const pkTime = (d: Date) => d.toLocaleString("en-PK", { timeZone: "Asia/Karachi"
 export async function placeFoodOrder(input: unknown): Promise<ActionResult<PlacedFoodOrder>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "restaurant")) return fail(rm("notAvailable", lang));
   const parsed = placeOrderSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
@@ -127,20 +125,17 @@ export async function placeFoodOrder(input: unknown): Promise<ActionResult<Place
   const rlPhone = await rateLimit({ bucket: `foodorder:phone:${phone}`, limit: 10, windowSec: 3600, tenantId: tid });
   if (!rlPhone.ok) return fail(rm("tooManyAttempts", lang));
 
-  /* duplicate-submit protection: same key → same order */
+  /* duplicate-submit protection: same key → same order (FoodOrder.idempotencyKey is unique per tenant, see ecommerce/idempotency.ts) */
   const idem = d.idempotencyKey ?? null;
-  if (idem) {
-    const claim = await claimIdempotency(tid, IDEM_SCOPE, idem);
-    if (claim.state === "done") {
-      const existing = await db.foodOrder.findFirst({ where: { tenantId: tid, number: claim.number, customerPhone: phone }, select: { number: true } });
-      if (existing) return success(rm("orderReceived", lang), placed(existing.number, phone));
-    } else if (claim.state === "in_flight") {
-      return fail(rm("duplicateInFlight", lang));
-    }
-  }
-  const release = async () => {
-    if (idem) await releaseIdempotency(tid, IDEM_SCOPE, idem);
+  const alreadyPlaced = (dup: { number: number; customerPhone: string }) => {
+    // the key is per browser checkout; a different phone means the form was edited after the first attempt went through
+    if (dup.customerPhone !== phone) return fail(rm("alreadySubmitted", lang));
+    return success(rm("orderReceived", lang), placed(dup.number, phone));
   };
+  if (idem) {
+    const dup = await findOrderByIdempotencyKey(IDEM_SCOPE, tid, idem);
+    if (dup) return alreadyPlaced(dup);
+  }
 
   try {
     /* scheduling & opening hours */
@@ -252,6 +247,7 @@ export async function placeFoodOrder(input: unknown): Promise<ActionResult<Place
               paymentMethod: "COD",
               status: "NEW",
               timeline: json(timeline),
+              idempotencyKey: idem,
               scheduledFor,
               estimatedMins,
               ip,
@@ -273,11 +269,16 @@ export async function placeFoodOrder(input: unknown): Promise<ActionResult<Place
           });
         });
       } catch (e) {
-        if (!isUniqueViolation(e) || attempt === 2) throw e;
+        if (!isUniqueViolation(e)) throw e;
+        if (idem) {
+          // a concurrent submit with the same key committed first: hand its order back instead of creating a second one
+          const dup = await findOrderByIdempotencyKey(IDEM_SCOPE, tid, idem);
+          if (dup) return alreadyPlaced(dup);
+        }
+        if (attempt === 2) throw e; // concurrent order number three times in a row
       }
     }
     if (!created) throw new Error("order number allocation failed");
-    if (idem) await completeIdempotency(tid, IDEM_SCOPE, idem, created.number);
 
     const itemLines = priced.map((l) => `${l.quantity} × ${l.name}${l.sizeName ? ` (${l.sizeName})` : ""}${l.modifiers.length ? ` + ${l.modifiers.map((m) => m.name).join(", ")}` : ""} — ${formatPKR(l.total)}`);
     notifyTenant(tc, {
@@ -302,11 +303,9 @@ export async function placeFoodOrder(input: unknown): Promise<ActionResult<Place
         .join("\n"),
     }).catch(() => undefined);
 
-    revalidatePath("/admin/kitchen");
-    revalidatePath("/admin/food-orders");
+    revalidatePath("/", "layout");
     return success(rm("orderReceived", lang), placed(created.number, phone));
   } catch (e) {
-    await release();
     if (e instanceof OrderError) return fail(e.message, e.fieldErrors);
     log.error("food_order.place_failed", { tenantId: tid, ...errorFields(e) });
     return fail(rm("couldNotPlace", lang));
@@ -320,6 +319,7 @@ export async function getFoodOrderStatus(
 ): Promise<ActionResult<{ status: FoodOrderStatusKey; timeline: TimelineEntry[]; estimatedMins: number | null; updatedAt: string }>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "restaurant")) return fail(rm("notAvailable", lang));
   const n = Number(number);
   if (tc.tenant.status === "SUSPENDED") return fail(rm("storeUnavailable", lang));
   if (!Number.isInteger(n) || n <= 0 || !verifyOrderToken("food", tc.tenant.id, n, token)) return fail(rm("invalidOrder", lang));
@@ -338,6 +338,7 @@ export async function getFoodOrderStatus(
 export async function lookupFoodOrder(number: unknown, phone: unknown): Promise<ActionResult<{ number: number; token: string }>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "restaurant")) return fail(rm("notAvailable", lang));
   const n = parseInt(String(number ?? "").replace(/\D/g, ""), 10);
   const p = typeof phone === "string" ? normalizePkPhone(phone) : null;
   if (tc.tenant.status === "SUSPENDED") return fail(rm("storeUnavailable", lang));
@@ -367,6 +368,7 @@ export type ReservationInput = z.infer<typeof reservationSchema>;
 export async function createReservation(input: unknown): Promise<ActionResult<{ id: string }>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "restaurant")) return fail(rm("notAvailable", lang));
   if (!tc.settings.restaurant.reservations) return fail(rm("reservationsOff", lang));
   const parsed = reservationSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
@@ -409,7 +411,7 @@ export async function createReservation(input: unknown): Promise<ActionResult<{ 
       .filter((l) => l !== "")
       .join("\n"),
   }).catch(() => undefined);
-  revalidatePath("/admin/reservations");
+  revalidatePath("/", "layout");
   return success(rm("reservationReceived", lang), { id: row.id });
 }
 
@@ -461,9 +463,7 @@ export async function updateFoodOrderStatus(id: string, status: string, note?: s
       entityId: order.id,
       meta: { number: order.number, from: order.status, to: s.data, note: cleanNote },
     });
-    revalidatePath("/admin/kitchen");
-    revalidatePath("/admin/food-orders");
-    revalidatePath(`/admin/food-orders/${order.id}`);
+    revalidatePath("/", "layout");
     return success(`Order #${order.number} → ${s.data.replace(/_/g, " ")}.`, { status: s.data });
   } catch (e) {
     return fail((e as Error).message);
@@ -835,7 +835,7 @@ export async function updateReservationStatus(id: string, status: string): Promi
     const { count } = await db.reservation.updateMany({ where: { id, tenantId: ctx.tenant.id, status: row.status }, data: { status: s.data } });
     if (!count) return fail("This reservation was just updated by someone else. Refresh and try again.");
     await audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action: "reservation.status", entity: "Reservation", entityId: id, meta: { from: row.status, to: s.data } });
-    revalidatePath("/admin/reservations");
+    revalidatePath("/", "layout");
     return success(`Reservation ${s.data.toLowerCase()}.`, { status: s.data });
   } catch (e) {
     return fail((e as Error).message);

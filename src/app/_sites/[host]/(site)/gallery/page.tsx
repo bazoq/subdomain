@@ -52,7 +52,7 @@ export default async function GalleryPage({ searchParams }: Props) {
           {rows.length === 0 ? (
             <p className="t-card px-6 py-16 text-center text-t-muted-fg">{ctx.lang === "ur" ? "ابھی کوئی تصویر نہیں۔" : "No photos yet."}</p>
           ) : (
-            <GalleryGrid items={rows.map((r) => ({ id: r.id, src: r.imageUrl, caption: t(r.caption as LocalizedString, ctx.lang) }))} variant="masonry" columns={3} />
+            <GalleryGrid items={rows.map((r) => ({ id: r.id, src: r.imageUrl, caption: t(r.caption as LocalizedString, ctx.lang) }))} variant="masonry" columns={3} lang={ctx.lang} />
           )}
         </Container>
       </section>

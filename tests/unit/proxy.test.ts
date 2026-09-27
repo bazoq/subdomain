@@ -214,6 +214,20 @@ describe("proxy(req): tenant hosts", () => {
     expect(res.headers.get("x-middleware-request-content-security-policy")).toBeNull();
   });
 
+  it("rewrites the tenant SEO files (sitemap, robots, manifest) to the tenant handlers", () => {
+    for (const p of ["/sitemap.xml", "/robots.txt", "/manifest.webmanifest"]) {
+      const res = proxy(req("pizza.example.pk", p));
+      expect(res.status, p).toBe(200);
+      const rewrite = res.headers.get("x-middleware-rewrite");
+      expect(rewrite, p).toBeTruthy();
+      expect(new URL(rewrite as string).pathname, p).toBe(`/_sites/pizza.example.pk${p}`);
+      expect(res.headers.get("x-middleware-request-x-tenant-host"), p).toBe("pizza.example.pk");
+    }
+    for (const p of ["/sitemap.xml", "/robots.txt", "/manifest.webmanifest"]) {
+      expect(resolveRewrite("www.karachipizza.com", p, ROOT), p).toMatchObject({ kind: "tenant", pathname: `/_sites/www.karachipizza.com${p}` });
+    }
+  });
+
   it("supports custom domains", () => {
     const rewrite = proxy(req("www.karachipizza.com", "/shop/x")).headers.get("x-middleware-rewrite");
     expect(new URL(rewrite as string).pathname).toBe("/_sites/www.karachipizza.com/shop/x");

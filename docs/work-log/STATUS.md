@@ -13,4 +13,16 @@ Baseline (2026-09-27): `tsc` clean, `eslint src` clean, 84 templates, no tests, 
 | templates-a | templates-a.md | done | 2026-09-27 18:30 | done — 35 templates hardened; score 88/100; see templates-a.md Handoffs (eyebrow localisation, pack Urdu, notify.ts + components/site tsc) |
 | templates-b | templates-b.md | done | 2026-09-27 18:40 | done - 49 templates + catalog Urdu; see templates-b.md summary (score 86) + Handoffs (packs eyebrow/note localized, notify.ts tsc error) |
 | admin-ux | admin-ux.md | done | 2026-09-27 20:10 | done - score 78/100; see admin-ux.md Handoffs (server-side settings/password validation, media usage index, unlock action, uploader a11y) |
+| templates-i18n | templates-i18n.md | in-progress | 2026-09-27 21:05 | fields.ts preprocess → sections/packs localized eyebrow/note + Urdu → template sweep → test |
 | platform-dx | platform-dx.md | done | 2026-09-27 13:05 | done — 252 tests, health gating, cron, env/docs, eslint fix; see platform-dx.md Handoffs (header.tsx lint error blocks CI; revalidatePath pattern → data-layer/commerce) |
+
+## Wave 4 (handoff follow-ups, started 2026-09-27 after all 10 streams done; HEAD cfc86f3)
+Consolidated handoffs: `_handoffs-consolidated.md`. Agents log under "## Wave 4 follow-ups" in their stream file.
+
+| Follow-up agent | Logs in | Scope |
+|---|---|---|
+| commerce-w4 | commerce.md | idempotencyKey adoption, revalidation pattern, module gates, tenantPageMetadata + JSON-LD |
+| services-w4 | services-modules.md | passwordPolicy username, unlock action, logging, footer PoweredBy/nav/carousel a11y, uploader a11y, revalidation, metadata + JSON-LD |
+| templates-i18n | templates-i18n.md | eyebrow/note → localized (legacy-string tolerant), packs Urdu, sweep 84 renderers, tests |
+| data-super-w4 | data-layer.md | SuperLead.source migration, revalidateTenantContent in super actions, strict settings schema + hidePoweredBy toggle, Media index |
+| platform-w4 | platform-dx.md | db:seed script, .env.example, currentLang→resolveLang, tests (utils/theme/site-seo/proxy/module-gate), vitest config, CI |

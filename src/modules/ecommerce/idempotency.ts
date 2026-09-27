@@ -1,52 +1,43 @@
 import "server-only";
-import { db } from "@/server/db";
-import { Prisma } from "@/generated/prisma/client";
+import { db, isUniqueViolation } from "@/server/db";
 
 /**
- * Duplicate-submit protection for public order placement without a schema change.
+ * Duplicate-submit protection for public order placement.
  *
- * The client generates a random `idempotencyKey` per checkout session. We claim a row in `RateLimit`
- * (unique on tenantId + bucket) as a lock: `hits = 0` means "in flight", `hits = <order number>` means
- * "already placed". A retry with the same key therefore either waits, or gets the original order back,
- * instead of creating a second order. Rows expire with the normal rate-limit cleanup after 24h.
+ * The client generates one random `idempotencyKey` per mounted checkout and sends it with every attempt. The key is
+ * stored on the order row itself (`Order.idempotencyKey` / `FoodOrder.idempotencyKey`, `@@unique([tenantId, idempotencyKey])`,
+ * migration 20260927182500_order_idempotency_key), so the database guarantees at most one order per key:
+ *   - a retry after the first attempt succeeded finds that order by key and gets it back (no second order);
+ *   - two concurrent submits with the same key race on the unique index; the loser's transaction rolls back (stock,
+ *     coupon usage and customer upsert included) and the action re-reads the winner's order.
+ * Nothing is written before the order row, so a failed attempt leaves nothing behind and the customer can simply retry.
+ * (Until wave 4 this used lock rows in the RateLimit table; those are gone.)
  */
-const TTL_MS = 24 * 60 * 60 * 1000;
 
-export type IdempotencyClaim = { state: "new" } | { state: "in_flight" } | { state: "done"; number: number };
+export type IdempotencyScope = "shop" | "food";
+
+export interface ExistingOrder {
+  id: string;
+  number: number;
+  customerPhone: string;
+}
 
 export function isIdempotencyKey(v: unknown): v is string {
   return typeof v === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(v);
 }
 
-function bucketFor(scope: string, key: string) {
-  return `idem:${scope}:${key}`;
+/** The order already placed with this key for this tenant, if any. */
+export async function findOrderByIdempotencyKey(scope: IdempotencyScope, tenantId: string, key: string): Promise<ExistingOrder | null> {
+  const where = { tenantId_idempotencyKey: { tenantId, idempotencyKey: key } };
+  const select = { id: true, number: true, customerPhone: true };
+  return scope === "shop" ? db.order.findUnique({ where, select }) : db.foodOrder.findUnique({ where, select });
 }
 
-export async function claimIdempotency(tenantId: string, scope: string, key: string): Promise<IdempotencyClaim> {
-  const bucket = bucketFor(scope, key);
-  try {
-    await db.rateLimit.create({ data: { tenantId, bucket, hits: 0, windowEnd: new Date(Date.now() + TTL_MS) } });
-    return { state: "new" };
-  } catch (e) {
-    if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
-  }
-  const existing = await db.rateLimit.findFirst({ where: { tenantId, bucket } });
-  if (!existing) return { state: "new" };
-  if (existing.windowEnd.getTime() < Date.now()) {
-    // stale lock from an expired window: take it over
-    await db.rateLimit.update({ where: { id: existing.id }, data: { hits: 0, windowEnd: new Date(Date.now() + TTL_MS) } });
-    return { state: "new" };
-  }
-  if (existing.hits > 0) return { state: "done", number: existing.hits };
-  return { state: "in_flight" };
-}
-
-/** Record the created order number against the key so retries return it. */
-export async function completeIdempotency(tenantId: string, scope: string, key: string, number: number): Promise<void> {
-  await db.rateLimit.updateMany({ where: { tenantId, bucket: bucketFor(scope, key) }, data: { hits: number } }).catch(() => undefined);
-}
-
-/** Release the lock when the attempt failed so the customer can fix the problem and retry. */
-export async function releaseIdempotency(tenantId: string, scope: string, key: string): Promise<void> {
-  await db.rateLimit.deleteMany({ where: { tenantId, bucket: bucketFor(scope, key), hits: 0 } }).catch(() => undefined);
+/**
+ * True when an order create failed on the idempotency unique index (a concurrent submit with the same key won).
+ * Drivers do not always report the violated columns, so callers should re-read by key on any P2002 before treating
+ * the failure as the per-tenant order-number race.
+ */
+export function isIdempotencyConflict(e: unknown): boolean {
+  return isUniqueViolation(e, "idempotencyKey");
 }

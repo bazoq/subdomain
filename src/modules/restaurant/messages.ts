@@ -33,6 +33,8 @@ export const restaurantMessages = {
   couldNotPlace: ls("Could not place your order. Please try again or call us.", "آپ کا آرڈر نہیں دیا جا سکا۔ دوبارہ کوشش کریں یا ہمیں کال کریں۔"),
   orderReceived: ls("Order received!", "آرڈر موصول ہو گیا!"),
   duplicateInFlight: ls("Your order is already being placed. Please wait a moment.", "آپ کا آرڈر پہلے ہی دیا جا رہا ہے۔ ایک لمحہ انتظار کریں۔"),
+  alreadySubmitted: ls("An order from this checkout was already placed. Look it up with your order number and phone.", "اس چیک آؤٹ سے آرڈر پہلے ہی دیا جا چکا ہے۔ اپنے آرڈر نمبر اور فون سے تلاش کریں۔"),
+  notAvailable: ls("This feature is not available on this site.", "یہ سہولت اس ویب سائٹ پر دستیاب نہیں۔"),
   enterOrderNumber: ls("Enter a valid order number.", "درست آرڈر نمبر درج کریں۔"),
   enterPhoneUsed: ls("Enter the mobile number used for this order.", "اس آرڈر کے لیے استعمال شدہ موبائل نمبر درج کریں۔"),
   orderNotFound: ls("No order found with these details.", "ان تفصیلات سے کوئی آرڈر نہیں ملا۔"),

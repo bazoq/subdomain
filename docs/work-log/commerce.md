@@ -195,3 +195,19 @@ UX states, cache invalidation. DB not reachable: reasoned from code only.
   and paused stores refuse orders, bilingual messages, PK-timezone-correct expiry/hours). Deductions: −10 no runtime verification against
   a DB and no tests; −5 idempotency durability tied to RateLimit rows; −4 cache-invalidation path uncertainty (c); −3 admin timestamp TZ
   and notification fallbacks (d, g). Would be 85+ after the smoke pass and the `idempotencyKey` column.
+
+## Wave 4 follow-ups
+
+## [2026-09-27 19:05] Wave 4 follow-ups — started
+- Fourth agent on this stream (HEAD cfc86f3, tree clean apart from tenant-site's global-error edit). Tasks from `_handoffs-consolidated.md`:
+  (1) `Order.idempotencyKey` / `FoodOrder.idempotencyKey` adoption (data-layer), (2) replace no-op `revalidatePath("/admin/…")` calls
+  (platform-dx), (3) `hasModule` gates on submitPrescription / custom-cake (services-modules), (4) `tenantPageMetadata` + JSON-LD on
+  owned `(site)` pages (tenant-site), (5) tsc/eslint/vitest clean.
+- NEXT: task 1 — `npx prisma generate`, rewrite `idempotency.ts`, wire placeOrder/placeFoodOrder.
+
+## [2026-09-27 19:12] Task 1 — Order.idempotencyKey adoption — IN PROGRESS
+- Plan: `idempotency.ts` drops the RateLimit lock rows; new `findOrderByIdempotencyKey(scope, tenantId, key)` (findUnique on
+  `tenantId_idempotencyKey`). placeOrder/placeFoodOrder: fast path re-read before pricing; write `idempotencyKey` on create; on P2002
+  inside the create loop re-read by key first (concurrent duplicate → return the winner's order), otherwise treat as the order-number
+  race and retry. Phone mismatch on a found key → bilingual `alreadySubmitted` (no order data to a different phone). Local
+  `isUniqueViolation` copies replaced by the shared one from `@/server/db`.

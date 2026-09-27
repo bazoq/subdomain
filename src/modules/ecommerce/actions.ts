@@ -7,7 +7,7 @@
  * Every query is scoped by the tenant resolved from the host / session — never from the request body.
  */
 import { revalidatePath } from "next/cache";
-import { db, json } from "@/server/db";
+import { db, isUniqueViolation, json } from "@/server/db";
 import { Prisma } from "@/generated/prisma/client";
 import { requireTenant, currentLang } from "@/server/site";
 import { requireTenantAdminAction } from "@/server/auth/guards";
@@ -21,7 +21,8 @@ import { errorFields, log } from "@/lib/log";
 import { buildAttributes, asTimeline, toOrderDTO, toShippingZoneDTO } from "./mappers";
 import { computeShipping, couponDiscount, orderLabel, phoneLast4 } from "./pricing";
 import { orderToken } from "./order-token";
-import { claimIdempotency, completeIdempotency, releaseIdempotency } from "./idempotency";
+import { findOrderByIdempotencyKey } from "./idempotency";
+import { hasModule } from "@/modules/shared/module-gate";
 import { m } from "./messages";
 import {
   categoryInputSchema,
@@ -57,10 +58,6 @@ async function findCoupon(tenantId: string, code: string): Promise<CouponRow | n
 
 function adminAudit(ctx: TenantAdminContext, action: string, entity: string, entityId?: string, meta?: Record<string, unknown>) {
   return audit({ tenantId: ctx.tenant.id, actorKind: "TENANT", actorId: ctx.user.id, actorName: ctx.user.name, action, entity, entityId, meta });
-}
-
-function isUniqueViolation(e: unknown): boolean {
-  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
 }
 
 /**
@@ -138,11 +135,12 @@ async function priceLines(tc: TenantContext, lines: { productId: string; variant
   return out;
 }
 
-const IDEM_SCOPE = "checkout";
+const IDEM_SCOPE = "shop";
 
 export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrder>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "ecommerce")) return fail(m("notAvailable", lang));
   const parsed = checkoutInputSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
@@ -168,20 +166,17 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
   if (!rlPhone.ok) return fail(m("tooManyAttempts", lang));
   if (commerce.ageConfirmation && !d.ageConfirmed) return fail(m("fixFields", lang), { ageConfirmed: m("ageRequired", lang) });
 
-  // duplicate-submit protection: same key → same order
+  // duplicate-submit protection: same key → same order (Order.idempotencyKey is unique per tenant, see idempotency.ts)
   const idem = d.idempotencyKey ?? null;
-  if (idem) {
-    const claim = await claimIdempotency(tid, IDEM_SCOPE, idem);
-    if (claim.state === "done") {
-      const existing = await db.order.findFirst({ where: { tenantId: tid, number: claim.number, customerPhone: phone }, select: { number: true } });
-      if (existing) return success(t(ui.orderPlaced, lang), placed(existing.number, phone));
-    } else if (claim.state === "in_flight") {
-      return fail(m("duplicateInFlight", lang));
-    }
-  }
-  const release = async () => {
-    if (idem) await releaseIdempotency(tid, IDEM_SCOPE, idem);
+  const alreadyPlaced = (dup: { number: number; customerPhone: string }) => {
+    // the key is per browser checkout; a different phone means the form was edited after the first attempt went through
+    if (dup.customerPhone !== phone) return fail(m("alreadySubmitted", lang));
+    return success(t(ui.orderPlaced, lang), placed(dup.number, phone));
   };
+  if (idem) {
+    const dup = await findOrderByIdempotencyKey(IDEM_SCOPE, tid, idem);
+    if (dup) return alreadyPlaced(dup);
+  }
 
   try {
     const lines = await priceLines(tc, d.items, lang);
@@ -254,6 +249,7 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
               paymentMethod: "COD",
               status: "PENDING",
               timeline: json(timeline),
+              idempotencyKey: idem,
               giftMessage: d.giftMessage || null,
               prescriptionId,
               ageConfirmed: !!d.ageConfirmed,
@@ -296,12 +292,16 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
         orderId = created.id;
         break;
       } catch (e) {
-        if (isUniqueViolation(e) && attempt < 2) continue; // concurrent order number; retry
-        throw e;
+        if (!isUniqueViolation(e)) throw e;
+        if (idem) {
+          // a concurrent submit with the same key committed first: hand its order back instead of creating a second one
+          const dup = await findOrderByIdempotencyKey(IDEM_SCOPE, tid, idem);
+          if (dup) return alreadyPlaced(dup);
+        }
+        if (attempt === 2) throw e; // concurrent order number three times in a row
       }
     }
     if (!number) throw new Error("order number allocation failed");
-    if (idem) await completeIdempotency(tid, IDEM_SCOPE, idem, number);
 
     const result = placed(number, phone);
     notifyTenant(tc, {
@@ -323,11 +323,10 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
         .join("\n"),
     }).catch(() => undefined);
 
-    // stock changed → storefront availability badges must not show stale counts
-    revalidatePath("/shop", "layout");
+    // stock changed → storefront availability badges and admin lists must not show stale data
+    revalidatePath("/", "layout");
     return success(t(ui.orderPlaced, lang), result);
   } catch (e) {
-    await release();
     if (e instanceof CheckoutError) return fail(e.message, e.fieldErrors);
     log.error("order.place_failed", { tenantId: tid, ...errorFields(e) });
     return fail(t(ui.somethingWrong, lang));
@@ -337,6 +336,7 @@ export async function placeOrder(input: unknown): Promise<ActionResult<PlacedOrd
 export async function validateCoupon(code: unknown, subtotal: unknown): Promise<ActionResult<{ code: string; type: string; value: number; discount: number }>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "ecommerce")) return fail(m("notAvailable", lang));
   const c = typeof code === "string" ? code.trim().slice(0, 40) : "";
   const s = typeof subtotal === "number" && Number.isFinite(subtotal) ? Math.max(0, Math.floor(subtotal)) : 0;
   if (tc.tenant.status === "SUSPENDED") return fail(m("storeUnavailable", lang));
@@ -356,6 +356,7 @@ export async function validateCoupon(code: unknown, subtotal: unknown): Promise<
 export async function getOrderStatus(number: unknown, phone: unknown): Promise<ActionResult<OrderDTO & { token: string }>> {
   const tc = await requireTenant();
   const lang = await currentLang();
+  if (!hasModule(tc, "ecommerce")) return fail(m("notAvailable", lang));
   const n = parseInt(String(number ?? "").replace(/\D/g, ""), 10);
   const p = typeof phone === "string" ? normalizePkPhone(phone) : null;
   if (tc.tenant.status === "SUSPENDED") return fail(m("storeUnavailable", lang));
@@ -373,7 +374,7 @@ export async function getOrderStatus(number: unknown, phone: unknown): Promise<A
 export async function submitPrescription(input: unknown): Promise<ActionResult> {
   const tc = await requireTenant();
   const lang = await currentLang();
-  if (!tc.category.modules.includes("medical")) return fail(m("notAvailable", lang));
+  if (!hasModule(tc, "medical")) return fail(m("notAvailable", lang));
   const parsed = prescriptionInputSchema.safeParse(input);
   if (!parsed.success) return fromZod(parsed.error);
   const d = parsed.data;
@@ -398,7 +399,7 @@ export async function submitPrescription(input: unknown): Promise<ActionResult> 
     subject: `New prescription from ${d.name}`,
     text: [`${d.name} · ${phone}`, `Reply on WhatsApp: ${replyWhatsAppLink(phone, `Assalam o Alaikum ${d.name}, this is ${tc.tenant.name} regarding your prescription.`) ?? phone}`, d.notes ? `\n${d.notes}` : "", "", `Open admin: https://${tc.host}/admin/prescriptions (id ${rx.id})`].filter((l) => l !== "").join("\n"),
   }).catch(() => undefined);
-  revalidatePath("/admin/prescriptions");
+  revalidatePath("/", "layout");
   return success(t(ui.thankYou, lang));
 }
 
@@ -472,7 +473,6 @@ export async function upsertProduct(id: string | null, input: unknown): Promise<
 
     await adminAudit(ctx, id ? "product.update" : "product.create", "Product", productId, { slug: d.slug });
     revalidatePath("/", "layout");
-    revalidatePath("/admin/products");
     return success(id ? "Product updated." : "Product created.", { id: productId });
   } catch (e) {
     // two admins saving the same slug at the same time: the pre-check passed for both, the unique index caught the loser
@@ -496,14 +496,12 @@ export async function deleteProduct(id: string): Promise<ActionResult<{ archived
       await db.product.updateMany({ where: { id, tenantId: tid }, data: { isActive: false, isFeatured: false } });
       await adminAudit(ctx, "product.archive", "Product", id, { orderItems: orders });
       revalidatePath("/", "layout");
-      revalidatePath("/admin/products");
       return success(`This product is part of ${orders} past order line${orders === 1 ? "" : "s"}, so it was hidden from the shop instead of deleted. Its order history stays intact.`, { archived: true });
     }
     const { count } = await db.product.deleteMany({ where: { id, tenantId: tid } });
     if (!count) return fail("Not found.");
     await adminAudit(ctx, "product.delete", "Product", id);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/products");
     return success("Product deleted.", { archived: false });
   } catch (e) {
     return fail((e as Error).message);
@@ -518,7 +516,6 @@ export async function toggleProductFlag(id: string, flag: "isActive" | "isFeatur
     if (!count) return fail("Not found.");
     await adminAudit(ctx, `product.${flag}`, "Product", id, { value });
     revalidatePath("/", "layout");
-    revalidatePath("/admin/products");
     return success(flag === "isActive" ? (value ? "Product is now visible." : "Product hidden from the shop.") : value ? "Marked as featured." : "Removed from featured.");
   } catch (e) {
     return fail((e as Error).message);
@@ -553,7 +550,6 @@ export async function upsertCategory(id: string | null, input: unknown): Promise
     }
     await adminAudit(ctx, id ? "product_category.update" : "product_category.create", "ProductCategory", row.id);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/products/categories");
     return success(id ? "Category updated." : "Category added.", { id: row.id });
   } catch (e) {
     if (isUniqueViolation(e)) return fail("Please fix the highlighted fields.", { slug: "Another category already uses this slug. Choose a different one." });
@@ -568,7 +564,6 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
     if (!count) return fail("Not found.");
     await adminAudit(ctx, "product_category.delete", "ProductCategory", id);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/products/categories");
     return success("Category deleted. Its products are now uncategorised.");
   } catch (e) {
     return fail((e as Error).message);
@@ -627,9 +622,7 @@ export async function updateOrderStatus(id: string, status: string, note?: strin
     if (outcome.kind === "noop") return success("No change.", { status: outcome.current });
 
     await adminAudit(ctx, "order.status", "Order", id, { from: outcome.from, to: next, note: cleanNote || undefined, stockRestored: outcome.restored });
-    revalidatePath("/admin/orders");
-    revalidatePath(`/admin/orders/${id}`);
-    if (outcome.restored) revalidatePath("/", "layout"); // storefront stock badges
+    revalidatePath("/", "layout"); // admin lists + storefront stock badges (tenant routes are dynamic; this purges the router cache)
     const msg = outcome.from === next ? "Note added to the timeline." : `Order marked as ${pretty(next)}.${outcome.restored ? " Stock for its items has been restored." : ""}`;
     return success(msg, { status: next });
   } catch (e) {
@@ -673,7 +666,7 @@ export async function upsertCoupon(id: string | null, input: unknown): Promise<A
       row = await db.coupon.update({ where: { id }, data });
     } else row = await db.coupon.create({ data: { ...data, tenantId: tid } });
     await adminAudit(ctx, id ? "coupon.update" : "coupon.create", "Coupon", row.id, { code: d.code });
-    revalidatePath("/admin/coupons");
+    revalidatePath("/", "layout");
     return success(id ? "Coupon updated." : "Coupon created.", { id: row.id });
   } catch (e) {
     if (isUniqueViolation(e)) return fail("Please fix the highlighted fields.", { code: "This code already exists. Choose a different code." });
@@ -687,7 +680,7 @@ export async function deleteCoupon(id: string): Promise<ActionResult> {
     const { count } = await db.coupon.deleteMany({ where: { id, tenantId: ctx.tenant.id } });
     if (!count) return fail("Not found.");
     await adminAudit(ctx, "coupon.delete", "Coupon", id);
-    revalidatePath("/admin/coupons");
+    revalidatePath("/", "layout");
     return success("Coupon deleted.");
   } catch (e) {
     return fail((e as Error).message);
@@ -713,7 +706,6 @@ export async function upsertShippingZone(id: string | null, input: unknown): Pro
     } else row = await db.shippingZone.create({ data: { ...data, tenantId: tid } });
     await adminAudit(ctx, id ? "shipping_zone.update" : "shipping_zone.create", "ShippingZone", row.id);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/shipping");
     return success(id ? "Zone updated." : "Zone added.", { id: row.id });
   } catch (e) {
     return fail((e as Error).message);
@@ -727,7 +719,6 @@ export async function deleteShippingZone(id: string): Promise<ActionResult> {
     if (!count) return fail("Not found.");
     await adminAudit(ctx, "shipping_zone.delete", "ShippingZone", id);
     revalidatePath("/", "layout");
-    revalidatePath("/admin/shipping");
     return success("Zone deleted.");
   } catch (e) {
     return fail((e as Error).message);
@@ -744,7 +735,7 @@ export async function updatePrescriptionStatus(id: string, status: string): Prom
     const { count } = await db.prescription.updateMany({ where: { id, tenantId: ctx.tenant.id }, data: { status: s.data } });
     if (!count) return fail("Not found.");
     await adminAudit(ctx, "prescription.status", "Prescription", id, { status: s.data });
-    revalidatePath("/admin/prescriptions");
+    revalidatePath("/", "layout");
     return success(`Prescription marked as ${s.data.toLowerCase()}.`);
   } catch (e) {
     return fail((e as Error).message);

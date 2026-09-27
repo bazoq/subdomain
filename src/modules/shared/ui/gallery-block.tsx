@@ -36,7 +36,7 @@ export async function GalleryBlock({
   if (!rows.length) return null;
   const h = heading ?? sec;
   const items: GalleryImage[] = rows.map((r) => ({ id: r.id, src: r.imageUrl, caption: t(r.caption as LocalizedString, ctx.lang) }));
-  const body = <GalleryGrid items={items} variant={variant} columns={columns} />;
+  const body = <GalleryGrid items={items} variant={variant} columns={columns} lang={ctx.lang} />;
   if (bare) return <div className={className}>{body}</div>;
   return (
     <section id={id} className={cn("py-16 sm:py-20", light && "bg-t-dark text-t-dark-fg", className)}>

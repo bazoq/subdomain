@@ -191,3 +191,11 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
   coverage gate, -4 no error-tracking SaaS wired, -3 dependency-update automation + LF policy + typedRoutes still open,
   -2 lint not yet at zero repo-wide.
 - NEXT: none for this stream (done). Orchestrator: commit; route the Handoffs above (super-site header.tsx is the CI blocker).
+
+## Wave 4 follow-ups
+
+## [2026-09-27 20:10] IN PROGRESS: wave-4 follow-ups (db:seed script, .env.example, currentLang defaultLang, tests, vitest tsconfigPaths, CI prisma validate)
+- Plan: 1 `db:seed` → `tsx --tsconfig tsconfig.seed.json prisma/seed.ts`; 2 `.env.example` DIRECT_URL comment (+ verify optional vars);
+  3 `src/server/site.ts#currentLang` honours `settings.languages.defaultLang` via `resolveLang`; 4 new suites url-safety /
+  theme / site-seo / module-gate + proxy rewrite assertions for sitemap/robots/manifest; 5 `resolve.tsconfigPaths` (Vite 8.3.1);
+  6 CI `prisma validate`; 7 gates.

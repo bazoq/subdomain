@@ -6,14 +6,21 @@ import { z } from "zod";
  * client bundle ever pulling secrets in). Anything the browser needs is a separate NEXT_PUBLIC_*
  * variable read in `src/config/site.ts`.
  *
- * Production rules (NODE_ENV=production):
+ * Production rules apply when the app is RUNNING as a real production deployment:
+ * NODE_ENV=production, not during `next build` (NEXT_PHASE=phase-production-build, where only the
+ * dummy build-time env exists) and not on Vercel preview/development deployments (VERCEL_ENV != production).
+ * Rules:
  *  - SESSION_SECRET: >= 32 chars, not a placeholder, reasonable entropy.
  *  - ROOT_DOMAIN must be a real domain (not localhost) and must equal NEXT_PUBLIC_ROOT_DOMAIN.
  *  - R2_* is all-or-nothing and R2_PUBLIC_URL must be https.
  * Failing validation throws at startup with every problem listed, never a partial boot.
  */
 
-const isProdEnv = process.env.NODE_ENV === "production";
+const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+const isProdEnv =
+  process.env.NODE_ENV === "production" &&
+  !isBuildPhase &&
+  (process.env.VERCEL_ENV === undefined || process.env.VERCEL_ENV === "production");
 
 const hostname = z
   .string()
@@ -61,7 +68,7 @@ const schema = z
     CRON_SECRET: z.string().min(16, "must be at least 16 characters").optional(),
   })
   .superRefine((e, ctx) => {
-    const prod = e.NODE_ENV === "production";
+    const prod = isProdEnv;
 
     if (e.NEXT_PUBLIC_ROOT_DOMAIN && e.NEXT_PUBLIC_ROOT_DOMAIN !== e.ROOT_DOMAIN) {
       ctx.addIssue({ code: "custom", path: ["NEXT_PUBLIC_ROOT_DOMAIN"], message: `must equal ROOT_DOMAIN (${e.ROOT_DOMAIN})` });

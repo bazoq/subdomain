@@ -217,7 +217,8 @@ export function SectionHeading({
   level = 2,
   id,
 }: {
-  eyebrow?: string;
+  /** localized `{ en, ur }` (section `eyebrow` field) or an already-resolved string */
+  eyebrow?: LocalizedString | string;
   title?: LocalizedString | string;
   subtitle?: LocalizedString | string;
   align?: "left" | "center";
@@ -230,11 +231,12 @@ export function SectionHeading({
 }) {
   const ttl = t(title, lang);
   const sub = t(subtitle, lang);
-  if (!ttl && !eyebrow) return null;
+  const eyebrowText = t(eyebrow, lang);
+  if (!ttl && !eyebrowText) return null;
   const H = (`h${level}`) as "h1" | "h2" | "h3";
   return (
     <div className={cn("mb-10 max-w-2xl", align === "center" ? "mx-auto text-center" : "text-start", className)}>
-      {eyebrow ? <span className={cn("t-eyebrow", light && "text-t-accent")}>{eyebrow}</span> : null}
+      {eyebrowText ? <span className={cn("t-eyebrow", light && "text-t-accent")}>{eyebrowText}</span> : null}
       {ttl ? (
         <H id={id} className={cn("font-heading mt-2 text-3xl font-bold tracking-tight text-balance sm:text-4xl", light && "text-t-dark-fg")}>
           {ttl}

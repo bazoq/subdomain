@@ -1,0 +1,47 @@
+
+> siteforge@0.1.0 build
+> npm run gen:templates && prisma generate && next build
+
+
+> siteforge@0.1.0 gen:templates
+> node scripts/gen-registry.mjs
+
+Registry generated with 84 templates.
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.10.0) to .\src\generated\prisma in 1.46s
+
+▲ Next.js 16.3.5 (Turbopack)
+- Environments: .env
+✓ Running next.config.ts took 145ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 63s
+  Running TypeScript ...
+  Finished TypeScript in 85s ...
+  Collecting page data using 7 workers ...
+Error: Failed to collect configuration for /api/cron/maintenance
+    at ignore-listed frames {
+  [cause]: Error: Invalid environment variables (production rules apply):
+    - ROOT_DOMAIN: must be the real platform domain in production
+    - SESSION_SECRET: looks like a placeholder — generate one with `openssl rand -base64 48`
+  See .env.example and docs/DEPLOY.md.
+      at module evaluation (src\config\env.ts:101:9)
+      at <unknown> (src\app\api\cron\maintenance\route.ts:2:1)
+     99 | if (!parsed.success) {
+    100 |   const issues = parsed.error.issues.map((i) => `  - ${i.path.join(".") || "(env)"}: ${i.message}`).join("\n");
+  > 101 |   throw new Error(
+        |         ^
+    102 |     `Invalid environment variables${isProdEnv ? " (production rules apply)" : ""}:\n${issues}\n` +
+    103 |       "See .env.example and docs/DEPLOY.md.",
+    104 |   );
+}
+
+> Build error occurred
+Error: Failed to collect page data for /api/cron/maintenance
+    at ignore-listed frames {
+  type: 'Error'
+}
+BUILD_EXIT=1

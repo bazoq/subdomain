@@ -58,7 +58,7 @@ export default function Image() {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.05, letterSpacing: -2, maxWidth: 980 }}>A complete website for your business, ready in a day</div>
           <div style={{ marginTop: 22, fontSize: 28, color: "#c7d2fe", maxWidth: 900 }}>
-            {TOTAL_TEMPLATES} ready templates across {CATEGORIES.length} business types, managed for you.
+            {`${TOTAL_TEMPLATES} ready templates across ${CATEGORIES.length} business types, managed for you.`}
           </div>
         </div>
         <div style={{ display: "flex" }}>

@@ -1,0 +1,594 @@
+
+> siteforge@0.1.0 build
+> npm run gen:templates && prisma generate && next build
+
+
+> siteforge@0.1.0 gen:templates
+> node scripts/gen-registry.mjs
+
+Registry generated with 84 templates.
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.10.0) to .\src\generated\prisma in 1.61s
+
+▲ Next.js 16.3.5 (Turbopack)
+- Environments: .env
+✓ Running next.config.ts took 116ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 80s
+  Running TypeScript ...
+  Finished TypeScript in 75s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/147) ...
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+  Generating static pages using 7 workers (36/147) 
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+  Generating static pages using 7 workers (73/147) 
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+  Generating static pages using 7 workers (110/147) 
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Server has closed the connection.
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+prisma:error 
+Invalid `prisma.templateSetting.findMany()` invocation:
+
+
+Authentication failed against the database server, the provided database credentials for `postgres` are not valid
+✓ Generating static pages using 7 workers (147/147) in 11.5s
+  Finalizing page optimization ...
+
+Route (app)                                            Revalidate  Expire
+┌ ○ /                                                          1h      1y
+├ ○ /_not-found
+├ ƒ /[...rest]
+├ ○ /about
+├ ƒ /api/cron/maintenance
+├ ƒ /api/csp-report
+├ ƒ /api/health
+├ ƒ /api/lang
+├ ƒ /api/media/[id]
+├ ƒ /api/media/confirm
+├ ƒ /api/media/presign
+├ ○ /apple-icon-1wpscl
+├ ƒ /blog
+├ ƒ /blog/[category]
+├ ƒ /blog/[category]/[slug]
+├ ƒ /contact
+├ ○ /icon-1wpscl
+├ ƒ /manifest.webmanifest
+├ ○ /opengraph-image-1wpscl
+├ ○ /pricing
+├ ƒ /robots.txt
+├ ƒ /sitemap.xml
+├ ƒ /super
+├ ƒ /super/audit
+├ ƒ /super/blog
+├ ƒ /super/blog/[id]
+├ ƒ /super/blog/new
+├ ƒ /super/leads
+├ ƒ /super/login
+├ ƒ /super/templates
+├ ƒ /super/tenants
+├ ƒ /super/tenants/[id]
+├ ƒ /super/tenants/new
+├ ƒ /super/users
+├ ƒ /super/users/password
+├ ƒ /templates
+├   /templates/[category]
+│ ├ ● /templates/kitchen                                       1h      1y
+│ ├ ● /templates/printing                                      1h      1y
+│ ├ ● /templates/clothing                                      1h      1y
+│ └ ● [+13 more paths]
+├   /templates/[category]/[id]
+│ ├ ● /templates/bakery/bakery-01                              1h      1y
+│ ├ ● /templates/bakery/bakery-02                              1h      1y
+│ ├ ● /templates/bakery/bakery-03                              1h      1y
+│ └ ● [+81 more paths]
+├ ƒ /templates/[category]/[id]/opengraph-image-4p1gao
+└ ○ /twitter-image-1wpscl
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+BUILD_EXIT=0

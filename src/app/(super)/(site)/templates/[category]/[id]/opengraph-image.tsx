@@ -36,7 +36,7 @@ export default async function Image({ params }: { params: Promise<{ category: st
           </div>
           <div style={{ display: "flex", alignItems: "center", fontSize: 24, color: sub }}>
             <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg, ${brand.colors.primary}, ${brand.colors.accent})`, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 20 }}>S</div>
-            <div style={{ marginLeft: 12 }}>{brand.name} · live demo included · English + Urdu</div>
+            <div style={{ marginLeft: 12 }}>{`${brand.name} · live demo included · English + Urdu`}</div>
           </div>
         </div>
         {/* right: miniature */}

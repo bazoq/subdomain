@@ -113,6 +113,33 @@ export async function deleteTenantUser(id: string): Promise<ActionResult> {
   }
 }
 
+/** Owner clears a sign-in lock (too many failed attempts) for an active user without touching the password. */
+export async function unlockTenantUser(id: string): Promise<ActionResult> {
+  try {
+    const ctx = await requireTenantAdminAction();
+    requireRole(ctx.user, ["OWNER"]);
+    const target = await db.tenantUser.findFirst({ where: { id, tenantId: ctx.tenant.id }, select: { id: true, isActive: true, failedLogins: true, lockedUntil: true } });
+    if (!target) return fail("Not found.");
+    if (!target.isActive) return fail("Activate the user instead — activating also clears the lock.");
+    const locked = Boolean(target.lockedUntil && target.lockedUntil.getTime() > Date.now());
+    if (!locked && !target.failedLogins) return success("This account is not locked.");
+    await db.tenantUser.update({ where: { id }, data: { failedLogins: 0, lockedUntil: null } });
+    await audit({
+      tenantId: ctx.tenant.id,
+      actorKind: "TENANT",
+      actorId: ctx.user.id,
+      actorName: ctx.user.name,
+      action: "user.unlock",
+      entity: "TenantUser",
+      entityId: id,
+      meta: { failedLogins: target.failedLogins, lockedUntil: target.lockedUntil?.toISOString() ?? null },
+    });
+    return success("Account unlocked. They can sign in again now.");
+  } catch (e) {
+    return fail((e as Error).message);
+  }
+}
+
 /** Owner resets another user's password; returns the new password once. */
 export async function resetTenantUserPassword(id: string, newPassword?: string): Promise<ActionResult<{ password: string }>> {
   try {

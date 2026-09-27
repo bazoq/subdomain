@@ -1,10 +1,9 @@
 import Link from "next/link";
 import type { SiteContext } from "@/templates/types";
 import { footerSection } from "@/templates/shared/sections";
-import { Container, SmartLink } from "@/templates/ui";
+import { Container, PoweredBy, SmartLink } from "@/templates/ui";
 import { t, ui } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-import { brand } from "@/config/brand";
 import { ContactInfo } from "@/modules/shared/ui/contact-info";
 import { HoursTable } from "@/modules/shared/ui/hours-table";
 import { SocialLinks } from "@/modules/shared/ui/social-links";
@@ -89,12 +88,7 @@ export function SiteFooter({
             © {year} {ctx.tenant.name}. {t(ui.allRightsReserved, ctx.lang)}
             {d.bottomNote ? ` ${d.bottomNote}` : ""}
           </p>
-          <p>
-            {t(ui.poweredBy, ctx.lang)}{" "}
-            <a href={`https://${brand.name.toLowerCase().replace(/\s+/g, "")}.pk`} target="_blank" rel="noreferrer" className="font-semibold hover:underline">
-              {brand.name}
-            </a>
-          </p>
+          <PoweredBy ctx={ctx} />
         </Container>
       </div>
     </footer>

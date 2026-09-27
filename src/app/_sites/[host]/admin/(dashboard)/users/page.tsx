@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KeyRound, Trash2, UserX, UserCheck } from "lucide-react";
+import { KeyRound, LockOpen, Trash2, UserX, UserCheck } from "lucide-react";
 import { requireTenantAdmin } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { PageHeader } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { ActionButton } from "@/components/admin/action-button";
 import { AddUserButton, ResetPasswordButton } from "@/components/admin/shared/user-forms";
-import { deleteTenantUser, setTenantUserActive, updateTenantUserRole } from "@/modules/shared/users-actions";
+import { deleteTenantUser, setTenantUserActive, unlockTenantUser, updateTenantUserRole } from "@/modules/shared/users-actions";
 import { formatDate } from "@/lib/utils";
 
 const ROLE_HELP: Record<string, string> = {
@@ -117,6 +117,16 @@ export default async function UsersAdminPage() {
                   <TD label="Actions">
                     <div className="flex flex-wrap items-center justify-end gap-1">
                       <ResetPasswordButton id={u.id} name={u.name} username={u.username} />
+                      {locked && u.isActive ? (
+                        <ActionButton
+                          size="sm"
+                          variant="ghost"
+                          confirm={{ title: `Unlock ${u.name}?`, message: "Clears the failed sign-in counter so they can try again with their current password.", confirmLabel: "Unlock", danger: false }}
+                          action={() => unlockTenantUser(u.id)}
+                        >
+                          <LockOpen /> Unlock
+                        </ActionButton>
+                      ) : null}
                       {canModify ? (
                         <ActionButton
                           size="sm"

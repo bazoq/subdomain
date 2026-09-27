@@ -40,7 +40,7 @@ export async function TestimonialsBlock({
   const cols = columns === 2 ? "sm:grid-cols-2" : columns === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3";
 
   let body: React.ReactNode;
-  if (variant === "carousel") body = <TestimonialsCarousel items={items} light={light} />;
+  if (variant === "carousel") body = <TestimonialsCarousel items={items} light={light} lang={ctx.lang} />;
   else if (variant === "single") {
     const it = items[0];
     body = (

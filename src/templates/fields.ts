@@ -58,16 +58,24 @@ export type InferFields<Fs extends readonly Field[]> = {
 };
 
 /* ---------- zod builder ---------- */
-const linkSchema = z.object({ label: localizedString, href: z.string().max(500) });
+/**
+ * Localized value that also accepts a legacy plain string (`"Welcome"` → `{ en: "Welcome" }`).
+ * Fields that were `f.text` before (hero/about/… `eyebrow`, destinations `note`) have rows saved
+ * as strings; without this coercion the whole section would fail validation and fall back to the
+ * template defaults, discarding the tenant's edits.
+ */
+export const localizedOrString = z.preprocess((v) => (typeof v === "string" ? { en: v } : v), localizedString);
+
+const linkSchema = z.object({ label: localizedOrString, href: z.string().max(500) });
 
 function fieldSchema(f: Field): z.ZodTypeAny {
   switch (f.type) {
     case "text":
       return z.string().max(f.maxLength ?? 500).default("");
     case "localized":
-      return localizedString.default({ en: "" });
+      return localizedOrString.default({ en: "" });
     case "richtext":
-      return localizedString.default({ en: "" });
+      return localizedOrString.default({ en: "" });
     case "number":
       return z.coerce.number().min(f.min ?? -1e12).max(f.max ?? 1e12).default(0);
     case "boolean":
