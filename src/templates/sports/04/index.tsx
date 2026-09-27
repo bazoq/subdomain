@@ -73,7 +73,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative isolate overflow-hidden bg-t-dark text-t-dark-fg">
-      <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" fallback={<Mountain className="size-24 text-t-primary/30" />} />
+      <Img src={h.image} alt="" priority className="absolute inset-0 -z-10 h-full w-full object-cover" fallback={<Mountain className="size-24 text-t-primary/30" />} />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-t-dark via-t-dark/70 to-t-dark/20" aria-hidden="true" />
       <Container className="py-24 lg:py-36">
         <div className="max-w-2xl">

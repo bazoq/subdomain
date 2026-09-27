@@ -201,7 +201,7 @@ export function ImagesField({
           e.target.value = "";
         }}
       />
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-red-600" role="alert">{error}</p> : null}
     </div>
   );
 }
@@ -266,7 +266,7 @@ export function FileField({
           e.target.value = "";
         }}
       />
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-red-600" role="alert">{error}</p> : null}
     </div>
   );
 }

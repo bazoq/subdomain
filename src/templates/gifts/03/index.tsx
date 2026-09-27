@@ -91,7 +91,7 @@ async function Hero({ ctx }: TemplatePageProps) {
         <ul className="mt-14 grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4">
           {tiles.map((src, i) => (
             <li key={i} className={cn("transition hover:rotate-0 hover:scale-105", tilt[i])}>
-              <Img src={src} alt="" className="aspect-square w-full rounded-[var(--t-radius)] border-2 border-dashed border-t-border object-cover" fallback={<Heart className="size-8 text-t-primary/40" />} />
+              <Img src={src} alt="" priority={i === 0} className="aspect-square w-full rounded-[var(--t-radius)] border-2 border-dashed border-t-border object-cover" fallback={<Heart className="size-8 text-t-primary/40" />} />
             </li>
           ))}
         </ul>

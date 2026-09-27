@@ -93,7 +93,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const quick = sectionData<CollectionsData>(ctx, collectionsSection)?.items?.slice(0, 4) ?? [];
   return (
     <section className="relative overflow-hidden bg-t-dark text-t-dark-fg">
-      {h.image ? <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" /> : null}
+      {h.image ? <Img src={h.image} alt="" priority className="absolute inset-0 h-full w-full object-cover" /> : null}
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark via-t-dark/85 to-t-dark/30 rtl:bg-gradient-to-l" aria-hidden="true" />
       <Container className="relative py-24 lg:py-36">
         <div className="t-fade-up max-w-2xl">

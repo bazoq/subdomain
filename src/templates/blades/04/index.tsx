@@ -94,6 +94,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <Img
             src={h.image}
             alt=""
+            priority
             className="relative aspect-[4/3] w-full rounded-[var(--t-radius)] bg-t-bg object-contain p-4"
             fallback={<Utensils className="size-16 text-t-accent" />}
           />

@@ -119,7 +119,7 @@ async function Hero({ ctx }: TemplatePageProps) {
           {slides.length ? (
             <div className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto">
               {slides.map((src, i) => (
-                <Img key={i} src={src} alt="" className="h-64 w-full shrink-0 snap-center object-cover sm:h-80 lg:h-[26rem]" />
+                <Img key={i} src={src} alt="" priority={i === 0} className="h-64 w-full shrink-0 snap-center object-cover sm:h-80 lg:h-[26rem]" />
               ))}
             </div>
           ) : (

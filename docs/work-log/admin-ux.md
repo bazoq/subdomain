@@ -77,3 +77,10 @@ Everything else → `## Handoffs` at the bottom. Never `git commit`. DB not reac
 - NEXT: settings form (tablist, PK phone/email/colour/URL client validation with inline errors, beforeunload, Urdu RTL, focus first invalid).
 
 ## [2026-09-27 18:21] IN PROGRESS: settings form
+
+## [2026-09-27 18:40] DONE: settings form
+- DONE: `src/components/admin/shared/settings-form.tsx` — real `tablist`/`tab`/`tabpanel` with roving tabindex + arrow/Home/End keys, `?tab=` kept in the URL via replaceState; `validateSection()` runs before save (PK phone via `normalizePkPhone` for phone/phone2/whatsapp/whatsappTo, email format, hex colours, social/announcement links, Google Maps embed src (also extracts src from a pasted iframe), GA/Pixel id shape, non-negative integers, order prefix, hours), inline errors clear on edit, first invalid control focused; phones reformatted to "0300 1234567" on blur; beforeunload while any section is dirty; save keeps other sections' unsaved edits after a successful save (previously overwritten by the server copy); Urdu announcement input has `lang="ur" dir="rtl"`; live-region status; safe-area padding on the sticky bar; Save disabled until the section changes.
+- eslint clean; tsc clean for owned files (remaining errors are in `src/app/(super)/(site)/**` and `src/server/notify.ts`, other streams mid-edit).
+- NEXT: users (password policy 10+, strength meter, Enter submits dialogs, last-owner explanations).
+
+## [2026-09-27 18:41] IN PROGRESS: users forms + page

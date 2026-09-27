@@ -101,7 +101,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           <div className="absolute -inset-4 rotate-2 rounded-[2.5rem] bg-t-accent/30" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/3] w-full rounded-[2rem] bg-t-card object-cover" fallback={<Pill className="size-20 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-[4/3] w-full rounded-[2rem] bg-t-card object-cover" fallback={<Pill className="size-20 text-t-primary/30" />} />
         </div>
       </Container>
     </section>

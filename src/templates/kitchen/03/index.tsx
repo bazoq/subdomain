@@ -64,7 +64,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative -mt-16 flex min-h-[85vh] items-end overflow-hidden bg-t-dark lg:-mt-20">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Leaf className="size-24 opacity-20" />} />
+      <Img src={h.image} alt="" priority className="absolute inset-0 h-full w-full object-cover" fallback={<Leaf className="size-24 opacity-20" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/30" aria-hidden="true" />
       <Container className="relative pb-14 pt-32 sm:pb-20">
         <div className="t-fade-up max-w-md bg-t-bg p-7 sm:p-9">

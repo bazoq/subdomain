@@ -60,7 +60,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative -mt-16 min-h-[88vh] overflow-hidden bg-t-dark lg:-mt-20">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Flower2 className="size-24 text-t-primary/30" />} />
+      <Img src={h.image} alt="" priority className="absolute inset-0 h-full w-full object-cover" fallback={<Flower2 className="size-24 text-t-primary/30" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/70 to-t-bg/10" aria-hidden="true" />
       <div className="absolute inset-0 bg-gradient-to-r from-t-dark/70 to-transparent" aria-hidden="true" />
       <Container className="relative flex min-h-[88vh] flex-col justify-end pb-20 pt-36 lg:pb-28">

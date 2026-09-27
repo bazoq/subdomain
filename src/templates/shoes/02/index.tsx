@@ -80,7 +80,7 @@ function Hero({ ctx }: TemplatePageProps) {
     <section className="bg-t-bg py-10 sm:py-16">
       <Container>
         <div className={cn("grid items-center gap-8 p-4 sm:gap-12 sm:p-8 lg:grid-cols-2", STITCH)}>
-          <Img src={h.image} alt="" className="aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover" fallback={<Hammer className="size-16 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="aspect-[4/5] w-full rounded-[var(--t-radius)] object-cover" fallback={<Hammer className="size-16 text-t-primary/30" />} />
           <div className="t-fade-up">
             {h.eyebrow ? (
               <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-t-primary">

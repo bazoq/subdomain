@@ -70,7 +70,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const primary: LinkData = { label: t(h.primaryCta?.label, lang) ? h.primaryCta.label : ui.getQuote, href: h.primaryCta?.href || "/quote" };
   return (
     <section className="relative isolate overflow-hidden bg-t-dark text-t-dark-fg">
-      {h.image ? <Img src={h.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40" /> : null}
+      {h.image ? <Img src={h.image} alt="" priority className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40" /> : null}
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-t-bg via-t-dark/80 to-t-dark/40" aria-hidden="true" />
       <Container className="flex min-h-[26rem] flex-col justify-end py-16 lg:min-h-[34rem] lg:py-24">
         <div className="t-fade-up max-w-4xl">

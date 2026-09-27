@@ -123,7 +123,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           <div className="absolute -inset-3 rounded-[1.5rem] bg-t-primary/10" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full rounded-[1.25rem] bg-t-card object-cover" fallback={<Stethoscope className="size-20 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-[4/5] w-full rounded-[1.25rem] bg-t-card object-cover" fallback={<Stethoscope className="size-20 text-t-primary/30" />} />
         </div>
       </Container>
     </section>

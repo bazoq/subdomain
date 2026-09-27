@@ -117,3 +117,16 @@ Rules: never `git commit`; DB is not reachable, so tests must not need a databas
 - NEXT: health route gating (CRON_SECRET), vercel.json crons, .env.example.
 
 ## [2026-09-27 12:20] IN PROGRESS: health route metadata gating + vercel cron + .env.example
+- DONE: `src/app/api/health/route.ts` — public body is now `{status,time}` only (503 still signals degraded); build
+  block + database check/latency/error only with `Authorization: Bearer <CRON_SECRET>` (constant-time compare via
+  node:crypto; unavailable when CRON_SECRET is unset). `tests/api/health.test.ts` rewritten (7 tests: public shape,
+  no error text leak, authorised detail, wrong/truncated/non-Bearer token → public, timeout, no secrets).
+  `vercel.json` — added `crons: [{ path: "/api/cron/maintenance", schedule: "0 3 * * *" }]` (daily, Hobby-plan safe).
+  `.env.example` rewritten: every `process.env.*` read across src/prisma/scripts is listed (added `NEXT_PUBLIC_SITE_URL`,
+  `DB_POOL_MAX`, `DB_LOG_QUERIES`, `CRON_SECRET`, `LOG_LEVEL`, `SENTRY_DSN`, `SEED_SUPER_*`, `SEED_DEMO_*`), with the
+  SESSION_SECRET-rotation warning and the Vercel-provided vars noted as "do not add".
+- FOUND: `npx tsc --noEmit` currently fails on `src/app/(super)/(site)/page.tsx:265` (`source` prop not on the
+  component — super-site stream's in-flight edit, not this stream). `eslint src/app/api/health tests` clean.
+- NEXT: README quick start, docs/DEPLOY.md (Vercel/env/cron/health, non-DB), docs/OPERATIONS.md, docs/CONVENTIONS.md.
+
+## [2026-09-27 12:30] IN PROGRESS: README + DEPLOY (non-DB) + OPERATIONS + CONVENTIONS

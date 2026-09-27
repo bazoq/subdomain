@@ -85,7 +85,7 @@ function Hero({ ctx }: TemplatePageProps) {
           </div>
         </div>
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full rounded-[1.5rem] bg-t-card object-cover" fallback={<WashingMachine className="size-20 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="aspect-[4/3] w-full rounded-[1.5rem] bg-t-card object-cover" fallback={<WashingMachine className="size-20 text-t-primary/30" />} />
           {badges[0] ? (
             <div className="absolute -bottom-5 start-4 flex items-center gap-3 rounded-[var(--t-radius)] bg-t-card p-4 shadow-lg">
               <span className="flex size-10 items-center justify-center rounded-full bg-t-accent text-t-accent-fg [&_svg]:size-5">

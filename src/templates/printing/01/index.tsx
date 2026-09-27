@@ -141,7 +141,7 @@ function Hero({ ctx }: TemplatePageProps) {
               ))}
             </div>
           ) : (
-            <Img src={h.image} alt="" className="relative aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-lg" fallback={<Printer className="size-16 opacity-25" />} />
+            <Img src={h.image} alt="" priority className="relative aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-lg" fallback={<Printer className="size-16 opacity-25" />} />
           )}
         </div>
       </Container>

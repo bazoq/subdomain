@@ -98,7 +98,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
           <div className="absolute -bottom-6 -end-6 top-10 w-2/3 rounded-[var(--t-radius)] bg-t-accent/50" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[3/4] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<CookingPot className="size-20 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-[3/4] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<CookingPot className="size-20 text-t-primary/30" />} />
         </div>
       </Container>
     </section>

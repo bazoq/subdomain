@@ -109,7 +109,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         {/* exhibit on a plinth */}
         <div className="relative mx-auto mt-14 max-w-4xl">
-          <Img src={h.image} alt="" className="mx-auto aspect-[16/7] w-full object-contain" fallback={<Swords className="size-20 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="mx-auto aspect-[16/7] w-full object-contain" fallback={<Swords className="size-20 text-t-primary/30" />} />
           <div className="mx-auto h-7 w-[92%] border border-t-border bg-t-muted shadow-lg" aria-hidden="true" />
           <div className="mx-auto h-3 w-[97%] border-x border-b border-t-border bg-t-border/60" aria-hidden="true" />
         </div>

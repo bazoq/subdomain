@@ -90,7 +90,7 @@ function Hero({ ctx }: TemplatePageProps) {
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           <div className="absolute -end-6 -top-6 size-48 rounded-full bg-t-accent" aria-hidden="true" />
           <div className="absolute -bottom-6 -start-6 h-32 w-32 rounded-[var(--t-radius)] bg-t-primary/10" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full rounded-[2rem] object-cover" fallback={<Users className="size-16 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-[4/5] w-full rounded-[2rem] object-cover" fallback={<Users className="size-16 text-t-primary/30" />} />
         </div>
       </Container>
     </section>

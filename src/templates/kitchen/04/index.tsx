@@ -101,7 +101,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
           <div className="absolute inset-0 -rotate-6 bg-t-accent/50" style={BLOB} aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-square w-full object-cover" style={BLOB} fallback={<CookingPot className="size-20 text-t-primary/40" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-square w-full object-cover" style={BLOB} fallback={<CookingPot className="size-20 text-t-primary/40" />} />
           {h.badges?.length ? (
             <ul className="absolute inset-0">
               {h.badges.slice(0, 4).map((b, i) => (

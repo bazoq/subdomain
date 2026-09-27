@@ -117,3 +117,63 @@ Out of scope (handoffs only): `src/templates/{shared,ui,types,fields,theme,regis
   Scrims are intentional overlays; 02/03 will be tokenised in the final sweep.
 - NEXT: catalog Urdu polish (IN PROGRESS) — recruiting.ts, travel.ts, restaurant.ts (pizza block), services.ts
   (bakery/gym/law/realestate blocks only; printing is templates-a's).
+
+## [2026-09-27 18:40] catalog Urdu polish DONE; final sweep DONE; stream COMPLETE
+- DONE (catalog): 39 `{ en }`-only localized fields given `ur` (recruiting.ts 9, travel.ts 13, restaurant.ts 9 [pizza-05/08/10,
+  bakery-04], services.ts 8 [realestate-02/03, gym-03/05, law-03/04/06]). Applied via exact-match Node script that re-read each
+  file immediately before writing and asserted exactly one match per string; printing/ecommerce blocks untouched. `eyebrow` and
+  destination `note` stay English: they are `f.text` (plain string) fields in packs.ts, not localized (see Handoffs).
+  0 `{ en: "..." }`-only fields remain in owned catalog blocks.
+- DONE (final sweep, all 49): exactly one `<h1>` per index.tsx (49/49); `<main id="main">` in every Layout; header/nav/footer
+  landmarks via shared SiteHeader (HeaderNav: `<header>` + `<nav aria-label="Main|Mobile">`) / SiteFooter (`<footer>` + labelled
+  `<nav>`s) or the 4 custom recruiting headers (each `<header>` + 2 `<nav>`); every `<Img>` has `alt`; 0 fixed-px
+  `w/h/min/max-[Npx]` classes; 0 physical ml/mr/pl/pr/left/right/text-left/right/rounded-l/r/border-l/r classes (only
+  `left-1/2` centring); 0 literal "Rs"/"PKR" in JSX — all prices via `formatPKR` from `@/lib/utils`; recruiting/02
+  (`hover:bg-white/10` -> `t-primary-fg/10`, `bg-white/5` -> `t-dark-fg/5`) and 03 (`ring-black/5` -> `ring-t-fg/5`, `bg-white/5`
+  -> `t-primary-fg/5`) tokenised. Only remaining white/black: 3 mobile-drawer scrims `bg-black/40-60` (recruiting 05/07/09
+  headers) — intentional modal overlays, left as is.
+- VERIFIED: `npx eslint` on all 7 category dirs + catalog clean; `node scripts/gen-registry.mjs` = 84 templates, no diff;
+  `npx tsc --noEmit` has exactly 1 error and it is NOT in owned files: `src/server/notify.ts(25,33) TS1487 octal escape`
+  (commerce stream, committed in bfde950). All owned dirs type-check clean.
+- NOTE: orchestrator checkpoint bfde950 (12:09 wall clock) already includes this stream's catalog + recruiting/02-03 edits.
+
+### Per-category summary
+- recruiting (10): all distinct briefs realised (corporate navy search, Gulf gold/green country chips, violet floating cards,
+  blue-collar big buttons, clinical teal stepper, dark gold executive rows, Urdu-first green community, coral photo collage,
+  dark terminal pipeline, warm story cards). Fixes: Img/eager/fetchPriority, tokens on gradient/dark surfaces, 4 custom headers
+  with landmarks + RTL. Catalog: 02/05 overrides localized.
+- travel (10): distinct (search card, Umrah departures strip, transparent-header mountain, ticket-mask, black/gold editorial,
+  blob bubbles, sunset postcards, visa checklist + stamps, masonry magazine, corporate rows). Fixes: 08/10/04 Services honour
+  `count`; 09 rem hero + mobile packages CTA; 10 desk card tel/mailto logic; token whites. Catalog: 02/03/07/08/10 localized.
+- pizza (10): distinct; restaurant kit wired everywhere (OrderProvider/CartBar/CartDrawer/OpenBadge/HoursTable, zones with
+  settings fallback, /menu#item deep links, /reserve when enabled). Fixes: 06 "Rs Infinity" bug (Math.min over empty),
+  01 dead export + unreachable fallback, 03 WhatsApp float vs order bar overlap, tokens. Catalog: 05/08/10 localized.
+- bakery (5): distinct; custom-cake CTA -> /custom-cake, hours guarded, zones fallback. Fixes: 02 RTL frame + empty "Call us:"
+  guard, eager LCP. Catalog: 04 localized. Judgement left: 05 pairing chips are decorative positional copy.
+- gym (5): distinct; PlansGrid/ClassTimetable/BmiCalculator/TrialForm/Transformations used, /join CTAs. Fixes: 01 phone
+  `dir="ltr"`, 04 RTL frame + guarded tel chip + hover fg. Catalog: 03/05 localized.
+- law (6): distinct. Fixes: 01 localized "Call the chambers" + removed placeholder phone (card hidden when none), 04 grid gap
+  token, 05 fetchPriority. Catalog: 03/04/06 localized.
+- realestate (3): distinct; PropertySearch + area counts + stats. Fixes: 01 outline CTA tokens, 03 grid-line tokens, eager LCP.
+  Catalog: 02/03 localized.
+
+### Remaining issues (owned scope)
+- 3 drawer scrims use `bg-black/N` (semantic overlay; could become `bg-t-dark/N` if a rule bans literal black).
+- bakery/05 pairing chips ("Pairs with · Flat white/Karak chai") are not tenant-editable.
+- No visual regression / render tests exist for any template (no test infra in repo) — verification was read-through + lint/tsc.
+
+### Template-quality score: 86/100
+- +: 49/49 pass a11y structure (1 h1, main/header/nav/footer, alt, labelled navs), RTL-safe utilities only, all colours via
+  theme tokens (no per-template hex/white), LCP hero eager+high priority, section() guards + optional-chaining on every array,
+  PKR only via shared formatter, all tenant-facing strings localized (UI kit + catalog overrides), each template visually
+  distinct per its brief with module kits (jobs/packages/order/gym/law/property) wired.
+- -: no automated render tests or screenshot diffs (-8); `eyebrow`/`note` pack fields are plain text so cannot carry Urdu (-3,
+  contract-level, handoff); minor judgement items above (-3).
+
+## Handoffs
+- shared/packs.ts (templates contract owner): `eyebrow` and destinations `note` are `f.text` — make them `f.localized` so
+  catalog eyebrows ("Saudi · UAE · Qatar · Oman", "5 days from Rs 45,000") can carry Urdu; `note` should also be built from
+  `formatPKR` rather than a hard-coded "Rs 45,000" string in defaults.
+- commerce / server: `src/server/notify.ts(25,33)` TS1487 octal escape breaks `tsc --noEmit` repo-wide (introduced in bfde950).
+- tenant-site / product: consider a per-menu-item "pairs with" field if bakery/05 pairing chips should be editable.
+- modules/shared/ui/header-nav.tsx: `aria-label="Main"` / `"Mobile"` are English-only; localize via `ctx.lang`.

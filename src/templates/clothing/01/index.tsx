@@ -70,7 +70,7 @@ function Hero({ ctx }: TemplatePageProps) {
       <div className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth">
         {frames.map((src, i) => (
           <div key={i} id={`zarnish-slide-${i}`} className="relative flex min-h-[calc(100vh-4rem)] w-full shrink-0 snap-center items-end bg-t-dark text-t-dark-fg lg:min-h-[calc(100vh-5rem)]">
-            <Img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" fallback={<Shirt className="size-24 opacity-20" />} />
+            <Img src={src} alt="" priority={i === 0} className="absolute inset-0 h-full w-full object-cover" fallback={<Shirt className="size-24 opacity-20" />} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/25" aria-hidden="true" />
             {h.eyebrow ? (
               <span className={cn("absolute end-6 top-1/2 -translate-y-1/2 [writing-mode:vertical-rl] text-t-accent", LABEL)} aria-hidden={i > 0}>

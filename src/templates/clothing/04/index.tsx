@@ -113,7 +113,7 @@ function Hero({ ctx }: TemplatePageProps) {
               </ul>
             ) : null}
           </div>
-          <Img src={pics[0]} alt="" className="aspect-[4/3] w-full object-cover lg:aspect-auto lg:h-full" fallback={<Shirt className="size-12 text-t-primary/30" />} />
+          <Img src={pics[0]} alt="" priority className="aspect-[4/3] w-full object-cover lg:aspect-auto lg:h-full" fallback={<Shirt className="size-12 text-t-primary/30" />} />
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 lg:grid-rows-2">
             <Img src={pics[1]} alt="" className="aspect-square w-full object-cover" fallback={<Shirt className="size-10 text-t-primary/30" />} />
             <div className="relative aspect-square w-full bg-t-muted lg:aspect-auto" aria-hidden="true">

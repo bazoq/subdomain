@@ -123,7 +123,7 @@ function Hero({ ctx }: TemplatePageProps) {
           {["-start-5 -top-5", "-end-5 -top-5", "-start-5 -bottom-5", "-end-5 -bottom-5"].map((pos) => (
             <span key={pos} className={cn("absolute size-2.5 rotate-45 bg-t-accent", pos)} aria-hidden="true" />
           ))}
-          <Img src={h.image} alt="" className="relative aspect-square w-full object-cover" fallback={<Gift className="size-20 text-t-accent/50" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-square w-full object-cover" fallback={<Gift className="size-20 text-t-accent/50" />} />
         </div>
       </Container>
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-t-accent to-transparent" aria-hidden="true" />

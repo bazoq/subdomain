@@ -78,7 +78,7 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="bg-t-muted">
       <Container className="grid items-stretch gap-6 py-10 lg:grid-cols-3 lg:gap-8 lg:py-16">
-        <Img src={pics[0]} alt="" className="order-2 aspect-[3/4] w-full object-cover lg:order-1" fallback={<Gem className="size-12 text-t-accent" />} />
+        <Img src={pics[0]} alt="" priority className="order-2 aspect-[3/4] w-full object-cover lg:order-1" fallback={<Gem className="size-12 text-t-accent" />} />
         <div className="t-fade-up order-1 flex flex-col items-center justify-center border border-t-accent/60 bg-t-bg p-8 text-center sm:p-10 lg:order-2">
           {h.eyebrow ? (
             <span className={cn(MICRO, "flex items-center gap-2 text-t-accent")}>

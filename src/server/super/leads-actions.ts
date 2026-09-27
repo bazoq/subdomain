@@ -7,13 +7,14 @@ import { requireSuperAction } from "@/server/auth/guards";
 import { audit } from "@/server/audit";
 import { clientIp, rateLimit } from "@/server/rate-limit";
 import { getCategory } from "@/lib/categories";
+import { log, errorFields } from "@/lib/log";
 import { normalizePkPhone } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 
 const LEAD_STATUSES = ["NEW", "CONTACTED", "IN_PROGRESS", "CLOSED", "SPAM"] as const;
 type LeadStatusValue = (typeof LEAD_STATUSES)[number];
 
-/* ---------------- super admin ---------------- */
+/* ---------------- super admin (SUPERADMIN + EDITOR) ---------------- */
 
 export async function updateSuperLeadStatus(id: string, status: string): Promise<ActionResult> {
   try {
@@ -44,35 +45,49 @@ export async function deleteSuperLead(id: string): Promise<ActionResult> {
 
 /* ---------------- public (super website contact form) ---------------- */
 
+const THANKS = "Thank you! We will contact you shortly.";
+
 const submitSchema = z.object({
-  website: z.string().max(0, "Spam detected").optional().or(z.literal("")), // honeypot
-  name: z.string().trim().min(2, "Please enter your name").max(80),
-  phone: z.string().trim().min(7, "Please enter your mobile number").max(30),
+  /** Honeypot. Any value means a bot filled the hidden field; validated loosely so it never produces a field error. */
+  website: z.string().max(500).optional().or(z.literal("")),
+  name: z.string().trim().min(2, "Please enter your name").max(80, "Name is too long"),
+  phone: z.string().trim().min(7, "Please enter your mobile number").max(30, "Phone number is too long"),
   email: z.email("Enter a valid email").trim().max(120).optional().or(z.literal("")),
-  business: z.string().trim().max(120).optional().or(z.literal("")),
+  business: z.string().trim().max(120, "Business name is too long").optional().or(z.literal("")),
   category: z.string().trim().max(40).optional().or(z.literal("")),
-  message: z.string().trim().max(2000).optional().or(z.literal("")),
+  message: z.string().trim().max(2000, "Message is too long (2000 characters max)").optional().or(z.literal("")),
+  /** Page / template the form was shown on (client-set, informational only). */
+  source: z.string().trim().max(80).optional().or(z.literal("")),
 });
 export type SubmitSuperLeadInput = z.infer<typeof submitSchema>;
 
 /**
  * Public action used by the super website's "Get your website" / contact forms.
- * Rate limited per IP, honeypot-protected, zod-validated.
+ * Honeypot-protected (silent success for bots), rate limited per IP, zod-validated.
  */
 export async function submitSuperLead(input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
     const raw = input instanceof FormData ? Object.fromEntries(input.entries()) : input;
+    // Honeypot first: a filled hidden field is a bot, answer exactly like a success and store nothing.
+    if (raw && typeof raw === "object" && typeof (raw as Record<string, unknown>).website === "string" && (raw as Record<string, string>).website.trim()) {
+      log.info("superlead.honeypot", { ip: await clientIp().catch(() => "?") });
+      return success(THANKS);
+    }
     const parsed = submitSchema.safeParse(raw);
     if (!parsed.success) return fromZod(parsed.error);
     const d = parsed.data;
-    if (d.website) return success("Thank you! We will contact you shortly."); // silently drop bots
+
+    const phone = normalizePkPhone(d.phone);
+    if (!phone) return fail("Please check the mobile number.", { phone: "Enter a Pakistani mobile number, e.g. 0300 1234567." });
 
     const ip = await clientIp();
     const rl = await rateLimit({ bucket: `form:superlead:${ip}`, limit: 5, windowSec: 600 });
     if (!rl.ok) return fail("Too many submissions. Please try again in a few minutes.");
 
-    const phone = normalizePkPhone(d.phone) ?? d.phone;
     const category = d.category && getCategory(d.category) ? d.category : null;
+    // SuperLead has no `source` column yet; keep the page/template reference with the message so sales can see it.
+    const source = d.source ? d.source.replace(/[^\w:/.-]/g, "") : "";
+    const message = [d.message || "", source ? `(via ${source})` : ""].filter(Boolean).join("\n") || null;
     const row = await db.superLead.create({
       data: {
         name: d.name,
@@ -80,12 +95,13 @@ export async function submitSuperLead(input: unknown): Promise<ActionResult<{ id
         email: d.email || null,
         business: d.business || null,
         category,
-        message: d.message || null,
+        message,
       },
     });
-    return success("Thank you! We will contact you shortly.", { id: row.id });
+    log.info("superlead.created", { id: row.id, category, source: source || undefined });
+    return success(THANKS, { id: row.id });
   } catch (e) {
-    console.error("submitSuperLead", e);
-    return fail("Something went wrong. Please try again.");
+    log.error("superlead.failed", errorFields(e));
+    return fail("Something went wrong. Please try again, or WhatsApp us directly.");
   }
 }

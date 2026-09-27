@@ -117,7 +117,7 @@ function Hero({ ctx }: TemplatePageProps) {
             <Img src={frames[2] || frames[0]} alt="" className="aspect-[3/4] w-full object-cover" fallback={<Flower2 className="size-10 text-t-primary/40" />} />
           </div>
           <div className="absolute bottom-0 start-1/4 w-3/5 rotate-[2deg] overflow-hidden rounded-[1.75rem] shadow-xl ring-4 ring-t-bg">
-            <Img src={frames[0]} alt="" className="aspect-[4/5] w-full object-cover" fallback={<Flower2 className="size-12 text-t-primary/40" />} />
+            <Img src={frames[0]} alt="" priority className="aspect-[4/5] w-full object-cover" fallback={<Flower2 className="size-12 text-t-primary/40" />} />
           </div>
         </div>
       </Container>

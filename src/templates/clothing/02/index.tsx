@@ -93,7 +93,7 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <>
       <section className="relative overflow-hidden bg-t-muted">
-        <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" fallback={<Shirt className="size-24 opacity-20" />} />
+        <Img src={h.image} alt="" priority className="absolute inset-0 h-full w-full object-cover opacity-60" fallback={<Shirt className="size-24 opacity-20" />} />
         <div className="pointer-events-none absolute inset-0 opacity-60" style={GRAIN} aria-hidden="true" />
         <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/40 to-transparent" aria-hidden="true" />
         <Container className="relative py-20 sm:py-28 lg:py-36">

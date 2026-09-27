@@ -83,7 +83,7 @@ function Hero({ ctx }: TemplatePageProps) {
   return (
     <section className="relative overflow-hidden bg-t-muted">
       <div className={cn("absolute inset-0 lg:[clip-path:polygon(0_0,72%_0,56%_100%,0_100%)]", GRADIENT)} aria-hidden="true" />
-      <Img src={h.image} alt="" className="absolute inset-y-0 end-0 hidden h-full w-1/2 object-cover lg:block" fallback={<span />} />
+      <Img src={h.image} alt="" priority className="absolute inset-y-0 end-0 hidden h-full w-1/2 object-cover lg:block" fallback={<span />} />
       <div className="pointer-events-none absolute inset-y-1/4 start-0 w-2/3 opacity-70" style={SPEED} aria-hidden="true" />
       <Container className="relative grid gap-10 py-16 lg:grid-cols-2 lg:py-28">
         <div className="t-fade-up text-t-primary-fg">
@@ -109,7 +109,7 @@ function Hero({ ctx }: TemplatePageProps) {
           ) : null}
         </div>
         <div className="relative lg:hidden">
-          <Img src={h.image} alt="" className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<Gauge className="size-16 text-t-primary/30" />} />
+          <Img src={h.image} alt="" priority className="aspect-[4/3] w-full rounded-[var(--t-radius)] object-cover shadow-xl" fallback={<Gauge className="size-16 text-t-primary/30" />} />
         </div>
       </Container>
     </section>

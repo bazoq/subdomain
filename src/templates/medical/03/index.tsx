@@ -99,7 +99,7 @@ async function Hero({ ctx }: TemplatePageProps) {
     <section className="relative overflow-hidden bg-t-muted py-8 sm:py-12">
       <Container>
         <div className="relative overflow-hidden rounded-[1.5rem] bg-t-secondary p-6 text-t-secondary-fg sm:p-10">
-          {h.image ? <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" /> : null}
+          {h.image ? <Img src={h.image} alt="" priority className="absolute inset-0 h-full w-full object-cover opacity-30" /> : null}
           <div className="absolute inset-0 bg-gradient-to-r from-t-secondary via-t-secondary/85 to-t-secondary/40 rtl:bg-gradient-to-l" aria-hidden="true" />
           <div className="relative max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">

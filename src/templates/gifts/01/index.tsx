@@ -144,7 +144,7 @@ function Hero({ ctx }: TemplatePageProps) {
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           <div className="absolute -inset-3 rotate-2 rounded-[2rem] bg-t-accent/60" aria-hidden="true" />
           <div className="absolute -inset-3 -rotate-2 rounded-[2rem] bg-t-primary/10" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative aspect-[4/5] w-full rounded-[2rem] object-cover shadow-xl" fallback={<Gift className="size-20 text-t-primary/40" />} />
+          <Img src={h.image} alt="" priority className="relative aspect-[4/5] w-full rounded-[2rem] object-cover shadow-xl" fallback={<Gift className="size-20 text-t-primary/40" />} />
           <span className="absolute -bottom-4 start-6 inline-flex items-center gap-2 rounded-full bg-t-card px-4 py-2 text-sm font-bold text-t-fg shadow-lg">
             <Truck className="size-4 text-t-primary" /> {t(SAME_DAY, lang)}
           </span>

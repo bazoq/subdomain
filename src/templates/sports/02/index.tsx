@@ -61,7 +61,7 @@ function Hero({ ctx }: TemplatePageProps) {
   const lang = ctx.lang;
   return (
     <section className="relative overflow-hidden bg-t-dark">
-      <Img src={h.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" fallback={<Dumbbell className="size-24 text-t-primary/30" />} />
+      <Img src={h.image} alt="" priority className="absolute inset-0 h-full w-full object-cover opacity-45" fallback={<Dumbbell className="size-24 text-t-primary/30" />} />
       <div className="absolute inset-0 bg-gradient-to-t from-t-bg via-t-bg/70 to-t-bg/20" aria-hidden="true" />
       <div className="absolute -start-24 top-1/3 h-24 w-[140%] -rotate-6 bg-t-primary/80" aria-hidden="true" />
       <Container className="relative py-24 lg:py-32">

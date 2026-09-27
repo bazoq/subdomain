@@ -91,7 +91,7 @@ function Hero({ ctx }: TemplatePageProps) {
         </div>
         <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
           <div className={cn("absolute -inset-4 bg-t-accent/40", BLOB)} aria-hidden="true" />
-          <Img src={h.image} alt="" className={cn("relative aspect-square w-full object-cover", BLOB)} fallback={<Medal className="size-20 text-t-primary/40" />} />
+          <Img src={h.image} alt="" priority className={cn("relative aspect-square w-full object-cover", BLOB)} fallback={<Medal className="size-20 text-t-primary/40" />} />
         </div>
       </Container>
     </section>

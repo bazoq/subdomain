@@ -149,7 +149,7 @@ function Hero({ ctx }: TemplatePageProps) {
         <div className="relative mx-auto flex aspect-square w-full max-w-md items-center justify-center">
           <span className="absolute inset-4 rounded-full bg-t-primary" aria-hidden="true" />
           <span className="absolute inset-0 rounded-full border-2 border-t-secondary/15" aria-hidden="true" />
-          <Img src={h.image} alt="" className="relative w-[88%] -rotate-12 object-contain drop-shadow-2xl" fallback={<Footprints className="size-24 text-t-secondary/40" />} />
+          <Img src={h.image} alt="" priority className="relative w-[88%] -rotate-12 object-contain drop-shadow-2xl" fallback={<Footprints className="size-24 text-t-secondary/40" />} />
         </div>
       </Container>
       <div className="h-3 w-full bg-t-secondary" aria-hidden="true" />

@@ -167,31 +167,60 @@ export function Checkbox({ className, label, ...props }: React.InputHTMLAttribut
 /* ---------- password strength ---------- */
 
 export type Strength = { score: 0 | 1 | 2 | 3 | 4; label: string; hint?: string };
+export type PasswordContext = { username?: string | null };
 
-/** Mirrors the server policy (8+ chars, letters and digits) and adds length/variety hints. */
-export function passwordStrength(pw: string): Strength {
+/** Mirrors `PASSWORD_MIN` / `PASSWORD_MAX` in src/server/auth/password.ts. */
+export const PASSWORD_MIN = 10;
+export const PASSWORD_MAX = 200;
+/** Same denylist as the server (well-known passwords that satisfy "letters + digits"). */
+const COMMON = new Set([
+  "password1", "password12", "password123", "password1234", "passw0rd", "passw0rd1", "qwerty123", "qwerty1234", "qwertyuiop1", "1q2w3e4r5t",
+  "1qaz2wsx3edc", "abc123456", "abcd1234", "abcdef123", "admin123", "admin1234", "administrator1", "welcome1", "welcome123", "letmein123",
+  "iloveyou1", "pakistan123", "karachi123", "lahore123", "siteforge1", "changeme1", "temp1234", "test1234", "user1234",
+]);
+
+/**
+ * Client-side mirror of the server `passwordPolicy`: returns the same message the server would,
+ * or null when acceptable. The server stays the authority; this only gives instant feedback.
+ */
+export function passwordPolicyMessage(pw: string, ctx: PasswordContext = {}): string | null {
+  if (pw.length < PASSWORD_MIN) return `Password must be at least ${PASSWORD_MIN} characters.`;
+  if (pw.length > PASSWORD_MAX) return `Password must be at most ${PASSWORD_MAX} characters.`;
+  if (!/[a-zA-Z]/.test(pw) || !/\d/.test(pw)) return "Password must contain letters and numbers.";
+  const lower = pw.toLowerCase();
+  if (COMMON.has(lower)) return "That password is too common. Choose something less guessable.";
+  if (/^(.)\1+$/.test(lower)) return "Password must not repeat a single character.";
+  const u = ctx.username?.trim().toLowerCase();
+  if (u && u.length >= 4 && lower.includes(u)) return "Password must not contain your username.";
+  return null;
+}
+
+/** Strength estimate for the meter: policy failures score 1, then length/variety add points. */
+export function passwordStrength(pw: string, ctx: PasswordContext = {}): Strength {
   if (!pw) return { score: 0, label: "" };
-  const hasLetter = /[a-zA-Z]/.test(pw);
-  const hasDigit = /\d/.test(pw);
   const hasUpperLower = /[a-z]/.test(pw) && /[A-Z]/.test(pw);
   const hasSymbol = /[^a-zA-Z0-9]/.test(pw);
-  if (pw.length < 8) return { score: 1, label: "Too short", hint: `${8 - pw.length} more character${8 - pw.length === 1 ? "" : "s"} needed` };
-  if (!hasLetter || !hasDigit) return { score: 1, label: "Weak", hint: "Use both letters and numbers" };
+  if (pw.length < PASSWORD_MIN) {
+    const left = PASSWORD_MIN - pw.length;
+    return { score: 1, label: "Too short", hint: `${left} more character${left === 1 ? "" : "s"} needed` };
+  }
+  const policy = passwordPolicyMessage(pw, ctx);
+  if (policy) return { score: 1, label: "Weak", hint: policy.replace(/^Password must /, "Must ").replace(/\.$/, "") };
   let score = 2;
-  if (pw.length >= 12) score++;
+  if (pw.length >= 14) score++;
   if (hasUpperLower || hasSymbol) score++;
   if (pw.length >= 16 && hasUpperLower && hasSymbol) score = 4;
   const s = Math.min(4, score) as Strength["score"];
   return { score: s, label: s >= 4 ? "Very strong" : s === 3 ? "Strong" : "OK", hint: s === 2 ? "Longer or mixed-case passwords are stronger" : undefined };
 }
 
-export function PasswordStrength({ value, className }: { value: string; className?: string }) {
-  const s = passwordStrength(value);
+export function PasswordStrength({ value, className, username, id }: { value: string; className?: string; username?: string | null; id?: string }) {
+  const s = passwordStrength(value, { username });
   if (!value) return null;
   const colors = ["bg-slate-200", "bg-red-500", "bg-amber-500", "bg-emerald-500", "bg-emerald-600"];
   return (
-    <div className={cn("mt-2", className)} aria-live="polite">
-      <div className="flex gap-1" role="meter" aria-valuemin={0} aria-valuemax={4} aria-valuenow={s.score} aria-label="Password strength">
+    <div id={id} className={cn("mt-2", className)} aria-live="polite">
+      <div className="flex gap-1" role="meter" aria-valuemin={0} aria-valuemax={4} aria-valuenow={s.score} aria-valuetext={s.label} aria-label="Password strength">
         {[1, 2, 3, 4].map((i) => (
           <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-colors", i <= s.score ? colors[s.score] : "bg-slate-200")} />
         ))}

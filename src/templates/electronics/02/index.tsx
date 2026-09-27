@@ -109,6 +109,7 @@ function Hero({ ctx }: TemplatePageProps) {
           <Img
             src={h.image}
             alt=""
+            priority
             className="aspect-[4/3] w-full rounded-[var(--t-radius)] bg-t-card object-cover"
             fallback={<Gamepad2 className="size-20 text-t-primary/50" />}
           />
