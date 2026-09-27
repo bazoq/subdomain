@@ -82,7 +82,7 @@ export function TeamFormButton({
         <div className="grid gap-5 md:grid-cols-[180px_1fr]">
           <div>
             <Field label="Photo">
-              <ImageField value={value.imageUrl ?? ""} onChange={(url) => set({ imageUrl: url })} folder="team" aspect="aspect-[4/5]" />
+              <ImageField label="Photo" value={value.imageUrl ?? ""} onChange={(url) => set({ imageUrl: url })} folder="team" aspect="aspect-[4/5]" />
             </Field>
           </div>
           <div className="space-y-4">

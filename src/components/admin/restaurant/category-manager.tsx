@@ -161,7 +161,7 @@ export function CategoryManager({ rows, urduEnabled }: { rows: CategoryRow[]; ur
           </Field>
           <Switch checked={v.isActive} onChange={(b) => setV({ isActive: b })} label="Show on menu" />
           <Field label="Image (optional)">
-            <ImageField value={v.imageUrl ?? ""} onChange={(url) => setV({ imageUrl: url })} folder="menu" aspect="aspect-video" className="max-w-[240px]" />
+            <ImageField label="Category image" value={v.imageUrl ?? ""} onChange={(url) => setV({ imageUrl: url })} folder="menu" aspect="aspect-video" className="max-w-[240px]" />
           </Field>
         </div>
       </Dialog>

@@ -76,7 +76,7 @@ export function PostForm({ id, initial, urduEnabled }: { id?: string; initial?: 
             </Field>
           </FormCard>
           <FormCard title="Cover image">
-            <ImageField value={value.coverUrl ?? ""} onChange={(url) => set({ coverUrl: url })} folder="posts" aspect="aspect-video" />
+            <ImageField label="Cover image" value={value.coverUrl ?? ""} onChange={(url) => set({ coverUrl: url })} folder="posts" aspect="aspect-video" />
           </FormCard>
         </>
       }

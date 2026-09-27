@@ -7,7 +7,7 @@ import { t, ui, type LocalizedString } from "@/lib/i18n";
 import { cn, formatDate } from "@/lib/utils";
 import { getPosts } from "@/modules/shared/queries";
 
-type HeadingData = { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+type HeadingData = { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
 
 export function PostCard({ ctx, post, variant = "card", light, className }: { ctx: SiteContext; post: TenantPost; variant?: "card" | "horizontal"; light?: boolean; className?: string }) {
   const href = `/blog/${post.slug}`;

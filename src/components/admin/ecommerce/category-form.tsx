@@ -130,7 +130,7 @@ export function CategoryFormButton({
           </div>
           <Switch checked={value.isActive} onChange={(v) => setValue({ ...value, isActive: v })} label="Visible in shop" />
           <Field label="Image (optional)">
-            <ImageField value={value.imageUrl} onChange={(url) => setValue({ ...value, imageUrl: url })} folder="categories" aspect="aspect-square" className="max-w-[160px]" />
+            <ImageField label="Category image" value={value.imageUrl} onChange={(url) => setValue({ ...value, imageUrl: url })} folder="categories" aspect="aspect-square" className="max-w-[160px]" />
           </Field>
         </div>
       </Dialog>

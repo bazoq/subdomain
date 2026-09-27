@@ -9,7 +9,7 @@ import { getTeam } from "@/modules/shared/queries";
 import { asSocials } from "@/modules/shared/content-types";
 import { SocialLinks } from "@/modules/shared/ui/social-links";
 
-type HeadingData = { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+type HeadingData = { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
 
 export function TeamCard({
   ctx,

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { getGallery } from "@/modules/shared/queries";
 import { GalleryGrid, type GalleryImage } from "@/modules/shared/ui/gallery-grid";
 
-type HeadingData = { eyebrow?: string; title?: LocalizedString; album?: string };
+type HeadingData = { eyebrow?: LocalizedString | string; title?: LocalizedString; album?: string };
 
 export async function GalleryBlock({
   ctx,

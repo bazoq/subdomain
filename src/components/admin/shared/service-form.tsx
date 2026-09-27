@@ -91,7 +91,7 @@ export function ServiceForm({ id, initial, urduEnabled, entityLabel = "Service",
             </FormCard>
           ) : null}
           <FormCard title="Image & icon">
-            <ImageField value={value.imageUrl ?? ""} onChange={(url) => set({ imageUrl: url })} folder={imageFolder} aspect="aspect-[4/3]" />
+            <ImageField label="Service image" value={value.imageUrl ?? ""} onChange={(url) => set({ imageUrl: url })} folder={imageFolder} aspect="aspect-[4/3]" />
             <Field label="Icon" error={errors.icon} help="Lucide icon name (lucide.dev/icons), e.g. Scale, Printer, Gavel">
               <Input value={value.icon ?? ""} onChange={(e) => set({ icon: e.target.value })} placeholder="Sparkles" />
             </Field>

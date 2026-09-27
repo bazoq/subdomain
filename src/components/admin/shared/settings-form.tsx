@@ -308,10 +308,10 @@ export function SettingsForm({ initial, modules, initialTab }: { initial: Tenant
             <div className="space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <Field label="Logo" help="PNG or SVG with transparent background works best.">
-                  <ImageField value={b.logoUrl ?? ""} onChange={(url) => patch("branding", { logoUrl: url })} folder="branding" aspect="aspect-[3/1]" />
+                  <ImageField label="Logo" value={b.logoUrl ?? ""} onChange={(url) => patch("branding", { logoUrl: url })} folder="branding" aspect="aspect-[3/1]" />
                 </Field>
                 <Field label="Favicon" help="Square image, at least 64×64.">
-                  <ImageField value={b.faviconUrl ?? ""} onChange={(url) => patch("branding", { faviconUrl: url })} folder="branding" aspect="aspect-square" className="max-w-[140px]" />
+                  <ImageField label="Favicon" value={b.faviconUrl ?? ""} onChange={(url) => patch("branding", { faviconUrl: url })} folder="branding" aspect="aspect-square" className="max-w-[140px]" />
                 </Field>
               </div>
               <p className="text-sm text-slate-500">Colours override the template palette. Leave blank to use the template default.</p>
@@ -581,7 +581,7 @@ export function SettingsForm({ initial, modules, initialTab }: { initial: Tenant
                 />
               </Field>
               <Field label="Social share image (Open Graph)" help="1200×630 recommended.">
-                <ImageField value={seo.ogImageUrl ?? ""} onChange={(url) => patch("seo", { ogImageUrl: url })} folder="branding" aspect="aspect-[1.91/1]" className="max-w-md" />
+                <ImageField label="Social share image" value={seo.ogImageUrl ?? ""} onChange={(url) => patch("seo", { ogImageUrl: url })} folder="branding" aspect="aspect-[1.91/1]" className="max-w-md" />
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Google Analytics ID" error={e("googleAnalyticsId")}>

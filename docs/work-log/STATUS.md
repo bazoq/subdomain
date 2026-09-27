@@ -1,5 +1,12 @@
 # STATUS BOARD — SiteForge production-hardening (started 2026-09-27)
 
+## FINAL STATE (2026-09-27, end of session)
+All 10 streams + wave-4 follow-ups + wave-5 polish are DONE and committed.
+Gates at final commit: tsc 0 errors · eslint 0 problems · vitest 374/374 (27 files) · gen-registry 84 templates · next build 147 pages OK.
+Not done (needs credentials from the owner): prisma migrate deploy + seed against Supabase, R2 config, runtime smoke QA of demo tenants/admin, first CI run on GitHub, Vercel deploy.
+Overall production-grade estimate: ~80% (code/infra ≈ 88%, runtime verification 0%). Per-stream scores: security 82, data 82, commerce 78, services 84, super-site 82, tenant-site 80, templates 86-88, admin 78, platform 78.
+Resume protocol for future work: docs/work-log/README.md. Build logs: _build-final.log.
+
 Baseline (2026-09-27): `tsc` clean, `eslint src` clean, 84 templates, no tests, no CI, DB not reachable locally.
 
 | Stream | File | State | Last update | NEXT |
@@ -26,3 +33,4 @@ Consolidated handoffs: `_handoffs-consolidated.md`. Agents log under "## Wave 4 
 | templates-i18n | templates-i18n.md | eyebrow/note → localized (legacy-string tolerant), packs Urdu, sweep 84 renderers, tests |
 | data-super-w4 | data-layer.md | done | 2026-09-27 20:55 | tasks 1-6 done (SuperLead.source + migration, super revalidation, strict-write/lenient-read settings + hidePoweredBy toggle + 14 tests, Media index = not needed (PK lookup), DEPLOY.md migrations); see data-layer.md Handoffs (super leads UI `source` column, theme test fixtures if hidePoweredBy becomes required, templates eyebrow tsc) |
 | platform-w4 | platform-dx.md | done | 2026-09-27 21:40 | all 8 items done (+site-seo 31 tests, env.ts gate 11 tests, docs for runtime-scoped prod rules, vite-tsconfig-paths removed); tests/tsc red only via templates-i18n in-flight eyebrow defaults — see platform-dx.md Handoffs |
+| polish-w5 | polish-w5.md | done | 2026-09-27 23:45 | done - submitLead custom_cake gate, super leads source badge + ?source= filter, tests/unit/jsonld.test.ts (12), eyebrow/heading `LocalizedString | string` across section-types + module kits, ImageField/ImagesField labels at 18 call sites; tsc 0, eslint clean, 374 tests |

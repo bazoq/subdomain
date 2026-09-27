@@ -177,7 +177,7 @@ export function BlogForm({ id, initial }: { id?: string; initial?: BlogPostInput
             <CardTitle>Cover image</CardTitle>
           </CardHeader>
           <CardContent>
-            <ImageField value={v.coverUrl ?? ""} onChange={(coverUrl) => setV({ ...v, coverUrl })} folder="blog" />
+            <ImageField label="Cover image" value={v.coverUrl ?? ""} onChange={(coverUrl) => setV({ ...v, coverUrl })} folder="blog" />
             {errors.coverUrl ? <p className="mt-1 text-xs font-medium text-red-600">{errors.coverUrl}</p> : null}
           </CardContent>
         </Card>

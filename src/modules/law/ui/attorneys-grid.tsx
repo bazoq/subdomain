@@ -20,7 +20,7 @@ export function AttorneysGrid({
   light?: boolean;
   className?: string;
   bare?: boolean;
-  heading?: { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+  heading?: { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
 }) {
   return (
     <TeamBlock

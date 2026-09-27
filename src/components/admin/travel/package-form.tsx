@@ -125,7 +125,7 @@ export function PackageForm({ id, initial, urduEnabled }: { id?: string; initial
               <CardTitle>Photos</CardTitle>
             </CardHeader>
             <CardContent>
-              <ImagesField value={value.images} onChange={(v) => set("images", v)} folder={PACKAGE_IMAGES_FOLDER} max={12} />
+              <ImagesField label="Package photos" value={value.images} onChange={(v) => set("images", v)} folder={PACKAGE_IMAGES_FOLDER} max={12} />
               {errors.images ? <p className="mt-1 text-xs font-medium text-red-600">{errors.images}</p> : null}
               <p className="mt-2 text-xs text-slate-500">First image is the cover. Landscape photos (4:3) look best.</p>
             </CardContent>

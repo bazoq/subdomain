@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { getTestimonials } from "@/modules/shared/queries";
 import { TestimonialCard, TestimonialsCarousel, type TestimonialItem } from "@/modules/shared/ui/testimonials-carousel";
 
-type HeadingData = { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+type HeadingData = { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
 
 /**
  * Testimonials section. Fetches active reviews; heading comes from the `testimonials`

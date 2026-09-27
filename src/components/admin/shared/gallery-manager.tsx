@@ -204,7 +204,7 @@ function UploadDialog({ open, onClose, albums, defaultAlbum, onDone }: { open: b
             </Field>
           ) : null}
         </div>
-        <ImagesField value={urls} onChange={setUrls} folder="gallery" max={40} />
+        <ImagesField label="Gallery images" value={urls} onChange={setUrls} folder="gallery" max={40} />
       </div>
     </Dialog>
   );

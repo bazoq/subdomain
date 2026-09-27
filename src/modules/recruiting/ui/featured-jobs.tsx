@@ -19,7 +19,7 @@ export async function FeaturedJobs({
 }: {
   ctx: SiteContext;
   take?: number;
-  eyebrow?: string;
+  eyebrow?: LocalizedString | string;
   title?: LocalizedString | string;
   subtitle?: LocalizedString | string;
   className?: string;

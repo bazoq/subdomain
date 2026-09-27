@@ -199,7 +199,7 @@ export function MenuItemForm({
       <div className="space-y-6">
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold text-slate-900">Photo</h2>
-          <ImageField value={v.imageUrl ?? ""} onChange={(url) => set("imageUrl", url)} folder="menu" aspect="aspect-[4/3]" />
+          <ImageField label="Item photo" value={v.imageUrl ?? ""} onChange={(url) => set("imageUrl", url)} folder="menu" aspect="aspect-[4/3]" />
         </section>
         <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-900">Visibility</h2>

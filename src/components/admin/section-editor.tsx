@@ -406,7 +406,7 @@ function FieldControl({
           <p id={`${id}-label`} className="mb-1.5 text-sm font-medium text-slate-700">
             {f.label}
           </p>
-          <ImageField value={url} onChange={onChange} folder="sections" className={compact ? "max-w-xs" : "max-w-md"} />
+          <ImageField label={f.label} value={url} onChange={onChange} folder="sections" className={compact ? "max-w-xs" : "max-w-md"} />
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <MediaPickerButton onPick={(urls) => urls[0] && onChange(urls[0])} exclude={url ? [url] : []}>
               {url ? "Replace from library" : "Choose from library"}
@@ -424,7 +424,7 @@ function FieldControl({
           <p id={`${id}-label`} className="mb-1.5 text-sm font-medium text-slate-700">
             {f.label} <span className="text-xs font-normal text-slate-400">({urls.length} / {max})</span>
           </p>
-          <ImagesField value={urls} onChange={onChange} folder="sections" max={max} />
+          <ImagesField label={f.label} value={urls} onChange={onChange} folder="sections" max={max} />
           {urls.length < max ? (
             <div className="mt-1.5">
               <MediaPickerButton multiple max={max - urls.length} exclude={urls} onPick={(picked) => onChange([...urls, ...picked].slice(0, max))}>

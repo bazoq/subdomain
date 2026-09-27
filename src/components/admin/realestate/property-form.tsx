@@ -188,7 +188,7 @@ export function PropertyForm({ id, initial, urduEnabled, agents }: { id?: string
               <CardTitle>Photos</CardTitle>
             </CardHeader>
             <CardContent>
-              <ImagesField value={value.images} onChange={(v) => set("images", v)} folder={PROPERTY_IMAGES_FOLDER} max={20} />
+              <ImagesField label="Property photos" value={value.images} onChange={(v) => set("images", v)} folder={PROPERTY_IMAGES_FOLDER} max={20} />
               {errors.images ? <p className="mt-1 text-xs font-medium text-red-600">{errors.images}</p> : null}
               <p className="mt-2 text-xs text-slate-500">First image is the cover. Add the front elevation first, then rooms, lawn and street view.</p>
             </CardContent>

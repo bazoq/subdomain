@@ -76,7 +76,7 @@ export async function PlansGrid({
   columns,
 }: {
   ctx: SiteContext;
-  heading?: { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+  heading?: { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
   ctaHref?: string;
   light?: boolean;
   className?: string;
@@ -86,7 +86,7 @@ export async function PlansGrid({
 }) {
   const plans = await getPlans(ctx.tenant.id);
   if (!plans.length) return null;
-  const h = heading ?? ((ctx.sections.plans?.data as { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString } | undefined) ?? { eyebrow: "Pricing", title: { en: "Membership plans", ur: "ممبرشپ پلانز" } });
+  const h = heading ?? ((ctx.sections.plans?.data as { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString } | undefined) ?? { eyebrow: "Pricing", title: { en: "Membership plans", ur: "ممبرشپ پلانز" } });
   const n = columns ?? (plans.length >= 4 ? 4 : plans.length === 2 ? 2 : 3);
   const cols = n === 2 ? "sm:grid-cols-2 lg:max-w-4xl lg:mx-auto" : n === 4 ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3";
   const body = (

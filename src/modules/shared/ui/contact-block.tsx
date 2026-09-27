@@ -8,7 +8,7 @@ import { MapEmbed } from "@/modules/shared/ui/map-embed";
 import { HoursTable } from "@/modules/shared/ui/hours-table";
 import { SocialLinks } from "@/modules/shared/ui/social-links";
 
-type ContactData = { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString; showForm?: boolean; showMap?: boolean };
+type ContactData = { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString; showForm?: boolean; showMap?: boolean };
 
 /** Heading from the `contact` section + ContactInfo + ContactForm + MapEmbed. */
 export function ContactBlock({

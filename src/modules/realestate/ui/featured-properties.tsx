@@ -21,7 +21,7 @@ export async function FeaturedProperties({
   ctx: SiteContext;
   take?: number;
   purpose?: "SALE" | "RENT";
-  eyebrow?: string;
+  eyebrow?: LocalizedString | string;
   title?: LocalizedString | string;
   subtitle?: LocalizedString | string;
   className?: string;

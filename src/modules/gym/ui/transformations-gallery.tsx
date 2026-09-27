@@ -20,7 +20,7 @@ export function TransformationsGallery({
   light?: boolean;
   className?: string;
   bare?: boolean;
-  heading?: { eyebrow?: string; title?: LocalizedString };
+  heading?: { eyebrow?: LocalizedString | string; title?: LocalizedString };
 }) {
   return (
     <GalleryBlock

@@ -19,7 +19,7 @@ export async function ClassTimetable({
   bare,
 }: {
   ctx: SiteContext;
-  heading?: { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+  heading?: { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
   light?: boolean;
   className?: string;
   id?: string;
@@ -27,7 +27,7 @@ export async function ClassTimetable({
 }) {
   const rows = await getClasses(ctx.tenant.id);
   if (!rows.length) return null;
-  const h = heading ?? ((ctx.sections.classes?.data as { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString } | undefined) ?? { eyebrow: "Timetable", title: { en: "Weekly class schedule", ur: "ہفتہ وار کلاس شیڈول" } });
+  const h = heading ?? ((ctx.sections.classes?.data as { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString } | undefined) ?? { eyebrow: "Timetable", title: { en: "Weekly class schedule", ur: "ہفتہ وار کلاس شیڈول" } });
   const classes: TimetableClass[] = rows.map((r) => ({
     id: r.id,
     name: t(r.name as LocalizedString, ctx.lang),

@@ -103,7 +103,7 @@ export function TestimonialFormButton({
             </div>
           </div>
           <Field label="Photo (optional)">
-            <ImageField value={value.imageUrl ?? ""} onChange={(url) => setValue({ ...value, imageUrl: url })} folder="testimonials" aspect="aspect-square" className="max-w-[160px]" />
+            <ImageField label="Photo" value={value.imageUrl ?? ""} onChange={(url) => setValue({ ...value, imageUrl: url })} folder="testimonials" aspect="aspect-square" className="max-w-[160px]" />
           </Field>
         </div>
       </Dialog>

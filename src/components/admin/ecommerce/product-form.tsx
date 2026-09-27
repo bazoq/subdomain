@@ -333,7 +333,7 @@ export function ProductForm({
             <CardDescription>First image is the main one. Square images (1000×1000) look best.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ImagesField value={value.images} onChange={(urls) => set("images", urls)} folder="products" max={12} />
+            <ImagesField label="Product images" value={value.images} onChange={(urls) => set("images", urls)} folder="products" max={12} />
             {errors.images ? <p className="mt-1 text-xs text-red-600">{errors.images}</p> : null}
           </CardContent>
         </Card>
@@ -401,7 +401,7 @@ export function ProductForm({
                           <Input aria-label="Variant SKU" value={v.sku} onChange={(e) => updateVariant(i, { sku: e.target.value })} className="w-28" />
                         </td>
                         <td className="px-3 py-2">
-                          <ImageField value={v.imageUrl} onChange={(url) => updateVariant(i, { imageUrl: url })} folder="products" aspect="aspect-square" className="w-16" />
+                          <ImageField label={`Variant ${i + 1} image`} value={v.imageUrl} onChange={(url) => updateVariant(i, { imageUrl: url })} folder="products" aspect="aspect-square" className="w-16" />
                         </td>
                         <td className="px-3 py-3">
                           <Switch checked={v.isActive} onChange={(val) => updateVariant(i, { isActive: val })} />

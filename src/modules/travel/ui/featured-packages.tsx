@@ -21,7 +21,7 @@ export async function FeaturedPackages({
   ctx: SiteContext;
   take?: number;
   kind?: string;
-  eyebrow?: string;
+  eyebrow?: LocalizedString | string;
   title?: LocalizedString | string;
   subtitle?: LocalizedString | string;
   className?: string;

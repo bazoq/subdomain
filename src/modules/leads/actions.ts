@@ -16,6 +16,7 @@ import { formatPKR } from "@/lib/utils";
 import { fail, fromZod, success, type ActionResult } from "@/lib/action-result";
 import { notifyNewLead } from "@/server/notify";
 import { publicFailure, publicFormGuard, publicMessages } from "@/modules/shared/public-form";
+import { hasModule } from "@/modules/shared/module-gate";
 import { ISO_DATE, normalizeContactPhone, parseExtraFields, zEmailOptional, zPhone } from "@/modules/shared/validation";
 
 const leadSchema = z.object({
@@ -103,6 +104,10 @@ export async function submitLead(_prev: ActionResult, fd: FormData): Promise<Act
   const guard = await publicFormGuard({ bucket: `form:${d.formKey}`, honeypot: d.website, limit: 5, windowSec: 600 });
   if (!guard.ok) return guard.result;
   const { tc, lang } = guard;
+
+  // Bakeries only (same gate as /custom-cake: restaurant module + category key). Other tenants never see the form,
+  // so a submission with this key is a forged request; answer with the bilingual "unavailable" message.
+  if (d.formKey === "custom_cake" && !(hasModule(tc, "restaurant") && tc.category.key === "bakery")) return fail(t(publicMessages.unavailable, lang));
 
   try {
     const phone = normalizeContactPhone(d.phone);

@@ -8,7 +8,7 @@ import { cn, formatPKR } from "@/lib/utils";
 import { getServices } from "@/modules/shared/queries";
 import { asLocalizedList } from "@/modules/shared/content-types";
 
-type HeadingData = { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+type HeadingData = { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
 
 export function servicePriceLabel(s: Pick<Service, "priceFrom" | "priceNote">, lang: "en" | "ur"): string {
   if (s.priceFrom == null) return s.priceNote ?? "";

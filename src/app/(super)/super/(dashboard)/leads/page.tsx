@@ -4,6 +4,7 @@ import { db } from "@/server/db";
 import { PageHeader, EmptyState } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD, Pagination } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/input";
 import { LeadStatusSelect, LeadDeleteButton } from "@/components/admin/super/lead-actions";
 import { getCategory } from "@/lib/categories";
@@ -14,22 +15,36 @@ export const metadata = { title: "Leads" };
 
 const PAGE = 25;
 const STATUSES = ["NEW", "CONTACTED", "IN_PROGRESS", "CLOSED", "SPAM"] as const;
+/** `SuperLead.source` is a client token such as `home`, `pricing`, `template:901`, `templates/bakery`, `guide:gym`. */
+const SOURCE_RE = /^[w:/.-]{1,80}$/;
+
+/** Short badge text: `template:901` → `#901`, `contact:starter` → `contact · starter`, others as-is. */
+function sourceLabel(source: string): string {
+  const m = /^template:(.+)$/.exec(source);
+  if (m) return `#${m[1]}`;
+  return source.replace(":", " · ");
+}
 
 export default async function SuperLeadsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   await requireSuper();
   const sp = await searchParams;
   const q = sp.q?.trim() ?? "";
   const status = sp.status ?? "";
+  const source = SOURCE_RE.test(sp.source ?? "") ? (sp.source as string) : "";
   const page = Math.max(1, Number(sp.page ?? 1) || 1);
   const where: Prisma.SuperLeadWhereInput = {
     ...(q ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { phone: { contains: q } }, { email: { contains: q, mode: "insensitive" } }, { business: { contains: q, mode: "insensitive" } }] } : {}),
     ...(STATUSES.includes(status as (typeof STATUSES)[number]) ? { status: status as (typeof STATUSES)[number] } : {}),
+    ...(source ? { source } : {}),
   };
-  const [rows, total] = await Promise.all([
+  const [rows, total, sources] = await Promise.all([
     db.superLead.findMany({ where, orderBy: { createdAt: "desc" }, take: PAGE, skip: (page - 1) * PAGE }),
     db.superLead.count({ where }),
+    db.superLead.findMany({ where: { source: { not: null } }, select: { source: true }, distinct: ["source"], orderBy: { source: "asc" }, take: 200 }),
   ]);
-  const hrefFor = (p: number) => `/super/leads?${new URLSearchParams({ ...(q ? { q } : {}), ...(status ? { status } : {}), page: String(p) })}`;
+  const sourceOptions = sources.map((s) => s.source).filter((s): s is string => Boolean(s));
+  if (source && !sourceOptions.includes(source)) sourceOptions.unshift(source);
+  const hrefFor = (p: number) => `/super/leads?${new URLSearchParams({ ...(q ? { q } : {}), ...(status ? { status } : {}), ...(source ? { source } : {}), page: String(p) })}`;
 
   return (
     <>
@@ -41,6 +56,14 @@ export default async function SuperLeadsPage({ searchParams }: { searchParams: P
           {STATUSES.map((s) => (
             <option key={s} value={s}>
               {s.replace(/_/g, " ")}
+            </option>
+          ))}
+        </Select>
+        <Select name="source" defaultValue={source} className="w-44" aria-label="Source">
+          <option value="">Any source</option>
+          {sourceOptions.map((s) => (
+            <option key={s} value={s}>
+              {sourceLabel(s)}
             </option>
           ))}
         </Select>
@@ -57,6 +80,7 @@ export default async function SuperLeadsPage({ searchParams }: { searchParams: P
               <TH>Contact</TH>
               <TH>Business</TH>
               <TH>Message</TH>
+              <TH>Source</TH>
               <TH>Status</TH>
               <TH>Received</TH>
               <TH className="text-right">Actions</TH>
@@ -82,6 +106,15 @@ export default async function SuperLeadsPage({ searchParams }: { searchParams: P
                   <p className="line-clamp-2 text-slate-600" title={l.message ?? ""}>
                     {l.message ?? "—"}
                   </p>
+                </TD>
+                <TD>
+                  {l.source ? (
+                    <Badge tone={l.source.startsWith("template:") ? "brand" : "default"} title={l.source}>
+                      {sourceLabel(l.source)}
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-slate-400">—</span>
+                  )}
                 </TD>
                 <TD>
                   <LeadStatusSelect id={l.id} status={l.status} />

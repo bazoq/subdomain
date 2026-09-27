@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { getFaqs } from "@/modules/shared/queries";
 import { FaqAccordion, type FaqEntry } from "@/modules/shared/ui/faq-accordion";
 
-type HeadingData = { eyebrow?: string; title?: LocalizedString; subtitle?: LocalizedString };
+type HeadingData = { eyebrow?: LocalizedString | string; title?: LocalizedString; subtitle?: LocalizedString };
 
 export async function FaqBlock({
   ctx,

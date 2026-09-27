@@ -29,7 +29,7 @@ export async function FeaturedProducts({
   take?: number;
   title?: LocalizedString | string;
   subtitle?: LocalizedString | string;
-  eyebrow?: string;
+  eyebrow?: LocalizedString | string;
   layout?: ProductCardLayout;
   showQuickAdd?: boolean;
   columns?: 2 | 3 | 4 | 5;

@@ -150,12 +150,15 @@ export function ImagesField({
   folder = "general",
   max = 12,
   tenantId,
+  label = "Images",
 }: {
   value: string[];
   onChange: (urls: string[]) => void;
   folder?: string;
   max?: number;
   tenantId?: string;
+  /** Plural noun used in the control labels ("Add product images", "Remove product image 2"). */
+  label?: string;
 }) {
   const [busy, setBusy] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
@@ -191,25 +194,27 @@ export function ImagesField({
   }
 
   const overlayBtn = cn(iconBtn, "bg-white/90 text-slate-800 shadow hover:bg-white disabled:opacity-40");
+  const plural = label.toLowerCase();
+  const singular = plural.replace(/s$/, "");
 
   return (
     <div>
-      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6" aria-label="Images">
+      <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6" aria-label={label}>
         {value.map((url, i) => (
           <li key={url + i} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={url} alt={`Image ${i + 1} of ${value.length}${i === 0 ? " (main)" : ""}`} className="h-full w-full object-cover" />
             <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/60 via-transparent to-black/30 p-1 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100">
               <div className="flex justify-end">
-                <button type="button" onClick={() => onChange(value.filter((_, k) => k !== i))} className={cn(overlayBtn, "text-red-600")} aria-label={`Remove image ${i + 1}`} title="Remove">
+                <button type="button" onClick={() => onChange(value.filter((_, k) => k !== i))} className={cn(overlayBtn, "text-red-600")} aria-label={`Remove ${singular} ${i + 1}`} title="Remove">
                   <X className="size-4" aria-hidden="true" />
                 </button>
               </div>
               <div className="flex justify-between">
-                <button type="button" onClick={() => move(i, -1)} className={overlayBtn} aria-label={`Move image ${i + 1} earlier`} title="Move earlier" disabled={i === 0}>
+                <button type="button" onClick={() => move(i, -1)} className={overlayBtn} aria-label={`Move ${singular} ${i + 1} earlier`} title="Move earlier" disabled={i === 0}>
                   <ArrowLeft className="size-4" aria-hidden="true" />
                 </button>
-                <button type="button" onClick={() => move(i, 1)} className={overlayBtn} aria-label={`Move image ${i + 1} later`} title="Move later" disabled={i === value.length - 1}>
+                <button type="button" onClick={() => move(i, 1)} className={overlayBtn} aria-label={`Move ${singular} ${i + 1} later`} title="Move later" disabled={i === value.length - 1}>
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </button>
               </div>
@@ -232,7 +237,7 @@ export function ImagesField({
                 e.preventDefault();
                 handleFiles(e.dataTransfer.files);
               }}
-              aria-label={busy ? `Uploading ${busy} image${busy === 1 ? "" : "s"}…` : `Add images (${value.length} of ${max})`}
+              aria-label={busy ? `Uploading ${busy} ${busy === 1 ? singular : plural}…` : `Add ${plural} (${value.length} of ${max})`}
               aria-describedby={error ? errorId : undefined}
               aria-busy={busy > 0 || undefined}
             >
