@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm run gen:templates && prisma generate && next build",
+    "build": "npm run gen:templates && prisma generate && next build && node scripts/migrate-on-deploy.mjs",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
