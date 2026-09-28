@@ -157,7 +157,7 @@ function strictCsp(n: string, opts: { admin: boolean }) {
     `script-src 'self' 'nonce-${n}' 'strict-dynamic'${IS_DEV ? " 'unsafe-eval'" : ""}`,
     // Templates theme via inline style attributes; nonces do not cover style attributes.
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: blob: https:",
+    `img-src 'self' data: blob: https:${IS_DEV ? " http://localhost:*" : ""}`,
     "font-src 'self' data: https://fonts.gstatic.com",
     "media-src 'self' blob: https:",
     `connect-src 'self'${r2}${IS_DEV ? " ws: wss:" : ""}`,

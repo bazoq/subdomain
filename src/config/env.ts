@@ -12,7 +12,7 @@ import { z } from "zod";
  * Rules:
  *  - SESSION_SECRET: >= 32 chars, not a placeholder, reasonable entropy.
  *  - ROOT_DOMAIN must be a real domain (not localhost) and must equal NEXT_PUBLIC_ROOT_DOMAIN.
- *  - R2_* is all-or-nothing and R2_PUBLIC_URL must be https.
+ *  - R2_* is all-or-nothing (public files are served by the app at /media/*, so no public bucket URL).
  * Failing validation throws at startup with every problem listed, never a partial boot.
  */
 
@@ -55,7 +55,6 @@ const schema = z
     R2_ACCESS_KEY_ID: z.string().min(8).optional(),
     R2_SECRET_ACCESS_KEY: z.string().min(16).optional(),
     R2_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/, "must be a valid bucket name").optional(),
-    R2_PUBLIC_URL: z.string().url().optional(),
 
     RESEND_API_KEY: z.string().optional(),
     // Either a bare address or the RFC 5322 display form `Name <address>` (as in .env.example).
@@ -82,19 +81,14 @@ const schema = z
       if (weak) ctx.addIssue({ code: "custom", path: ["SESSION_SECRET"], message: weak });
     }
 
-    const r2 = [e.R2_ACCOUNT_ID, e.R2_ACCESS_KEY_ID, e.R2_SECRET_ACCESS_KEY, e.R2_BUCKET, e.R2_PUBLIC_URL];
+    const r2 = [e.R2_ACCOUNT_ID, e.R2_ACCESS_KEY_ID, e.R2_SECRET_ACCESS_KEY, e.R2_BUCKET];
     const set = r2.filter(Boolean).length;
     if (set > 0 && set < r2.length) {
       ctx.addIssue({
         code: "custom",
         path: ["R2_ACCOUNT_ID"],
-        message: "R2 is half-configured: set all of R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_PUBLIC_URL (or none)",
+        message: "R2 is half-configured: set all of R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET (or none)",
       });
-    }
-    if (e.R2_PUBLIC_URL) {
-      const u = new URL(e.R2_PUBLIC_URL);
-      if (prod && u.protocol !== "https:") ctx.addIssue({ code: "custom", path: ["R2_PUBLIC_URL"], message: "must be https in production" });
-      if (u.search || u.hash) ctx.addIssue({ code: "custom", path: ["R2_PUBLIC_URL"], message: "must not contain a query string or fragment" });
     }
 
     if (e.RESEND_API_KEY && !e.NOTIFY_FROM_EMAIL) {
@@ -114,6 +108,4 @@ if (!parsed.success) {
 export const env = parsed.data;
 export const isProd = env.NODE_ENV === "production";
 export const isVercel = Boolean(env.VERCEL);
-export const r2Configured = Boolean(
-  env.R2_ACCOUNT_ID && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY && env.R2_BUCKET && env.R2_PUBLIC_URL,
-);
+export const r2Configured = Boolean(env.R2_ACCOUNT_ID && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY && env.R2_BUCKET);

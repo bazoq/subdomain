@@ -9,6 +9,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { nanoid } from "nanoid";
 import { env, r2Configured } from "@/config/env";
+import { rootUrl } from "@/config/site";
 
 /**
  * Cloudflare R2 access. Tenant isolation is enforced here by construction:
@@ -16,6 +17,8 @@ import { env, r2Configured } from "@/config/env";
  *  - callers never pass raw keys from the client; they pass Media ids that are
  *    ownership-checked in the media service before reaching this module
  *  - presigned PUTs pin content-type and content-length; presigned GETs live 60 s
+ *  - the bucket stays private: PUBLIC objects are served by the app at `/media/<key>`
+ *    (src/app/media/[...key]/route.ts), so no public bucket URL / custom domain is needed
  */
 
 let client: S3Client | null = null;
@@ -45,8 +48,8 @@ export const ALLOWED_IMAGE_TYPES: Record<string, string> = {
 };
 
 /**
- * SVG can carry scripts; it is served from the R2 origin (not the tenant's), so the blast radius
- * is small, but it is still restricted to the platform owner (logos, icons).
+ * SVG can carry scripts. `/media/*` responses carry a sandboxing CSP so an SVG opened directly
+ * cannot run script on the platform origin, but uploads are still restricted to the platform owner.
  */
 export const SUPER_ONLY_TYPES: Record<string, string> = {
   "image/svg+xml": "svg",
@@ -88,8 +91,21 @@ export function keyBelongsTo(key: string, scope: Scope) {
   return key.startsWith(prefix) && !key.includes("..") && !key.includes("//");
 }
 
+/** Shape of a key produced by `buildKey(scope, "public", ext)`. Private keys never match. */
+const PUBLIC_KEY_RE = /^(?:t\/[A-Za-z0-9_-]{1,64}|s)\/public\/\d{4}\/\d{2}\/[A-Za-z0-9_-]{21}\.[a-z0-9]{1,8}$/;
+
+/** True only for well-formed PUBLIC object keys: the one thing `/media/*` may serve. */
+export function isPublicKey(key: string) {
+  return PUBLIC_KEY_RE.test(key);
+}
+
+/**
+ * Absolute URL of a PUBLIC object, served through the app on the platform root host
+ * (`https://ROOT_DOMAIN/media/<key>`). Absolute so it works on every tenant host and custom
+ * domain and stays usable in OG images / JSON-LD.
+ */
 export function publicUrlFor(key: string) {
-  return `${env.R2_PUBLIC_URL!.replace(/\/$/, "")}/${key}`;
+  return rootUrl(`/media/${key}`);
 }
 
 /**
@@ -142,6 +158,24 @@ export async function presignGet(key: string, filename?: string, expiresIn = 60)
     ResponseContentDisposition: `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`,
   });
   return getSignedUrl(r2(), cmd, { expiresIn });
+}
+
+/** Read a PUBLIC object for `/media/*`. Null when the key is not public or the object does not exist. */
+export async function getPublicObject(key: string) {
+  if (!isPublicKey(key)) return null;
+  try {
+    const res = await r2().send(new GetObjectCommand({ Bucket: env.R2_BUCKET!, Key: key }));
+    if (!res.Body) return null;
+    return {
+      body: res.Body.transformToWebStream(),
+      size: res.ContentLength,
+      etag: res.ETag,
+    };
+  } catch (err) {
+    const name = (err as { name?: string }).name;
+    if (name === "NoSuchKey" || name === "NotFound") return null;
+    throw err;
+  }
 }
 
 export async function headObject(key: string) {

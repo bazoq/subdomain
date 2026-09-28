@@ -147,6 +147,6 @@ NEXT_PUBLIC_ROOT_DOMAIN=localhost
 DATABASE_URL=postgresql://...pooler...:6543/postgres?pgbouncer=true
 DIRECT_URL=postgresql://...:5432/postgres
 SESSION_SECRET=<32+ random bytes>
-R2_ACCOUNT_ID= R2_ACCESS_KEY_ID= R2_SECRET_ACCESS_KEY= R2_BUCKET= R2_PUBLIC_URL=https://media.siteforge.pk
+R2_ACCOUNT_ID= R2_ACCESS_KEY_ID= R2_SECRET_ACCESS_KEY= R2_BUCKET=   # bucket stays private; public files served at /media/*
 RESEND_API_KEY= (optional)
 ```

@@ -13,7 +13,7 @@ Stack: Next.js 16 on Vercel · Supabase Postgres via Prisma · Cloudflare R2 (S3
 - Node **22** locally (`.nvmrc`; 20.9+ is supported and tested in CI). Run `npm install` once (this also runs `prisma generate`).
 - Copy `.env.example` to `.env` and fill it in as you go through the steps below. Every variable is documented inline there; `src/config/env.ts` validates the set at startup and a production deployment refuses to boot with a placeholder secret, a `localhost` root domain or a half-configured R2.
 
-**When the production rules apply.** `src/config/env.ts` has two layers. *Shape rules* (postgres URL, 32+ char secret, bare hostname, `NEXT_PUBLIC_ROOT_DOMAIN = ROOT_DOMAIN`, R2 all-or-nothing, no query string on `R2_PUBLIC_URL`, `NOTIFY_FROM_EMAIL` with `RESEND_API_KEY`) apply everywhere. *Production rules* (non-`localhost` `ROOT_DOMAIN`, strong non-placeholder `SESSION_SECRET`, `https` `R2_PUBLIC_URL`) apply only when the app is **running as a real production deployment**: `NODE_ENV=production` **and** not the `next build` phase (`NEXT_PHASE=phase-production-build`, where only the dummy build-time env exists) **and** `VERCEL_ENV` unset or `production`. So `npm run build` / CI passes with dummy values, Vercel **Preview** deployments (`VERCEL_ENV=preview`) boot with whatever env the Preview scope has, and only the **Production** deployment is strict. Consequence: a misconfigured production secret is caught on the first request of the production deployment, not in the build log — check the Vercel *Functions* log after the first production deploy (or hit `/api/health`, step 3.7).
+**When the production rules apply.** `src/config/env.ts` has two layers. *Shape rules* (postgres URL, 32+ char secret, bare hostname, `NEXT_PUBLIC_ROOT_DOMAIN = ROOT_DOMAIN`, R2 all-or-nothing, `NOTIFY_FROM_EMAIL` with `RESEND_API_KEY`) apply everywhere. *Production rules* (non-`localhost` `ROOT_DOMAIN`, strong non-placeholder `SESSION_SECRET`) apply only when the app is **running as a real production deployment**: `NODE_ENV=production` **and** not the `next build` phase (`NEXT_PHASE=phase-production-build`, where only the dummy build-time env exists) **and** `VERCEL_ENV` unset or `production`. So `npm run build` / CI passes with dummy values, Vercel **Preview** deployments (`VERCEL_ENV=preview`) boot with whatever env the Preview scope has, and only the **Production** deployment is strict. Consequence: a misconfigured production secret is caught on the first request of the production deployment, not in the build log — check the Vercel *Functions* log after the first production deploy (or hit `/api/health`, step 3.7).
 
 Environment variables (from `.env.example`):
 
@@ -24,7 +24,7 @@ Environment variables (from `.env.example`):
 | `NEXT_PUBLIC_SITE_URL` | Optional. Canonical origin of the marketing site when it differs from `https://ROOT_DOMAIN` (e.g. `https://www.yourdomain.pk`). |
 | `DATABASE_URL` | Supabase **transaction pooler** URL (port 6543) used by the app at runtime. |
 | `DIRECT_URL` | Supabase **direct / session** URL (port 5432) used by migrations and the seed. |
-| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` | Cloudflare R2 (see step 3). |
+| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` | Cloudflare R2 (see step 2). |
 | `RESEND_API_KEY`, `NOTIFY_FROM_EMAIL` | Optional email notifications (`NOTIFY_FROM_EMAIL` is required once the key is set; `Name <address>` allowed). |
 | `CRON_SECRET` | 16+ random characters (`openssl rand -hex 24`). Vercel Cron sends it as `Authorization: Bearer …` to `/api/cron/maintenance` (step 3.7); the same header unlocks the detailed `/api/health` body. Unset → cron route answers 404 and health stays minimal. |
 | `LOG_LEVEL` | Optional: `debug` / `info` (default) / `warn` / `error` threshold for the JSON logger. |
@@ -70,15 +70,13 @@ Environment variables (from `.env.example`):
 
 ## 2. Cloudflare R2 (media storage)
 
-1. In the Cloudflare dashboard open **R2 → Create bucket**. Name it e.g. `siteforge-media`, location **APAC**. Put the name in `R2_BUCKET`.
-2. **API token**: R2 → *Manage R2 API Tokens* → *Create API token*:
-   - Permission: **Object Read & Write**
-   - Scope: only this bucket
-   - Copy `Access Key ID` → `R2_ACCESS_KEY_ID`, `Secret Access Key` → `R2_SECRET_ACCESS_KEY`. The account id shown on the R2 overview page → `R2_ACCOUNT_ID`.
-3. **Public access** (needed so product/gallery images load in the browser). Choose one:
-   - **Custom domain (recommended)**: bucket → *Settings → Public access → Custom Domains → Connect domain* → `media.yourdomain.pk`. Cloudflare adds the DNS record automatically if the zone is on Cloudflare. Set `R2_PUBLIC_URL=https://media.yourdomain.pk`.
-   - **r2.dev subdomain** (quick, rate-limited, not for production traffic): enable *Public Development URL* and use that URL as `R2_PUBLIC_URL`.
-4. **CORS** (bucket → *Settings → CORS policy*). Browsers upload directly to R2 with presigned PUTs, so the bucket must allow your hosts:
+1. Cloudflare dashboard → **Storage & databases → R2 → Overview** (first time: complete the R2 checkout; there is a free tier). **Create bucket**, name it e.g. `siteforge-media`, location **Automatic** — do **not** pick a jurisdiction (EU/FedRAMP), the app uses the default `<ACCOUNT_ID>.r2.cloudflarestorage.com` endpoint. Put the name in `R2_BUCKET`.
+2. **Account ID**: press `Ctrl/Cmd + K` anywhere in the dashboard, type `Copy account ID`, select it → `R2_ACCOUNT_ID` (also shown under **Account Details** on the R2 Overview page).
+3. **API token**: R2 Overview → **Account Details** → **API Tokens → Manage** → **Create Account API token**:
+   - Permissions: **Object Read & Write**, scoped to this bucket only; TTL **Forever**
+   - Copy `Access Key ID` → `R2_ACCESS_KEY_ID`, `Secret Access Key` → `R2_SECRET_ACCESS_KEY` (shown once). The "Token value" on the same screen is not used.
+   - **No public access is needed.** Leave *Public Development URL* disabled and add no custom domain: public images are served by the app itself at `https://yourdomain.pk/media/<key>` (`src/app/media/[...key]/route.ts`), read from the private bucket and cached by the Vercel CDN.
+4. **CORS** (bucket → **Settings → CORS Policy → Add CORS policy** → **JSON** tab). Browsers upload directly to R2 with presigned PUTs, so the bucket must allow your hosts:
    ```json
    [
      {

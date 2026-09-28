@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 /**
  * `src/config/env.ts` validates `process.env` at import time. The production rules (real ROOT_DOMAIN,
- * strong non-placeholder SESSION_SECRET, https R2_PUBLIC_URL) must apply only when the app is RUNNING as a
+ * strong non-placeholder SESSION_SECRET) must apply only when the app is RUNNING as a
  * real production deployment: NODE_ENV=production AND not the `next build` phase AND (VERCEL_ENV unset or
  * "production"). Each case re-imports the module with a fresh env (`vi.stubEnv` + `vi.resetModules`).
  */
@@ -22,7 +22,6 @@ const BASE = {
   R2_ACCESS_KEY_ID: undefined,
   R2_SECRET_ACCESS_KEY: undefined,
   R2_BUCKET: undefined,
-  R2_PUBLIC_URL: undefined,
   RESEND_API_KEY: undefined,
   NOTIFY_FROM_EMAIL: undefined,
   CRON_SECRET: undefined,
@@ -102,14 +101,14 @@ describe("env.ts — production rules are scoped to a real production runtime", 
     await expect(load({ SESSION_SECRET: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" })).resolves.toBeTruthy();
   });
 
-  it("R2 is all-or-nothing, and https-only in production", async () => {
-    const r2 = { R2_ACCOUNT_ID: "0123456789abcdef0123456789abcdef", R2_ACCESS_KEY_ID: "AKIAXXXXXXXX", R2_SECRET_ACCESS_KEY: "s".repeat(32), R2_BUCKET: "siteforge-media", R2_PUBLIC_URL: "http://media.local" } as const;
+  it("R2 is all-or-nothing and needs no public URL", async () => {
+    const r2 = { R2_ACCOUNT_ID: "0123456789abcdef0123456789abcdef", R2_ACCESS_KEY_ID: "AKIAXXXXXXXX", R2_SECRET_ACCESS_KEY: "s".repeat(32), R2_BUCKET: "siteforge-media" } as const;
     await expect(load({ R2_ACCOUNT_ID: r2.R2_ACCOUNT_ID })).rejects.toThrow(/R2 is half-configured/);
+    await expect(load({ ...r2, R2_BUCKET: undefined })).rejects.toThrow(/R2 is half-configured/);
     const dev = await load(r2);
     expect(dev.r2Configured).toBe(true);
-    await expect(load({ ...r2, R2_PUBLIC_URL: "https://media.siteforge.pk/?v=1" })).rejects.toThrow(/must not contain a query string/);
-    await expect(load({ ...r2, NODE_ENV: "production", ROOT_DOMAIN: "siteforge.pk", NEXT_PUBLIC_ROOT_DOMAIN: "siteforge.pk", SESSION_SECRET: STRONG_SECRET })).rejects.toThrow(/R2_PUBLIC_URL: must be https in production/);
-    await expect(load({ ...r2, NODE_ENV: "production", NEXT_PHASE: "phase-production-build" })).resolves.toBeTruthy();
+    const prod = await load({ ...r2, NODE_ENV: "production", ROOT_DOMAIN: "siteforge.pk", NEXT_PUBLIC_ROOT_DOMAIN: "siteforge.pk", SESSION_SECRET: STRONG_SECRET });
+    expect(prod.r2Configured).toBe(true);
   });
 
   it("exports isVercel / r2Configured from the parsed values", async () => {

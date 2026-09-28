@@ -61,7 +61,7 @@ Tasks (each isolated; one failure does not stop the others):
 
 Redeploy after every env change (Vercel → Deployments → ⋯ → Redeploy); env vars are read at boot, and
 `src/config/env.ts` refuses to boot a **production deployment** (`NODE_ENV=production`, `VERCEL_ENV` unset or `production`,
-not the build phase) with a weak or placeholder `SESSION_SECRET`, a `localhost` root domain or an `http` `R2_PUBLIC_URL`;
+not the build phase) with a weak or placeholder `SESSION_SECRET` or a `localhost` root domain;
 a half-configured R2 or `NEXT_PUBLIC_ROOT_DOMAIN ≠ ROOT_DOMAIN` is rejected in every environment. The build itself and
 Preview deployments are not strict, so after a production env change watch the first request in the Functions log
 (or `/api/health`) rather than the build log — see `docs/DEPLOY.md §0`.
@@ -87,7 +87,7 @@ Preview deployments are not strict, so after a production env change watch the f
 | `/api/health` → 503 `degraded` | Supabase status page; Supabase → Database → connection count; authorised health shows `timeout` vs `error` | Pooler saturation → check `DB_POOL_MAX` (default 3 on Vercel) and long-running queries; paused project (free tier) → restore in Supabase. |
 | Logins fail for everyone | Was `SESSION_SECRET` changed/redeployed? `auth.locked` spikes in logs? | Expected after rotation. Lockouts are per account (5 failures / 15 min) — wait or reset the password from super admin. |
 | Uploads fail in a tenant admin | Browser console shows CORS error? R2 token valid? | Add the tenant's custom domain to the R2 CORS `AllowedOrigins` (DEPLOY §2.4). R2 credentials → rotate as above. |
-| Images 404 / broken | `R2_PUBLIC_URL` reachable? custom domain still attached to the bucket? | Fix the bucket's public access; `next.config.ts` `images.remotePatterns` derives from `R2_PUBLIC_URL`, so a URL change needs a redeploy. |
+| Images 404 / broken | Open the image URL (`https://<root>/media/…`) directly: 404 vs 502? Functions log `media.serve.failed`? | 502 → R2 credentials/bucket (`R2_*` env, token revoked?). 404 → object missing in the bucket. Image URLs are absolute on `ROOT_DOMAIN`, so changing the platform domain breaks previously stored image URLs. |
 | A tenant is abusive / unpaid | — | Super admin → website → status **Suspended**: public site shows a placeholder, public forms/orders refuse, all its sessions are revoked. Admin stays reachable. |
 | Suspicious activity | `/super/audit` (every super and tenant admin mutation with actor + IP); `auth.locked` events; `/api/csp-report` warnings | Reset the affected user's password (revokes its sessions); rotate `SESSION_SECRET` if a session token may have leaked. |
 | Cron job red in Vercel | Log line `cron.maintenance.task_failed` names the task | Tasks are idempotent — re-run manually after fixing the cause (usually DB or R2 availability). |

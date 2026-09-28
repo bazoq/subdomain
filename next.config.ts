@@ -8,14 +8,6 @@ const isDev = process.env.NODE_ENV !== "production";
 const rootDomain = (process.env.ROOT_DOMAIN ?? process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost").toLowerCase();
 const r2Account = (process.env.R2_ACCOUNT_ID ?? "").replace(/[^a-z0-9]/gi, "");
 
-const r2Host = (() => {
-  try {
-    return process.env.R2_PUBLIC_URL ? new URL(process.env.R2_PUBLIC_URL).hostname : undefined;
-  } catch {
-    return undefined;
-  }
-})();
-
 /** Origins of the platform itself — allowed to frame tenant sites (super-admin previews). */
 const platformOrigins =
   rootDomain === "localhost" ? "http://localhost:* http://*.localhost:*" : `https://${rootDomain} https://*.${rootDomain}`;
@@ -32,7 +24,8 @@ function csp(opts: { frameAncestors: string }) {
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: blob: https:",
+    // Uploaded images are served from the platform root (`/media/*`); in dev that is http://localhost:3000.
+    `img-src 'self' data: blob: https:${isDev ? " http://localhost:*" : ""}`,
     "font-src 'self' data: https://fonts.gstatic.com",
     "media-src 'self' blob: https:",
     // Browser uploads PUT straight to R2 with a presigned URL.
@@ -82,15 +75,14 @@ const nextConfig: NextConfig = {
   typedRoutes: false,
   images: {
     remotePatterns: [
-      ...(r2Host ? [{ protocol: "https" as const, hostname: r2Host }] : []),
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "*.r2.dev" },
     ],
     formats: ["image/avif", "image/webp"],
   },
   async headers() {
     return [
-      { source: "/(.*)", headers: baseHeaders },
+      // `/media/*` (uploaded files) sets its own sandboxing headers in its route handler.
+      { source: "/((?!media/).*)", headers: baseHeaders },
       { source: "/admin", headers: adminHeaders },
       { source: "/admin/:path*", headers: adminHeaders },
       { source: "/super", headers: adminHeaders },
