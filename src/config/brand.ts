@@ -27,7 +27,7 @@ export const brand = {
    * Login shown next to every template's "Demo admin panel" button. Must match the demo owner created by
    * the seed: run it with SEED_DEMO_PASSWORD set to this password.
    */
-  demoLogin: { username: "demo", password: "demo1234" },
+  demoLogin: { username: "demo", password: "baxoq2026pk" },
   social: {
     facebook: "https://facebook.com/",
     instagram: "https://instagram.com/",
