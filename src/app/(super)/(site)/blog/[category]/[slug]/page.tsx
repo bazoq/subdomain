@@ -68,18 +68,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ categ
           }),
         ]}
       />
-      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
-        <Link href="/blog" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="text-sm text-zinc-500">
+        <Link href="/blog" className="hover:text-white">
           Guides
         </Link>{" "}
         <span aria-hidden>/</span>{" "}
-        <Link href={`/blog/${category}`} className="hover:text-slate-900">
+        <Link href={`/blog/${category}`} className="hover:text-white">
           {categoryName(category)}
         </Link>
       </nav>
       <article dir={urdu ? "rtl" : undefined} lang={urdu ? "ur" : "en"} className={urdu ? "font-urdu" : undefined}>
-        <h1 className={`font-heading mt-4 text-4xl font-bold text-slate-900 ${urdu ? "font-urdu leading-[1.9]" : "leading-tight"}`}>{p.title}</h1>
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm text-slate-500" dir="ltr" lang="en">
+        <h1 className={`font-display mt-4 text-5xl text-white ${urdu ? "font-urdu leading-[1.9]" : "leading-tight"}`}>{p.title}</h1>
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm text-zinc-500" dir="ltr" lang="en">
           <span>{p.authorName}</span>
           {p.publishedAt ? (
             <>
@@ -96,20 +96,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ categ
           // eslint-disable-next-line @next/next/no-img-element
           <img src={p.coverUrl} alt={`Cover image for “${p.title}”`} decoding="async" fetchPriority="high" className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover" />
         ) : null}
-        {p.excerpt ? <p className={`mt-8 text-xl text-slate-600 ${urdu ? "leading-10" : "leading-8"}`}>{p.excerpt}</p> : null}
-        <div className={`t-prose mt-6 text-lg text-slate-700 ${urdu ? "leading-10" : "leading-8"}`}>{renderMarkdown(p.content)}</div>
+        {p.excerpt ? <p className={`mt-8 text-xl text-zinc-400 ${urdu ? "leading-10" : "leading-8"}`}>{p.excerpt}</p> : null}
+        <div className={`t-prose mt-6 text-lg text-zinc-300 ${urdu ? "leading-10" : "leading-8"}`}>{renderMarkdown(p.content)}</div>
         {p.tags.length ? (
           <ul className="mt-8 flex flex-wrap gap-2" aria-label="Tags" dir="ltr">
             {p.tags.map((t) => (
-              <li key={t} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+              <li key={t} className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-zinc-400">
                 #{t}
               </li>
             ))}
           </ul>
         ) : null}
       </article>
-      <div className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-6">
-        <h2 className="font-heading text-xl font-bold text-slate-900">Want a website like this for your {c?.name.toLowerCase() ?? "business"}?</h2>
+      <div className="mt-14 rounded-2xl border border-white/10 bg-ink-900 p-6">
+        <h2 className="font-display text-xl text-white">Want a website like this for your {c?.name.toLowerCase() ?? "business"}?</h2>
         <div className="mt-4">
           <LeadForm defaultCategory={c?.key} compact source={`post:${p.category}/${p.slug}`} />
         </div>

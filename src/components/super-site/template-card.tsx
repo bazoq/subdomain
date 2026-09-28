@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
-import type { TemplateMeta } from "@/templates/types";
+import Image from "next/image";
+import { ArrowUpRight, ExternalLink } from "lucide-react";
+import type { TemplateMeta, TemplateTheme } from "@/templates/types";
+import { TEMPLATE_SHOTS } from "@/templates/shots";
 import { hostUrl, subdomainHost } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -8,8 +10,30 @@ export function demoUrl(templateId: string) {
   return hostUrl(subdomainHost(`demo-${templateId}`));
 }
 
-export function templateHref(meta: Pick<TemplateMeta, "category" | "id">) {
+export function demoHost(templateId: string) {
+  return subdomainHost(`demo-${templateId}`);
+}
+
+export function templateHref(meta: { category: string; id: string }) {
   return `/templates/${meta.category}/${meta.id}`;
+}
+
+/**
+ * The slice of a template's meta the gallery needs. Full metas carry every section's defaults, far too
+ * much to ship to the browser for 84 cards, so client components receive this instead.
+ */
+export interface TemplateCardData {
+  id: string;
+  code: number;
+  name: string;
+  tagline: string;
+  category: string;
+  style: string[];
+  theme: Pick<TemplateTheme, "colors" | "fonts" | "radius" | "dark">;
+}
+
+export function toCardData(m: TemplateMeta): TemplateCardData {
+  return { id: m.id, code: m.code, name: m.name, tagline: m.tagline, category: m.category, style: m.style, theme: { colors: m.theme.colors, fonts: m.theme.fonts, radius: m.theme.radius, dark: m.theme.dark } };
 }
 
 /**
@@ -31,12 +55,10 @@ export function alpha(hex: string, a: number): string {
 const DARK_STYLES = ["dark", "neon", "night"];
 
 /**
- * CSS-only miniature of a template's look (palette, type scale, radius), used until real screenshots
- * exist. Purely decorative: the parent link carries the accessible name. The template's fonts are
- * referenced by name so they render when installed, but nothing is downloaded for the thumbnail —
- * the gallery lists 84 of these and must not fire 84 stylesheet requests.
+ * CSS-only miniature of a template's look (palette, type scale, radius). Fallback for templates that have
+ * no real screenshot yet (`npm run shots`). Purely decorative: the parent link carries the accessible name.
  */
-export function TemplateMini({ meta, className }: { meta: TemplateMeta; className?: string }) {
+export function TemplateMini({ meta, className }: { meta: Pick<TemplateCardData, "name" | "tagline" | "style" | "theme">; className?: string }) {
   const c = meta.theme.colors;
   const dark = meta.theme.dark ?? c.secondary;
   const isDark = meta.style.some((s) => DARK_STYLES.includes(s));
@@ -44,8 +66,7 @@ export function TemplateMini({ meta, className }: { meta: TemplateMeta; classNam
   const body = `"${meta.theme.fonts.body}", ui-sans-serif, system-ui, sans-serif`;
   const radius = meta.theme.radius === "none" ? 0 : meta.theme.radius === "full" ? 9999 : 6;
   return (
-    <div className={cn("relative aspect-[4/3] w-full overflow-hidden", className)} style={{ background: c.bg, fontFamily: body }} aria-hidden="true">
-      {/* header */}
+    <div className={cn("relative h-full w-full overflow-hidden", className)} style={{ background: c.bg, fontFamily: body }} aria-hidden="true">
       <div className="flex items-center justify-between px-3 py-2" style={{ background: isDark ? dark : c.card, borderBottom: `1px solid ${c.border}` }}>
         <span className="text-[9px] font-bold" style={{ color: isDark ? c.primary : c.fg, fontFamily: heading }}>
           {meta.name}
@@ -57,7 +78,6 @@ export function TemplateMini({ meta, className }: { meta: TemplateMeta; classNam
           <span className="h-2.5 w-6 rounded-full" style={{ background: c.primary }} />
         </div>
       </div>
-      {/* hero */}
       <div className="grid grid-cols-5 gap-2 px-3 py-3">
         <div className="col-span-3 space-y-1.5">
           <span className="block h-1 w-8 rounded" style={{ background: c.accent }} />
@@ -73,7 +93,6 @@ export function TemplateMini({ meta, className }: { meta: TemplateMeta; classNam
         </div>
         <div className="col-span-2" style={{ background: `linear-gradient(135deg, ${alpha(c.primary, 0.4)}, ${alpha(c.accent, 0.6)})`, borderRadius: radius }} />
       </div>
-      {/* cards */}
       <div className="grid grid-cols-4 gap-1.5 px-3">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="overflow-hidden" style={{ background: c.card, border: `1px solid ${c.border}`, borderRadius: Math.min(radius, 4) }}>
@@ -90,54 +109,131 @@ export function TemplateMini({ meta, className }: { meta: TemplateMeta; classNam
   );
 }
 
-/** Gallery card. One accessible link to the detail page (name + numeric code) plus the live demo. */
-export function TemplateCard({ meta, categoryName }: { meta: TemplateMeta; categoryName?: string }) {
+/** Window ratios (height / width) used by the frames below. */
+const RATIO = { desktop: 10 / 16, mobile: 19.5 / 9 };
+
+/** True when `npm run shots` produced a screenshot for this template/device. */
+export function hasShot(id: string, device: "desktop" | "mobile" = "desktop") {
+  return Boolean(TEMPLATE_SHOTS[id]?.[device]);
+}
+
+/**
+ * A real screenshot of the template's live demo, clipped to a fixed-ratio window. The image is the top of
+ * the home page (several screens tall); hovering the surrounding `.group` glides it to the bottom
+ * (see `.shot-scroll` in globals.css). Falls back to the CSS miniature when no screenshot exists.
+ */
+export function TemplateShot({
+  meta,
+  device = "desktop",
+  sizes,
+  priority,
+  autoplay,
+  className,
+}: {
+  meta: Pick<TemplateCardData, "id" | "name" | "tagline" | "style" | "theme">;
+  device?: "desktop" | "mobile";
+  sizes: string;
+  priority?: boolean;
+  /** scroll without hover (used by the hero showcase) */
+  autoplay?: boolean;
+  className?: string;
+}) {
+  const entry = TEMPLATE_SHOTS[meta.id];
+  const shot = entry?.[device];
+  if (!shot) return <TemplateMini meta={meta} className={className} />;
+  // Fraction of the image height visible in the window; the rest is what the hover scroll travels.
+  const visible = Math.min(1, (RATIO[device] * shot.width) / shot.height);
+  const shift = `${(-(1 - visible) * 100).toFixed(2)}%`;
+  const duration = `${Math.max(2.5, Math.min(9, (1 - visible) * 8)).toFixed(1)}s`;
+  return (
+    <div className={cn("relative h-full w-full overflow-hidden bg-ink-800", autoplay && "shot-autoplay", className)}>
+      <Image
+        src={`/templates/${meta.id}-${device}.webp`}
+        alt=""
+        width={shot.width}
+        height={shot.height}
+        sizes={sizes}
+        priority={priority}
+        className="shot-scroll block h-auto w-full select-none"
+        style={{ "--shot-shift": shift, "--shot-duration": duration } as React.CSSProperties}
+        draggable={false}
+      />
+    </div>
+  );
+}
+
+/** Minimal browser chrome (traffic lights + address pill) around a desktop screenshot. */
+export function BrowserFrame({ host, className, children }: { host: string; className?: string; children: React.ReactNode }) {
+  return (
+    <div className={cn("overflow-hidden rounded-xl border border-white/10 bg-ink-800 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]", className)}>
+      <div className="flex items-center gap-3 border-b border-white/[0.06] bg-ink-850 px-3 py-2" aria-hidden>
+        <span className="flex gap-1.5">
+          <span className="size-2 rounded-full bg-white/15" />
+          <span className="size-2 rounded-full bg-white/15" />
+          <span className="size-2 rounded-full bg-white/15" />
+        </span>
+        <span className="flex-1 truncate rounded-md bg-white/[0.04] px-2.5 py-0.5 text-center text-[10px] text-zinc-500">{host}</span>
+      </div>
+      <div className="aspect-[16/10]">{children}</div>
+    </div>
+  );
+}
+
+/** Phone frame around a mobile screenshot. */
+export function PhoneFrame({ className, children }: { className?: string; children: React.ReactNode }) {
+  return (
+    <div className={cn("rounded-[2.2rem] border border-white/15 bg-ink-950 p-2 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.95)]", className)}>
+      <div className="relative aspect-[9/19.5] overflow-hidden rounded-[1.7rem]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Gallery card: real screenshot (hover to scroll), name, code, palette and the two actions people want. */
+export function TemplateCard({ meta, categoryName, priority }: { meta: TemplateCardData; categoryName?: string; priority?: boolean }) {
   const href = templateHref(meta);
   const c = meta.theme.colors;
   return (
-    <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-within:ring-2 focus-within:ring-brand-500">
-      <Link href={href} className="block focus:outline-none" aria-label={`${meta.name} — template #${meta.code}${categoryName ? `, ${categoryName}` : ""}`} tabIndex={-1}>
-        <TemplateMini meta={meta} />
+    <article className="group ring-hairline flex h-full flex-col overflow-hidden rounded-2xl bg-ink-850 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-24px_rgba(226,187,114,0.25)] focus-within:ring-2 focus-within:ring-gold-400">
+      <Link href={href} className="block p-2.5 pb-0 focus:outline-none" tabIndex={-1} aria-hidden>
+        <BrowserFrame host={demoHost(meta.id)} className="rounded-lg shadow-none">
+          <TemplateShot meta={meta} sizes="(min-width: 1280px) 22rem, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw" priority={priority} />
+        </BrowserFrame>
       </Link>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3 className="font-heading text-base font-bold text-slate-900">
-              <Link href={href} className="hover:text-brand-700 focus:outline-none">
-                <span className="mr-1.5 rounded bg-slate-900 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-white" aria-label={`Template code ${meta.code}`}>
-                  #{meta.code}
-                </span>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-display truncate text-2xl leading-tight text-white">
+              <Link href={href} className="focus:outline-none">
                 {meta.name}
+                <span className="sr-only">, template #{meta.code}{categoryName ? `, ${categoryName}` : ""}</span>
               </Link>
             </h3>
-            <p className="text-xs text-slate-500">{categoryName ?? meta.category}</p>
+            <p className="mt-0.5 text-xs text-zinc-500">
+              <span className="font-mono text-gold-400">#{meta.code}</span>
+              {categoryName ? <span> · {categoryName}</span> : null}
+            </p>
           </div>
-          <div className="flex gap-1" aria-hidden="true">
-            {[c.primary, c.accent, c.secondary].map((col, i) => (
-              <span key={i} className="size-3.5 rounded-full ring-1 ring-black/10" style={{ background: col }} />
+          <span className="mt-1 flex shrink-0 -space-x-1" aria-hidden>
+            {[c.primary, c.accent, c.bg].map((col, i) => (
+              <span key={i} className="size-4 rounded-full ring-2 ring-ink-850" style={{ background: col }} />
             ))}
-          </div>
+          </span>
         </div>
-        <p className="mt-2 line-clamp-2 text-sm text-slate-600">{meta.tagline}</p>
-        <ul className="mt-3 flex flex-wrap gap-1" aria-label="Style">
-          {meta.style.slice(0, 3).map((s) => (
-            <li key={s} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium capitalize text-slate-600">
-              {s}
-            </li>
-          ))}
-        </ul>
-        <div className="mt-4 flex items-center gap-2">
-          <Link href={href} className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-center text-xs font-semibold text-white hover:bg-slate-800" aria-label={`Details of ${meta.name} (#${meta.code})`}>
-            Details
+        <p className="mt-3 line-clamp-2 text-sm leading-6 text-zinc-400">{meta.tagline}</p>
+        <div className="mt-auto flex items-center gap-2 pt-5">
+          <Link href={href} className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-white/[0.06] px-4 py-2 text-xs font-semibold text-zinc-100 transition hover:bg-white/[0.12]" aria-label={`Details of ${meta.name} (#${meta.code})`}>
+            Details <ArrowUpRight className="size-3.5" aria-hidden />
           </Link>
           <a
             href={demoUrl(meta.id)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-4 py-2 text-xs font-semibold text-ink-950 transition hover:from-gold-200 hover:to-gold-400"
             aria-label={`Open live demo of ${meta.name} (#${meta.code}) in a new tab`}
           >
-            Live demo <ExternalLink className="size-3" aria-hidden="true" />
+            Live demo <ExternalLink className="size-3.5" aria-hidden />
           </a>
         </div>
       </div>

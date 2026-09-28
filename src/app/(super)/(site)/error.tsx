@@ -17,17 +17,17 @@ export default function SiteError({ error, retry, reset }: { error: Error & { di
   const again = retry ?? reset;
   return (
     <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6" role="alert">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Something went wrong</p>
-      <h1 className="font-heading mt-3 text-3xl font-bold text-slate-900">This page could not be loaded</h1>
-      <p className="mt-3 text-slate-600">A temporary problem stopped this page from loading. Please try again; if it keeps happening, WhatsApp us at {brand.supportPhone}.</p>
-      {error.digest ? <p className="mt-2 font-mono text-xs text-slate-400">Reference: {error.digest}</p> : null}
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold-400">Something went wrong</p>
+      <h1 className="font-display mt-3 text-3xl text-white">This page could not be loaded</h1>
+      <p className="mt-3 text-zinc-400">A temporary problem stopped this page from loading. Please try again; if it keeps happening, WhatsApp us at {brand.supportPhone}.</p>
+      {error.digest ? <p className="mt-2 font-mono text-xs text-zinc-500">Reference: {error.digest}</p> : null}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {again ? (
-          <button type="button" onClick={() => again()} className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+          <button type="button" onClick={() => again()} className="rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-950 hover:from-gold-200 hover:to-gold-400">
             Try again
           </button>
         ) : null}
-        <Link href="/" className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+        <Link href="/" className="rounded-full border border-white/15 bg-ink-850 px-5 py-2.5 text-sm font-semibold text-zinc-100 hover:bg-ink-900">
           Back to home
         </Link>
       </div>

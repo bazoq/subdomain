@@ -1,5 +1,6 @@
 "use client";
 
+import { brand } from "@/config/brand";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
@@ -23,7 +24,7 @@ const empty: BlogPostInput = {
   tags: [],
   published: false,
   publishedAt: "",
-  authorName: "SiteForge Team",
+  authorName: `${brand.name} Team`,
 };
 
 function toLocalInput(d: string | undefined) {

@@ -10,22 +10,22 @@ export const metadata: Metadata = { title: "Page not found", robots: { index: fa
 export default function SiteNotFound() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
-      <p className="font-heading text-7xl font-black text-slate-200" aria-hidden>
+      <p className="font-display text-7xl text-white/10" aria-hidden>
         404
       </p>
-      <h1 className="font-heading mt-2 text-3xl font-bold text-slate-900">We could not find that page</h1>
-      <p className="mt-3 text-slate-600">The link may be old or mistyped. Here is where most people want to go:</p>
-      <p className="mt-2 font-urdu text-base leading-8 text-slate-600" dir="rtl" lang="ur">
+      <h1 className="font-display mt-2 text-3xl text-white">We could not find that page</h1>
+      <p className="mt-3 text-zinc-400">The link may be old or mistyped. Here is where most people want to go:</p>
+      <p className="mt-2 font-urdu text-base leading-8 text-zinc-400" dir="rtl" lang="ur">
         یہ صفحہ موجود نہیں ہے۔
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link href="/templates" className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+        <Link href="/templates" className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-950 hover:from-gold-200 hover:to-gold-400">
           Browse all templates <ArrowRight className="size-4" aria-hidden />
         </Link>
-        <Link href="/pricing" className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+        <Link href="/pricing" className="rounded-full border border-white/15 bg-ink-850 px-5 py-2.5 text-sm font-semibold text-zinc-100 hover:bg-ink-900">
           Pricing
         </Link>
-        <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+        <Link href="/contact" className="rounded-full border border-white/15 bg-ink-850 px-5 py-2.5 text-sm font-semibold text-zinc-100 hover:bg-ink-900">
           Contact {brand.name}
         </Link>
       </div>
@@ -33,7 +33,7 @@ export default function SiteNotFound() {
         <ul className="flex flex-wrap justify-center gap-2 text-sm">
           {CATEGORIES.map((c) => (
             <li key={c.key}>
-              <Link href={`/templates/${c.key}`} className="rounded-full bg-slate-100 px-3 py-1 text-slate-700 hover:bg-slate-200">
+              <Link href={`/templates/${c.key}`} className="rounded-full bg-white/[0.06] px-3 py-1 text-zinc-300 hover:bg-white/[0.1]">
                 {c.name}
               </Link>
             </li>

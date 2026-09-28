@@ -54,13 +54,13 @@ export function LeadForm({ defaultCategory, defaultMessage, source, compact, cla
     }
   }
 
-  const input = "h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 aria-[invalid=true]:border-red-500";
-  const label = "mb-1 block text-xs font-semibold text-slate-700";
+  const input = "h-12 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-zinc-100 placeholder:text-zinc-600 transition focus:border-gold-400/70 focus:bg-white/[0.06] focus:outline-none focus:ring-2 focus:ring-gold-400/25 aria-[invalid=true]:border-red-400 [&>option]:bg-ink-900";
+  const label = "mb-1.5 block text-xs font-medium text-zinc-400";
   const fieldErrors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
   const errId = (k: string) => `${id}-${k}-error`;
   const err = (k: string) =>
     fieldErrors[k] ? (
-      <p id={errId(k)} className="mt-1 text-xs text-red-600">
+      <p id={errId(k)} className="mt-1 text-xs text-red-400">
         {fieldErrors[k]}
       </p>
     ) : null;
@@ -68,10 +68,10 @@ export function LeadForm({ defaultCategory, defaultMessage, source, compact, cla
 
   if (state?.ok) {
     return (
-      <div className={cn("rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center", className)} role="status" aria-live="polite">
-        <CheckCircle2 className="mx-auto size-8 text-emerald-600" aria-hidden />
-        <p className="mt-2 font-semibold text-emerald-900">{state.message}</p>
-        <button type="button" onClick={() => setState(null)} className="mt-3 text-xs font-semibold text-emerald-800 underline">
+      <div className={cn("rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.06] p-8 text-center", className)} role="status" aria-live="polite">
+        <CheckCircle2 className="mx-auto size-10 text-emerald-400" aria-hidden />
+        <p className="mt-3 font-semibold text-emerald-100">{state.message}</p>
+        <button type="button" onClick={() => setState(null)} className="mt-4 text-xs font-semibold text-emerald-300 underline">
           Send another request
         </button>
       </div>
@@ -85,7 +85,7 @@ export function LeadForm({ defaultCategory, defaultMessage, source, compact, cla
         <label htmlFor={`${id}-website`}>Website</label>
         <input id={`${id}-website`} type="text" name="website" tabIndex={-1} autoComplete="off" defaultValue="" />
       </div>
-      <div ref={errorRef} tabIndex={-1} role="alert" aria-live="assertive" className={cn(state && !state.ok && state.message ? "rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" : "sr-only")}>
+      <div ref={errorRef} tabIndex={-1} role="alert" aria-live="assertive" className={cn(state && !state.ok && state.message ? "rounded-xl border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-300" : "sr-only")}>
         {state && !state.ok ? state.message : ""}
       </div>
       <div className={cn("grid gap-3", !compact && "sm:grid-cols-2")}>
@@ -129,7 +129,7 @@ export function LeadForm({ defaultCategory, defaultMessage, source, compact, cla
       </div>
       <div>
         <label htmlFor={`${id}-email`} className={label}>
-          Email <span className="font-normal text-slate-400">(optional)</span>
+          Email <span className="font-normal text-zinc-600">(optional)</span>
         </label>
         <input id={`${id}-email`} name="email" type="email" autoComplete="email" placeholder="you@example.com" className={input} {...a11y("email")} />
         {err("email")}
@@ -137,16 +137,16 @@ export function LeadForm({ defaultCategory, defaultMessage, source, compact, cla
       {!compact || defaultMessage ? (
         <div>
           <label htmlFor={`${id}-message`} className={label}>
-            Message <span className="font-normal text-slate-400">(optional)</span>
+            Message <span className="font-normal text-zinc-600">(optional)</span>
           </label>
           <textarea id={`${id}-message`} name="message" rows={3} defaultValue={defaultMessage} placeholder="Tell us about your business or the template number you liked" className={cn(input, "h-auto py-2.5")} {...a11y("message")} />
           {err("message")}
         </div>
       ) : null}
-      <button type="submit" disabled={pending} className="h-11 w-full rounded-xl bg-slate-900 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60">
+      <button type="submit" disabled={pending} className="h-12 w-full rounded-full bg-gradient-to-b from-gold-300 to-gold-500 text-sm font-semibold text-ink-950 shadow-[0_8px_30px_-8px_rgba(226,187,114,0.55)] transition hover:from-gold-200 hover:to-gold-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 disabled:opacity-60">
         {pending ? "Sending…" : "Request my website"}
       </button>
-      <p className="text-center text-xs text-slate-500">We reply within hours, 7 days a week.</p>
+      <p className="text-center text-xs text-zinc-500">We reply within hours, 7 days a week.</p>
     </form>
   );
 }

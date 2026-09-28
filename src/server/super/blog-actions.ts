@@ -1,5 +1,6 @@
 "use server";
 
+import { brand } from "@/config/brand";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/server/db";
@@ -19,7 +20,7 @@ const blogPostSchema = z.object({
   tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
   published: z.boolean().default(false),
   publishedAt: z.string().optional().or(z.literal("")),
-  authorName: z.string().trim().min(1).max(80).default("SiteForge Team"),
+  authorName: z.string().trim().min(1).max(80).default(`${brand.name} Team`),
 });
 export type BlogPostInput = z.infer<typeof blogPostSchema>;
 

@@ -36,6 +36,19 @@
   --color-brand-800: #3730a3;
   --color-brand-900: #312e81;
   --color-brand-950: #1e1b4b;
+
+  /* marketing site (dark premium): near-black "ink" surfaces + champagne "gold" accent */
+  --color-ink-950: #060608;
+  --color-ink-900: #0b0b0f;
+  --color-ink-850: #101016;
+  --color-ink-800: #15151d;
+  --color-ink-700: #1f1f2a;
+  --color-gold-200: #f6e4bd;
+  --color-gold-300: #eed39c;
+  --color-gold-400: #e2bb72;
+  --color-gold-500: #cf9f4c;
+  --color-gold-600: #a97a31;
+  --font-display: var(--font-instrument), "Iowan Old Style", Georgia, serif;
 }
 
 :root {
@@ -386,5 +399,89 @@ body {
   .t-card {
     break-inside: avoid;
     border-color: #bbb;
+  }
+}
+
+/* ───────────── Marketing site (dark premium) ───────────── */
+
+/* Gold gradient text for emphasised headline words. */
+.text-gold-gradient {
+  background: linear-gradient(100deg, #f6e4bd 0%, #e2bb72 45%, #cf9f4c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hairline gradient border for premium cards: `.ring-hairline` on a relatively positioned element. */
+.ring-hairline {
+  position: relative;
+  isolation: isolate;
+}
+.ring-hairline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 40%, rgba(226, 187, 114, 0.22));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/*
+ * Template screenshots: a tall page capture inside a fixed-ratio window. On hover/focus of the
+ * surrounding `.group` the image glides to the bottom (the distance comes from --shot-shift, computed
+ * from the image's real height), so visitors see the whole home page without opening the demo.
+ */
+.shot-scroll {
+  transform: translateY(0);
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.group:hover .shot-scroll,
+.group:focus-within .shot-scroll {
+  transform: translateY(var(--shot-shift, 0%));
+  transition-duration: var(--shot-duration, 6s);
+}
+/* Showcase frames pan up and down on their own. */
+@keyframes shot-pan {
+  0%, 12% {
+    transform: translateY(0);
+  }
+  88%, 100% {
+    transform: translateY(var(--shot-shift, 0%));
+  }
+}
+.shot-autoplay .shot-scroll {
+  animation: shot-pan calc(var(--shot-duration, 6s) * 2.5) ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shot-autoplay .shot-scroll {
+    animation: none;
+  }
+  .shot-scroll,
+  .group:hover .shot-scroll,
+  .group:focus-within .shot-scroll {
+    transform: none;
+    transition: none;
+  }
+}
+
+@keyframes sf-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: sf-marquee 60s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
   }
 }

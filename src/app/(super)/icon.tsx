@@ -17,13 +17,13 @@ export default function Icon() {
           justifyContent: "center",
           borderRadius: 112,
           background: `linear-gradient(135deg, ${brand.colors.primary}, ${brand.colors.accent})`,
-          color: "#ffffff",
+          color: brand.colors.dark,
           fontSize: 300,
           fontWeight: 800,
           fontFamily: "sans-serif",
         }}
       >
-        S
+        {brand.name.charAt(0)}
       </div>
     ),
     size,

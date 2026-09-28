@@ -1,3 +1,4 @@
+import { brand } from "@/config/brand";
 import { requireSuper } from "@/server/auth/guards";
 import { PageHeader } from "@/components/ui/card";
 import { BlogForm } from "@/components/admin/super/blog-form";
@@ -10,7 +11,7 @@ export default async function NewBlogPostPage({ searchParams }: { searchParams: 
   return (
     <>
       <PageHeader title="New post" backHref="/super/blog" />
-      <BlogForm initial={category ? { category, title: "", slug: "", excerpt: "", content: "", coverUrl: "", tags: [], published: false, publishedAt: "", authorName: "SiteForge Team" } : undefined} />
+      <BlogForm initial={category ? { category, title: "", slug: "", excerpt: "", content: "", coverUrl: "", tags: [], published: false, publishedAt: "", authorName: `${brand.name} Team` } : undefined} />
     </>
   );
 }

@@ -399,7 +399,8 @@ async function seedRestaurant(db: Db, tenantId: string, key: "pizza" | "bakery")
           name: J(ls(it.name, it.ur)),
           description: J(ls(it.desc)),
           price: it.price,
-          sizes: J((it.sizes ?? []).map((s) => ({ name: s.name, price: Math.round(s.price) }))),
+          // Seed sizes are written as add-ons to the base price; the app stores each size's full price.
+          sizes: J((it.sizes ?? []).map((s) => ({ name: s.name, price: Math.round(it.price + s.price) }))),
           imageUrl: u(pool[img++ % pool.length]),
           tags: it.tags ?? [],
           isFeatured: it.featured ?? false,
@@ -930,4 +931,71 @@ export async function seedCategoryData(db: Db, tenantId: string, categoryKey: Ca
       await seedShared(db, tenantId, categoryKey, "service");
       return;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* section images                                                       */
+/* ------------------------------------------------------------------ */
+
+type SectionField = { type: string; key: string; fields?: SectionField[]; max?: number };
+
+/** Field keys that show a person (team member, testimonial avatar …) rather than the business. */
+const PERSON_KEY = /(avatar|photo|portrait|person|author|founder|owner|chef|trainer|agent|lawyer|doctor|member)/i;
+
+/**
+ * Demo sites only: fill every EMPTY image field of the tenant's sections (hero, about, CTA, slides,
+ * nested list items …) with photos from the category's pool, so the live demos and the gallery
+ * screenshots show a finished website instead of placeholders. Values somebody already set are never
+ * touched, so re-running the seed is safe. `offset` varies the photos between templates of a category.
+ */
+export async function fillDemoSectionImages(db: Db, tenantId: string, categoryKey: CategoryKey, sections: { key: string; fields: SectionField[] }[], offset = 0): Promise<number> {
+  const pool = poolFor(categoryKey);
+  let n = offset * 2;
+  let filled = 0;
+  const pick = (key: string, wide: boolean) => {
+    const list = PERSON_KEY.test(key) ? IMG.people : pool;
+    return u(list[n++ % list.length], wide ? 1600 : 900);
+  };
+  const walk = (fields: SectionField[], data: Record<string, unknown>, top: boolean) => {
+    for (const f of fields) {
+      const v = data[f.key];
+      if (f.type === "image" && (typeof v !== "string" || !v.trim())) {
+        data[f.key] = pick(f.key, top);
+        filled++;
+      } else if (f.type === "images" && (!Array.isArray(v) || v.length === 0)) {
+        data[f.key] = Array.from({ length: Math.min(f.max ?? 3, 3) }, () => pick(f.key, top));
+        filled++;
+      } else if (f.fields && Array.isArray(v)) {
+        for (const item of v) if (item && typeof item === "object") walk(f.fields, item as Record<string, unknown>, false);
+      }
+    }
+  };
+
+  const rows = await db.siteSection.findMany({ where: { tenantId }, select: { id: true, key: true, data: true } });
+  for (const row of rows) {
+    const def = sections.find((s) => s.key === row.key);
+    if (!def || !row.data || typeof row.data !== "object" || Array.isArray(row.data)) continue;
+    const data = structuredClone(row.data) as Record<string, unknown>;
+    const before = filled;
+    walk(def.fields, data, true);
+    if (filled > before) await db.siteSection.update({ where: { id: row.id }, data: { data: J(data) } });
+  }
+  return filled;
+}
+
+/**
+ * Repair for demo tenants seeded before sizes were stored as full prices: a size priced 0 meant
+ * "base price" and showed as "From Rs 0". Adds the item's base price to every size of such items.
+ * Idempotent: after the repair no size is priced 0, so a second run changes nothing.
+ */
+export async function repairDemoMenuSizes(db: Db, tenantId: string): Promise<number> {
+  const items = await db.menuItem.findMany({ where: { tenantId }, select: { id: true, price: true, sizes: true } });
+  let fixed = 0;
+  for (const it of items) {
+    const sizes = Array.isArray(it.sizes) ? (it.sizes as { name: string; price: number }[]) : [];
+    if (!sizes.length || !sizes.some((s) => s.price === 0)) continue;
+    await db.menuItem.update({ where: { id: it.id }, data: { sizes: J(sizes.map((s) => ({ name: s.name, price: Math.round(it.price + s.price) }))) } });
+    fixed++;
+  }
+  return fixed;
 }

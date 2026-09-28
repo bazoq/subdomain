@@ -27,7 +27,7 @@ import { DEFAULT_HOURS } from "@/lib/tenant-settings";
 import { hashPassword, generatePassword, passwordPolicy } from "@/server/auth/password";
 import { buildTenantSettings } from "@/server/super/provision";
 import { provisionTenantSections } from "./seed/sections";
-import { seedCategoryData } from "./seed/demo-data";
+import { fillDemoSectionImages, repairDemoMenuSizes, seedCategoryData } from "./seed/demo-data";
 import { seedInboxData } from "./seed/inbox";
 
 const ROOT_DOMAIN = (process.env.ROOT_DOMAIN ?? process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost").toLowerCase();
@@ -168,6 +168,8 @@ async function seedDemoTenants(db: PrismaClient) {
 
     await provisionTenantSections(db, tenant.id, meta.id);
     await seedCategoryData(db, tenant.id, meta.category);
+    await fillDemoSectionImages(db, tenant.id, meta.category, meta.sections, i);
+    await repairDemoMenuSizes(db, tenant.id);
     await seedInboxData(db, tenant.id, meta.category, meta.demo.name, { dineIn: settings.restaurant.dineIn });
     console.log(`  • ${existed ? "refreshed" : "created "} ${hostname}  (${meta.name}, ${category.name})`);
   }

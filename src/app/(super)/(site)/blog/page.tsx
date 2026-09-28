@@ -46,20 +46,20 @@ export default async function BlogIndex() {
         ]}
       />
       <div className="max-w-2xl">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Guides</p>
-        <h1 className="font-heading mt-2 text-4xl font-bold text-slate-900">A guide for every business type</h1>
-        <p className="mt-3 text-slate-600">Each guide explains exactly what the templates in that category do, how orders or enquiries work, and how the admin panel manages it all.</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold-400">Guides</p>
+        <h1 className="font-display mt-2 text-5xl text-white">A guide for every business type</h1>
+        <p className="mt-3 text-zinc-400">Each guide explains exactly what the templates in that category do, how orders or enquiries work, and how the admin panel manages it all.</p>
       </div>
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {guides.map(({ category: c, guide }) => (
           <li key={c.key}>
-            <Link href={`/blog/${c.key}`} className="group block h-full rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700 group-hover:bg-brand-600 group-hover:text-white">
+            <Link href={`/blog/${c.key}`} className="group block h-full rounded-2xl border border-white/10 bg-ink-850 p-5 transition hover:-translate-y-0.5 hover:border-gold-400/40 hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-gold-400/10 text-gold-300 group-hover:bg-gold-400 group-hover:text-ink-950">
                 <CatIcon name={c.icon} className="size-5" />
               </span>
-              <h2 className="mt-4 font-semibold text-slate-900">{c.name}</h2>
-              <p className="mt-1 line-clamp-3 text-sm text-slate-500">{guide.title}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+              <h2 className="mt-4 font-semibold text-white">{c.name}</h2>
+              <p className="mt-1 line-clamp-3 text-sm text-zinc-500">{guide.title}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-gold-300">
                 Read guide <ArrowRight className="size-4" aria-hidden />
               </span>
             </Link>
@@ -70,11 +70,11 @@ export default async function BlogIndex() {
       {posts.length ? (
         <section className="mt-20" aria-labelledby="latest-title">
           <div className="flex items-end justify-between gap-4">
-            <h2 id="latest-title" className="font-heading text-2xl font-bold text-slate-900">
+            <h2 id="latest-title" className="font-display text-3xl text-white">
               Latest articles
             </h2>
             {posts.some((p) => p.category === "general") ? (
-              <Link href="/blog/general" className="text-sm font-semibold text-brand-700 hover:underline">
+              <Link href="/blog/general" className="text-sm font-semibold text-gold-300 hover:underline">
                 All general articles
               </Link>
             ) : null}
@@ -84,20 +84,20 @@ export default async function BlogIndex() {
               const urdu = isMostlyUrdu(p.title + " " + p.excerpt);
               return (
                 <li key={p.id}>
-                  <Link href={`/blog/${p.category}/${p.slug}`} className="block h-full overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-md">
+                  <Link href={`/blog/${p.category}/${p.slug}`} className="block h-full overflow-hidden rounded-2xl border border-white/10 bg-ink-850 transition hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]">
                     {p.coverUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.coverUrl} alt={`Cover image for “${p.title}”`} loading="lazy" decoding="async" className="aspect-[16/9] w-full object-cover" />
                     ) : (
-                      <div className="aspect-[16/9] w-full bg-gradient-to-br from-brand-100 to-violet-100" aria-hidden />
+                      <div className="aspect-[16/9] w-full bg-gradient-to-br from-gold-400/20 to-violet-500/20" aria-hidden />
                     )}
                     <div className="p-5" dir={urdu ? "rtl" : undefined} lang={urdu ? "ur" : undefined}>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-brand-600" dir="ltr" lang="en">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gold-400" dir="ltr" lang="en">
                         {blogCategoryName(p.category)}
                       </p>
-                      <h3 className={`mt-1 font-semibold text-slate-900 ${urdu ? "font-urdu leading-9" : ""}`}>{p.title}</h3>
-                      <p className={`mt-1 line-clamp-2 text-sm text-slate-500 ${urdu ? "font-urdu leading-8" : ""}`}>{p.excerpt}</p>
-                      <p className="mt-3 text-xs text-slate-400" dir="ltr" lang="en">
+                      <h3 className={`mt-1 font-semibold text-white ${urdu ? "font-urdu leading-9" : ""}`}>{p.title}</h3>
+                      <p className={`mt-1 line-clamp-2 text-sm text-zinc-500 ${urdu ? "font-urdu leading-8" : ""}`}>{p.excerpt}</p>
+                      <p className="mt-3 text-xs text-zinc-500" dir="ltr" lang="en">
                         {p.publishedAt ? formatDate(p.publishedAt) : ""} · {readingTime(p.content).minutes} min read
                       </p>
                     </div>

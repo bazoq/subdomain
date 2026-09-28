@@ -35,7 +35,7 @@ export default async function Image({ params }: { params: Promise<{ category: st
             <div style={{ marginTop: 18, fontSize: 30, lineHeight: 1.3, color: sub }}>{t?.tagline ?? brand.tagline}</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", fontSize: 24, color: sub }}>
-            <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg, ${brand.colors.primary}, ${brand.colors.accent})`, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 20 }}>S</div>
+            <div style={{ width: 36, height: 36, borderRadius: 9, background: `linear-gradient(135deg, ${brand.colors.primary}, ${brand.colors.accent})`, color: brand.colors.dark, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 20 }}>{brand.name.charAt(0)}</div>
             <div style={{ marginLeft: 12 }}>{`${brand.name} · live demo included · English + Urdu`}</div>
           </div>
         </div>

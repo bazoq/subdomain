@@ -1,88 +1,90 @@
 import Link from "next/link";
+import { Mail, MapPin, MessageCircle } from "lucide-react";
 import { brand } from "@/config/brand";
 import { CATEGORIES } from "@/lib/categories";
+import { Wordmark } from "@/components/super-site/wordmark";
 
 export function SuperFooter() {
   const year = new Date().getFullYear();
+  const half = Math.ceil(CATEGORIES.length / 2);
   return (
-    <footer className="border-t border-slate-200 bg-slate-950 text-slate-300">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-4">
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-violet-500 text-sm font-black text-white">S</span>
-              <span className="font-heading text-lg font-bold text-white">{brand.name}</span>
-            </div>
-            <p className="mt-4 text-sm leading-6 text-slate-400">{brand.tagline}</p>
-            <p className="mt-4 font-urdu text-sm leading-8 text-slate-400" dir="rtl">
+    <footer className="relative border-t border-white/[0.06] bg-ink-950 text-zinc-400">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400/40 to-transparent" aria-hidden />
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <Wordmark name={brand.name} />
+            <p className="mt-5 max-w-xs text-sm leading-6">{brand.tagline}</p>
+            <p className="mt-3 font-urdu text-sm leading-8 text-zinc-500" dir="rtl" lang="ur">
               {brand.taglineUr}
             </p>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white">Templates</h4>
-            <ul className="mt-4 space-y-2 text-sm">
-              {CATEGORIES.slice(0, 8).map((c) => (
-                <li key={c.key}>
-                  <Link href={`/templates/${c.key}`} className="hover:text-white">
-                    {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white">More</h4>
-            <ul className="mt-4 space-y-2 text-sm">
-              {CATEGORIES.slice(8).map((c) => (
-                <li key={c.key}>
-                  <Link href={`/templates/${c.key}`} className="hover:text-white">
-                    {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white">Company</h4>
-            <ul className="mt-4 space-y-2 text-sm">
+            <ul className="mt-6 space-y-2.5 text-sm">
               <li>
-                <Link href="/pricing" className="hover:text-white">
-                  Pricing
-                </Link>
+                <a href={`https://wa.me/${brand.whatsapp}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-white">
+                  <MessageCircle className="size-4 text-gold-400" aria-hidden /> {brand.supportPhone}
+                </a>
               </li>
               <li>
-                <Link href="/blog" className="hover:text-white">
-                  Feature guides
-                </Link>
+                <a href={`mailto:${brand.supportEmail}`} className="inline-flex items-center gap-2 hover:text-white">
+                  <Mail className="size-4 text-gold-400" aria-hidden /> {brand.supportEmail}
+                </a>
               </li>
-              <li>
-                <Link href="/about" className="hover:text-white">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-white">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/super/login" className="hover:text-white">
-                  Super admin
-                </Link>
+              <li className="inline-flex items-center gap-2">
+                <MapPin className="size-4 text-gold-400" aria-hidden /> {brand.address}
               </li>
             </ul>
-            <div className="mt-6 text-sm text-slate-400">
-              <p>{brand.supportEmail}</p>
-              <p>{brand.supportPhone}</p>
-              <p>{brand.address}</p>
+          </div>
+          <nav className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8" aria-label="Footer">
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-200">Templates</h2>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {CATEGORIES.slice(0, half).map((c) => (
+                  <li key={c.key}>
+                    <Link href={`/templates/${c.key}`} className="hover:text-white">
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-200">More industries</h2>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {CATEGORIES.slice(half).map((c) => (
+                  <li key={c.key}>
+                    <Link href={`/templates/${c.key}`} className="hover:text-white">
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-200">Company</h2>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {[
+                  ["/templates", "All templates"],
+                  ["/pricing", "Pricing"],
+                  ["/blog", "Feature guides"],
+                  ["/about", "About"],
+                  ["/contact", "Contact"],
+                  ["/super/login", "Super admin"],
+                ].map(([href, label]) => (
+                  <li key={href}>
+                    <Link href={href} className="hover:text-white">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
         </div>
-        <div className="mt-12 flex flex-col gap-2 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row sm:justify-between">
+        <div className="mt-14 flex flex-col gap-2 border-t border-white/[0.06] pt-6 text-xs text-zinc-600 sm:flex-row sm:justify-between">
           <p>
             © {year} {brand.name}. All rights reserved.
           </p>
-          <p>Built for Pakistani businesses. Cash on delivery, WhatsApp, Urdu — everything local.</p>
+          <p>Built for Pakistani businesses — cash on delivery, WhatsApp and Urdu, everything local.</p>
         </div>
       </div>
     </footer>

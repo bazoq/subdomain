@@ -3,14 +3,14 @@
  * Everything here is public (rendered into HTML, JSON-LD and the web manifest).
  */
 export const brand = {
-  name: "SiteForge",
-  legalName: "SiteForge",
+  name: "Baxoq",
+  legalName: "Baxoq",
   tagline: "Ready-made, fully managed websites for Pakistani businesses",
   taglineUr: "پاکستانی کاروباروں کے لیے تیار، مکمل منظم ویب سائٹس",
   /** Long-form description for meta descriptions, Organization JSON-LD and the manifest. */
   description:
-    "SiteForge builds and manages complete business websites for Pakistan: 84 industry-specific templates, cash on delivery, WhatsApp, English + Urdu, and a simple admin panel — connected to your own domain in a day.",
-  supportEmail: "support@siteforge.pk",
+    "Baxoq builds and manages complete business websites for Pakistan: 84 industry-specific templates, cash on delivery, WhatsApp, English + Urdu, and a simple admin panel — connected to your own domain in a day.",
+  supportEmail: "support@baxoq.com",
   supportPhone: "+92 300 0000000",
   whatsapp: "923000000000",
   address: "Lahore, Pakistan",
@@ -19,10 +19,15 @@ export const brand = {
   addressCountry: "PK",
   /** Brand colours used by the web manifest, theme-color and generated OG images. */
   colors: {
-    primary: "#4f46e5",
-    accent: "#7c3aed",
-    dark: "#0f172a",
+    primary: "#e2bb72",
+    accent: "#cf9f4c",
+    dark: "#060608",
   },
+  /**
+   * Login shown next to every template's "Demo admin panel" button. Must match the demo owner created by
+   * the seed: run it with SEED_DEMO_PASSWORD set to this password.
+   */
+  demoLogin: { username: "demo", password: "demo1234" },
   social: {
     facebook: "https://facebook.com/",
     instagram: "https://instagram.com/",

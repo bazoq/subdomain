@@ -16,13 +16,13 @@ export default function AppleIcon() {
           alignItems: "center",
           justifyContent: "center",
           background: `linear-gradient(135deg, ${brand.colors.primary}, ${brand.colors.accent})`,
-          color: "#ffffff",
+          color: brand.colors.dark,
           fontSize: 110,
           fontWeight: 800,
           fontFamily: "sans-serif",
         }}
       >
-        S
+        {brand.name.charAt(0)}
       </div>
     ),
     size,

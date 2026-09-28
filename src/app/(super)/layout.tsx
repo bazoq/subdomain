@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Plus_Jakarta_Sans, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Noto_Nastaliq_Urdu, Instrument_Serif } from "next/font/google";
 import "@/app/globals.css";
 import { brand } from "@/config/brand";
 import { SITE_URL } from "@/config/site";
@@ -7,6 +7,8 @@ import { CATEGORIES } from "@/lib/categories";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap", weight: ["500", "600", "700", "800"] });
+// Display serif for the marketing site's headlines (`font-display`).
+const instrument = Instrument_Serif({ subsets: ["latin"], variable: "--font-instrument", display: "swap", weight: "400", style: ["normal", "italic"] });
 // Loaded once here (self-hosted by next/font) so every `font-urdu` element on the marketing site renders in Nastaliq.
 const nastaliq = Noto_Nastaliq_Urdu({ subsets: ["arabic"], variable: "--font-nastaliq", display: "swap", weight: ["400", "700"], preload: false });
 
@@ -65,7 +67,7 @@ export default function SuperRootLayout({ children }: { children: React.ReactNod
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jakarta.variable} ${nastaliq.variable}`}
+      className={`${inter.variable} ${jakarta.variable} ${instrument.variable} ${nastaliq.variable}`}
       style={
         {
           "--t-font-heading": "var(--font-jakarta)",

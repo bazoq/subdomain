@@ -19,7 +19,7 @@ export default function Image() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 64,
-          background: `linear-gradient(135deg, ${brand.colors.dark} 0%, #1e1b4b 55%, #312e81 100%)`,
+          background: `linear-gradient(135deg, ${brand.colors.dark} 0%, #15120c 60%, #2a2112 100%)`,
           color: "#ffffff",
           fontFamily: "sans-serif",
           position: "relative",
@@ -49,15 +49,16 @@ export default function Image() {
               justifyContent: "center",
               fontSize: 40,
               fontWeight: 800,
+              color: brand.colors.dark,
             }}
           >
-            S
+            {brand.name.charAt(0)}
           </div>
           <div style={{ marginLeft: 20, fontSize: 40, fontWeight: 700, letterSpacing: -1 }}>{brand.name}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.05, letterSpacing: -2, maxWidth: 980 }}>A complete website for your business, ready in a day</div>
-          <div style={{ marginTop: 22, fontSize: 28, color: "#c7d2fe", maxWidth: 900 }}>
+          <div style={{ marginTop: 22, fontSize: 28, color: "#eed39c", maxWidth: 900 }}>
             {`${TOTAL_TEMPLATES} ready templates across ${CATEGORIES.length} business types, managed for you.`}
           </div>
         </div>

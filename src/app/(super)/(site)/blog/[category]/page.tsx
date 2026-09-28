@@ -41,10 +41,10 @@ function PostList({ posts, category }: { posts: PostRow[]; category: string }) {
         const urdu = isMostlyUrdu(p.title + " " + p.excerpt);
         return (
           <li key={p.id}>
-            <Link href={`/blog/${category}/${p.slug}`} className="block rounded-xl border border-slate-200 p-4 hover:border-brand-300 hover:bg-brand-50/40" dir={urdu ? "rtl" : undefined} lang={urdu ? "ur" : undefined}>
-              <p className={`font-semibold text-slate-900 ${urdu ? "font-urdu leading-9" : ""}`}>{p.title}</p>
-              <p className={`mt-1 line-clamp-2 text-sm text-slate-500 ${urdu ? "font-urdu leading-8" : ""}`}>{p.excerpt}</p>
-              <p className="mt-2 text-xs text-slate-400" dir="ltr" lang="en">
+            <Link href={`/blog/${category}/${p.slug}`} className="block rounded-xl border border-white/10 p-4 hover:border-gold-400/40 hover:bg-white/[0.03]" dir={urdu ? "rtl" : undefined} lang={urdu ? "ur" : undefined}>
+              <p className={`font-semibold text-white ${urdu ? "font-urdu leading-9" : ""}`}>{p.title}</p>
+              <p className={`mt-1 line-clamp-2 text-sm text-zinc-500 ${urdu ? "font-urdu leading-8" : ""}`}>{p.excerpt}</p>
+              <p className="mt-2 text-xs text-zinc-500" dir="ltr" lang="en">
                 {p.publishedAt ? formatDate(p.publishedAt) : ""} · {readingTime(p.content).minutes} min read
               </p>
             </Link>
@@ -71,21 +71,21 @@ export default async function CategoryBlogPage({ params }: { params: Promise<{ c
             { name: "Articles", path: `/blog/${GENERAL}` },
           ])}
         />
-        <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
-          <Link href="/blog" className="hover:text-slate-900">
+        <nav aria-label="Breadcrumb" className="text-sm text-zinc-500">
+          <Link href="/blog" className="hover:text-white">
             Guides
           </Link>{" "}
-          <span aria-hidden>/</span> <span className="text-slate-900">Articles</span>
+          <span aria-hidden>/</span> <span className="text-white">Articles</span>
         </nav>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Blog</p>
-        <h1 className="font-heading mt-2 text-4xl font-bold leading-tight text-slate-900">Articles from {brand.name}</h1>
-        <p className="mt-3 text-slate-600">News, tips and stories about selling online in Pakistan.</p>
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-gold-400">Blog</p>
+        <h1 className="font-display mt-2 text-5xl leading-tight text-white">Articles from {brand.name}</h1>
+        <p className="mt-3 text-zinc-400">News, tips and stories about selling online in Pakistan.</p>
         {posts.length ? (
           <PostList posts={posts} category={GENERAL} />
         ) : (
-          <p className="mt-8 rounded-xl border border-dashed p-10 text-center text-slate-500">
+          <p className="mt-8 rounded-xl border border-dashed border-white/10 p-10 text-center text-zinc-500">
             No articles yet.{" "}
-            <Link href="/blog" className="font-semibold text-brand-700 hover:underline">
+            <Link href="/blog" className="font-semibold text-gold-300 hover:underline">
               Read the feature guides
             </Link>
             .
@@ -120,30 +120,30 @@ export default async function CategoryBlogPage({ params }: { params: Promise<{ c
           faqJsonLd(guide.faq),
         ]}
       />
-      <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
-        <Link href="/blog" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="text-sm text-zinc-500">
+        <Link href="/blog" className="hover:text-white">
           Guides
         </Link>{" "}
-        <span aria-hidden>/</span> <span className="text-slate-900">{c.name}</span>
+        <span aria-hidden>/</span> <span className="text-white">{c.name}</span>
       </nav>
       <div className="mt-6 grid gap-12 lg:grid-cols-3">
         <article className="lg:col-span-2">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">{c.name} · Feature guide</p>
-          <h1 className="font-heading mt-2 text-4xl font-bold leading-tight text-slate-900">{guide.title}</h1>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold-400">{c.name} · Feature guide</p>
+          <h1 className="font-display mt-2 text-5xl leading-tight text-white">{guide.title}</h1>
+          <p className="mt-2 text-xs text-zinc-500">
             {rt.minutes} min read · by {brand.name}
           </p>
-          <p className="mt-4 text-lg leading-8 text-slate-600">{guide.intro}</p>
-          <p className="mt-2 font-urdu text-base leading-8 text-slate-600" dir="rtl" lang="ur">
+          <p className="mt-4 text-lg leading-8 text-zinc-400">{guide.intro}</p>
+          <p className="mt-2 font-urdu text-base leading-8 text-zinc-400" dir="rtl" lang="ur">
             {c.nameUr}
           </p>
 
-          <div className="mt-8 rounded-2xl border border-brand-100 bg-brand-50/60 p-6">
-            <h2 className="font-semibold text-slate-900">What every {c.name.toLowerCase()} template includes</h2>
+          <div className="mt-8 rounded-2xl border border-gold-400/20 bg-gold-400/[0.06] p-6">
+            <h2 className="font-semibold text-white">What every {c.name.toLowerCase()} template includes</h2>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2">
               {guide.features.map((f) => (
-                <li key={f} className="flex gap-2 text-sm text-slate-700">
-                  <BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden />
+                <li key={f} className="flex gap-2 text-sm text-zinc-300">
+                  <BadgeCheck className="mt-0.5 size-4 shrink-0 text-gold-400" aria-hidden />
                   {f}
                 </li>
               ))}
@@ -152,9 +152,9 @@ export default async function CategoryBlogPage({ params }: { params: Promise<{ c
 
           {guide.sections.map((s) => (
             <section key={s.heading} className="mt-10">
-              <h2 className="font-heading text-2xl font-bold text-slate-900">{s.heading}</h2>
+              <h2 className="font-display text-3xl text-white">{s.heading}</h2>
               {s.body.map((p, i) => (
-                <p key={i} className="mt-3 leading-7 text-slate-600">
+                <p key={i} className="mt-3 leading-7 text-zinc-400">
                   {p}
                 </p>
               ))}
@@ -162,14 +162,14 @@ export default async function CategoryBlogPage({ params }: { params: Promise<{ c
           ))}
 
           <section className="mt-12" aria-labelledby="faq-title">
-            <h2 id="faq-title" className="font-heading text-2xl font-bold text-slate-900">
+            <h2 id="faq-title" className="font-display text-3xl text-white">
               Frequently asked
             </h2>
-            <dl className="mt-4 divide-y divide-slate-200 rounded-2xl border border-slate-200">
+            <dl className="mt-4 divide-y divide-white/[0.06] rounded-2xl border border-white/10">
               {guide.faq.map((f) => (
                 <div key={f.q} className="p-5">
-                  <dt className="font-semibold text-slate-900">{f.q}</dt>
-                  <dd className="mt-1 text-sm leading-6 text-slate-600">{f.a}</dd>
+                  <dt className="font-semibold text-white">{f.q}</dt>
+                  <dd className="mt-1 text-sm leading-6 text-zinc-400">{f.a}</dd>
                 </div>
               ))}
             </dl>
@@ -177,7 +177,7 @@ export default async function CategoryBlogPage({ params }: { params: Promise<{ c
 
           {posts.length ? (
             <section className="mt-14" aria-labelledby="more-title">
-              <h2 id="more-title" className="font-heading text-2xl font-bold text-slate-900">
+              <h2 id="more-title" className="font-display text-3xl text-white">
                 More articles for {c.plural.toLowerCase()}
               </h2>
               <PostList posts={posts} category={c.key} />
@@ -186,20 +186,20 @@ export default async function CategoryBlogPage({ params }: { params: Promise<{ c
         </article>
 
         <aside className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 p-5">
-            <h2 className="font-semibold text-slate-900">Templates for {c.plural.toLowerCase()}</h2>
+          <div className="rounded-2xl border border-white/10 p-5">
+            <h2 className="font-semibold text-white">Templates for {c.plural.toLowerCase()}</h2>
             <div className="mt-4 space-y-4">
               {templates.map((t) => (
                 <TemplateCard key={t.id} meta={t} categoryName={c.name} />
               ))}
             </div>
-            <Link href={`/templates/${c.key}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">
+            <Link href={`/templates/${c.key}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-gold-300 hover:underline">
               See all {c.templateCount} <ArrowRight className="size-4" aria-hidden />
             </Link>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h2 className="font-semibold text-slate-900">Get a {c.name.toLowerCase()} website</h2>
-            <p className="mt-1 text-sm text-slate-500">Leave your number, we will call you.</p>
+          <div className="rounded-2xl border border-white/10 bg-ink-900 p-5">
+            <h2 className="font-semibold text-white">Get a {c.name.toLowerCase()} website</h2>
+            <p className="mt-1 text-sm text-zinc-500">Leave your number, we will call you.</p>
             <div className="mt-4">
               <LeadForm defaultCategory={c.key} compact source={`guide:${c.key}`} />
             </div>

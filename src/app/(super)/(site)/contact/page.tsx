@@ -3,6 +3,7 @@ import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { brand, pricing } from "@/config/brand";
 import { getCategory } from "@/lib/categories";
 import { LeadForm } from "@/components/super-site/lead-form";
+import { Container, Glow, GridTexture, Panel, SectionHeading } from "@/components/super-site/ui";
 import { JsonLd, breadcrumbJsonLd, pageMetadata } from "@/components/super-site/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -15,52 +16,67 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   const { category, plan } = await searchParams;
   const safeCategory = category && getCategory(category) ? category : undefined;
   const chosenPlan = pricing.plans.find((p) => p.key === plan);
+  const channels = [
+    { icon: MessageCircle, label: "WhatsApp", value: brand.supportPhone, href: `https://wa.me/${brand.whatsapp}`, external: true, tone: "text-emerald-400" },
+    { icon: Phone, label: "Call", value: brand.supportPhone, href: `tel:${brand.supportPhone.replace(/\s/g, "")}` },
+    { icon: Mail, label: "Email", value: brand.supportEmail, href: `mailto:${brand.supportEmail}` },
+    { icon: MapPin, label: "Office", value: brand.address },
+  ];
   return (
-    <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <div className="relative isolate">
+      <GridTexture />
+      <Glow className="left-[-10rem] top-[-10rem] h-[32rem] w-[48rem]" />
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
           { name: "Contact", path: "/contact" },
         ])}
       />
-      <div className="grid gap-12 lg:grid-cols-2">
+      <Container className="grid gap-14 pb-24 pt-14 sm:pt-20 lg:grid-cols-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-600">Contact</p>
-          <h1 className="font-heading mt-2 text-4xl font-bold text-slate-900">Let&apos;s get your website live</h1>
-          <p className="mt-4 text-lg text-slate-600">Send your details and we will call or WhatsApp you to pick a template, connect your domain and hand over your admin login.</p>
-          <p className="mt-4 font-urdu text-lg leading-9 text-slate-700" dir="rtl" lang="ur">
+          <SectionHeading
+            as="h1"
+            eyebrow="Contact"
+            title={
+              <>
+                Let&apos;s get your website <em className="text-gold-gradient">live</em>
+              </>
+            }
+            lead="Send your details and we will call or WhatsApp you to pick a template, connect your domain and hand over your admin login."
+          />
+          <p className="mt-5 font-urdu text-xl leading-10 text-zinc-300" dir="rtl" lang="ur">
             اپنی تفصیلات بھیجیں، ہم آپ کو کال یا واٹس ایپ کریں گے۔
           </p>
-          <ul className="mt-8 space-y-4 text-slate-700">
-            <li className="flex items-center gap-3">
-              <MessageCircle className="size-5 text-emerald-600" aria-hidden />
-              <a href={`https://wa.me/${brand.whatsapp}`} className="font-medium hover:underline" target="_blank" rel="noopener noreferrer">
-                WhatsApp {brand.supportPhone}
-              </a>
-            </li>
-            <li className="flex items-center gap-3">
-              <Phone className="size-5 text-brand-600" aria-hidden />
-              <a href={`tel:${brand.supportPhone.replace(/\s/g, "")}`} className="font-medium hover:underline">
-                {brand.supportPhone}
-              </a>
-            </li>
-            <li className="flex items-center gap-3">
-              <Mail className="size-5 text-brand-600" aria-hidden />
-              <a href={`mailto:${brand.supportEmail}`} className="font-medium hover:underline">
-                {brand.supportEmail}
-              </a>
-            </li>
-            <li className="flex items-center gap-3">
-              <MapPin className="size-5 text-brand-600" aria-hidden />
-              {brand.address}
-            </li>
+          <ul className="mt-10 grid gap-3 sm:grid-cols-2">
+            {channels.map((ch) => {
+              const inner = (
+                <>
+                  <ch.icon className={`size-5 ${ch.tone ?? "text-gold-400"}`} aria-hidden />
+                  <span className="mt-3 block text-xs uppercase tracking-[0.18em] text-zinc-500">{ch.label}</span>
+                  <span className="mt-1 block truncate text-sm font-medium text-zinc-100">{ch.value}</span>
+                </>
+              );
+              return (
+                <Panel as="li" key={ch.label} className="rounded-2xl">
+                  {ch.href ? (
+                    <a href={ch.href} {...(ch.external ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="block rounded-2xl p-5 transition hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+                      {inner}
+                    </a>
+                  ) : (
+                    <div className="p-5">{inner}</div>
+                  )}
+                </Panel>
+              );
+            })}
           </ul>
-          <p className="mt-8 text-sm text-slate-500">We reply within hours, 7 days a week. Your number is used only to contact you about your website.</p>
+          <p className="mt-8 text-sm text-zinc-500">We reply within hours, 7 days a week. Your number is used only to contact you about your website.</p>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
-          <LeadForm defaultCategory={safeCategory} source={chosenPlan ? `contact:${chosenPlan.key}` : "contact"} defaultMessage={chosenPlan ? `I am interested in the ${chosenPlan.name} plan.` : undefined} />
-        </div>
-      </div>
+        <Panel className="self-start p-6 sm:p-10">
+          <h2 className="font-display text-3xl text-white">Request your website</h2>
+          <p className="mt-2 text-sm text-zinc-500">Takes 30 seconds. No payment needed.</p>
+          <LeadForm className="mt-8" defaultCategory={safeCategory} source={chosenPlan ? `contact:${chosenPlan.key}` : "contact"} defaultMessage={chosenPlan ? `I am interested in the ${chosenPlan.name} plan.` : undefined} />
+        </Panel>
+      </Container>
     </div>
   );
 }
