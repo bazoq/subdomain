@@ -160,7 +160,9 @@ async function seedDemoTenants(db: PrismaClient) {
         update: { passwordHash: demoHash, isActive: true, failedLogins: 0, lockedUntil: null },
       });
       return { tenant: t, existed: Boolean(existing) };
-    });
+      // The seed runs from a developer machine against a remote database: each round trip can take
+      // hundreds of ms, so Prisma's 5 s default for interactive transactions is far too tight.
+    }, { maxWait: 30_000, timeout: 120_000 });
     if (existed) refreshed++;
     else created++;
 
