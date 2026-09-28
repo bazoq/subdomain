@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
  *
  *  ROOT_DOMAIN (and www.) -> super website + /super admin (served from app/(super))
  *  *.vercel.app           -> super website (preview deployments)
- *  any other host         -> tenant site, rewritten to app/_sites/[host]/...
+ *  any other host         -> tenant site, rewritten to app/%5Fsites/[host]/... (URL `/_sites/<host>`; a plain `_folder` is private in the App Router and never routed)
  *
  * Security posture of this file:
  *  - The request host is validated (RFC 1123 labels, optional port, IPv6 literal) and lowercased.

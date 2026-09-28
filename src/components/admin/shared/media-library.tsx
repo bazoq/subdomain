@@ -10,7 +10,7 @@ import { Alert } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/toast";
 import { uploadFile } from "@/lib/upload-client";
 import { cn, formatDate } from "@/lib/utils";
-import { deleteMediaAction, listMedia, updateMediaAlt, type MediaRow } from "@/app/_sites/[host]/admin/(dashboard)/media/actions";
+import { deleteMediaAction, listMedia, updateMediaAlt, type MediaRow } from "@/app/%5Fsites/[host]/admin/(dashboard)/media/actions";
 
 export type { MediaRow };
 

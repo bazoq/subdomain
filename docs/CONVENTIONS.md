@@ -7,7 +7,7 @@ Multi-agent work follows the **work-log protocol** in `docs/work-log/README.md`:
 ## Routing model
 
 - Root host (`localhost` / `ROOT_DOMAIN`) → `src/app/(super)/**` (super site + `/super` admin).
-- Tenant hosts are rewritten by `src/proxy.ts` to `src/app/_sites/[host]/**`. Inside that folder:
+- Tenant hosts are rewritten by `src/proxy.ts` to `src/app/%5Fsites/[host]/**`. Inside that folder:
   - `(site)/**` public website pages (wrapped by the template `Layout`).
   - `admin/(dashboard)/**` tenant admin (wrapped by `AdminShell`, auth enforced in layout).
   - `admin/login` login page.
@@ -43,7 +43,7 @@ Multi-agent work follows the **work-log protocol** in `docs/work-log/README.md`:
 
 Facts (verified against `node_modules/next/dist/docs/01-app/03-api-reference/04-functions/revalidatePath.md`, Next 16):
 
-- `revalidatePath` works on the **route file structure, not the URL**. With rewrites you must pass the *destination* path. Tenant admin lives at `src/app/_sites/[host]/admin/(dashboard)/orders/page.tsx`, so `revalidatePath("/admin/orders")` matches **no route** and does nothing; the correct path form would be `revalidatePath("/_sites/[host]/admin/(dashboard)/orders", "page")`, which invalidates that page for **every** tenant.
+- `revalidatePath` works on the **route file structure, not the URL**. With rewrites you must pass the *destination* path. Tenant admin lives at `src/app/%5Fsites/[host]/admin/(dashboard)/orders/page.tsx`, so `revalidatePath("/admin/orders")` matches **no route** and does nothing; the correct path form would be `revalidatePath("/_sites/[host]/admin/(dashboard)/orders", "page")`, which invalidates that page for **every** tenant.
 - Tenant pages are fully dynamic (no `"use cache"`, no ISR), so there is no full-route cache to purge. The only caches are (a) the **client router cache** — `revalidatePath("/", "layout")` inside a Server Action purges it (as does `router.refresh()`), and (b) the **tagged data cache** for section rows (`src/server/content/cache.ts`).
 - `revalidateTag(tag)` with one argument is deprecated in Next 16; pass a profile: `revalidateTag(tag, { expire: 0 })` for read-your-own-writes in actions/route handlers, or `updateTag(tag)` inside Server Actions.
 

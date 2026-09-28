@@ -55,7 +55,7 @@ Full setup for production — Supabase, R2, Vercel domains and DNS — is in [`d
 
 ```
 src/app/(super)/           marketing site + /super admin (root host)
-src/app/_sites/[host]/     tenant website (site) + /admin, reached only through the host rewrite
+src/app/%5Fsites/[host]/  tenant website (site) + /admin, reached only through the host rewrite
 src/app/api/               shared route handlers: health, cron, lang, media, csp-report
 src/proxy.ts               host → tenant routing, header hygiene, CSP nonce (Next 16 "middleware")
 src/server/                auth, sessions, tenant resolution, audit, rate limit, storage (R2), notify, super actions
